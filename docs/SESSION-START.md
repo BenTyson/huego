@@ -9,21 +9,16 @@
 
 ## Status
 
-| Sprint | Status |
-|--------|--------|
-| 1. Foundation + Immersive | Done |
-| 2. All 4 Modes | Done |
-| 3. Export & Accessibility | Done |
-| 4. Monetization | Done |
-| 5. Deployment | Done |
+**Phase: Live / Monitoring**
 
-**Live Features:**
-- 4 modes: Immersive, Context, Mood, Playground
-- 6 harmony types, OKLCH color generation
-- Manual color picker (click pencil icon)
-- Export (7 formats), WCAG checker, color blindness sim
-- Stripe checkout (HueGo Pro @ $5/mo)
-- Railway deployment with auto-deploy from main
+All sprints complete. Product is live. Stripe in test mode.
+
+**Next actions (when ready):**
+- Flip Stripe to live mode for real payments
+- Apply for AdSense (needs traffic first)
+- Add analytics if optimizing
+
+**Live features:** 4 modes, 6 harmony types, manual color picker, 7 export formats, WCAG checker, color blindness sim, Stripe checkout ($5/mo), Railway auto-deploy.
 
 ---
 
