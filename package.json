@@ -3,16 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3377",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p ${PORT:-3377}",
     "lint": "eslint"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^8.6.0",
     "framer-motion": "^12.23.26",
     "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1",
+    "stripe": "^20.0.0",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

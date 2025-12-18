@@ -12,6 +12,7 @@ export default function MoodPage() {
   // Disable spacebar generation in mood mode (use mood selection instead)
   useKeyboard({ enableGenerate: false });
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setMounted(true);
   }, []);

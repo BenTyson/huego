@@ -12,6 +12,7 @@ export default function PlaygroundPage() {
   // Disable spacebar generation in playground mode (use swipe instead)
   useKeyboard({ enableGenerate: false });
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setMounted(true);
   }, []);

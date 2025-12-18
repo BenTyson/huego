@@ -3,7 +3,7 @@
 > **STOP! Read this entire document before doing anything.**
 >
 > Last Updated: 2025-12-15
-> Current Phase: Sprint 4 (Monetization)
+> Current Phase: Sprint 5 (Launch & Growth)
 > Dev Server: `npm run dev -- -p 3377`
 
 ---
@@ -15,7 +15,7 @@
 | **Sprint 1** (Foundation + Immersive) | ✅ Complete |
 | **Sprint 2** (All 4 Modes) | ✅ Complete |
 | **Sprint 3** (Polish & Export) | ✅ Complete |
-| **Sprint 4** (Monetization) | ⏳ Pending |
+| **Sprint 4** (Monetization) | ✅ Complete |
 
 **What Works Right Now:**
 - All 4 modes functional (Immersive, Context, Mood, Playground)
@@ -27,12 +27,19 @@
 - Export modal (7 formats: CSS, SCSS, Tailwind, JSON, Array, SVG, PNG)
 - WCAG contrast checker (AAA/AA/AA-Large/Fail indicators)
 - Color blindness simulation (5 types with confusable pair detection)
+- **SEO optimized** (sitemap, robots.txt, JSON-LD structured data)
+- **Google AdSense integration** (banner ads for free users)
+- **Stripe checkout** ($3/month premium subscription)
+- **Premium features gating** (unlimited saves, all exports, ad-free)
+- **Pricing modal & upgrade flow**
 
-**What Needs Building (Sprint 4):**
-- Google AdSense integration
-- Premium tier ($3/month)
-- Stripe checkout
-- SEO optimization
+**What Needs Building (Sprint 5):**
+- Add env vars for AdSense and Stripe (see `.env.example`)
+- Deploy to Vercel
+- Submit to Google Search Console
+- Create AdSense ad units
+- Create Stripe product/price
+- Marketing & launch
 
 ---
 
@@ -225,20 +232,31 @@ npx tsc --noEmit
 
 ---
 
-## Current Sprint: Sprint 4 (Monetization)
+## Current Sprint: Sprint 5 (Launch & Growth)
 
 ### TODO
-- [ ] Google AdSense integration
-- [ ] Premium subscription gate ($3/month)
-- [ ] Stripe checkout integration
-- [ ] Premium features gating (unlimited saves, ad-free, advanced exports)
-- [ ] SEO optimization
-- [ ] Launch prep
+- [ ] Add environment variables (see `.env.example`)
+- [ ] Deploy to Vercel
+- [ ] Create Stripe product and price in dashboard
+- [ ] Create AdSense ad units in dashboard
+- [ ] Submit to Google Search Console
+- [ ] Marketing and launch
 
 ### Definition of Done
-- Ads displaying for free users
-- Premium checkout working
-- Ad-free experience for premium
+- Production deployment live
+- Payments processing
+- Ads displaying
+
+---
+
+## Completed: Sprint 4 (Monetization)
+
+- [x] SEO optimization (sitemap, robots.txt, JSON-LD)
+- [x] Google AdSense integration with env var placeholders
+- [x] Stripe checkout flow
+- [x] Premium subscription store
+- [x] Feature gating (saves, exports, ads)
+- [x] Pricing modal and upgrade flow
 
 ---
 

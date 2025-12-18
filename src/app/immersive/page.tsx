@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ImmersiveView } from "@/components/modes/immersive";
 import { ModeToggle } from "@/components/ModeToggle";
 import { ActionBar } from "@/components/ActionBar";
+import { BannerAd } from "@/components/ads";
 import { useKeyboard } from "@/hooks/useKeyboard";
 
 export default function ImmersivePage() {
@@ -12,7 +13,8 @@ export default function ImmersivePage() {
   // Enable keyboard shortcuts
   useKeyboard();
 
-  // Prevent hydration mismatch
+  // Prevent hydration mismatch (intentional setState in effect for client-only rendering)
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -27,6 +29,7 @@ export default function ImmersivePage() {
 
   return (
     <>
+      <BannerAd position="top" />
       <ModeToggle />
       <ImmersiveView />
       <ActionBar />

@@ -52,6 +52,29 @@ export interface UserPreferences {
   savedPalettes: Palette[];
 }
 
+// Subscription types for premium features
+export type SubscriptionStatus = "active" | "canceled" | "past_due" | "trialing" | null;
+
+export interface Subscription {
+  isPremium: boolean;
+  status: SubscriptionStatus;
+  customerId: string | null;
+  subscriptionId: string | null;
+  currentPeriodEnd: number | null; // Unix timestamp
+}
+
+// Export format types
+export type ExportFormat = "css" | "scss" | "tailwind" | "json" | "array" | "svg" | "png";
+
+// Free vs Premium export formats
+export const FREE_EXPORT_FORMATS: ExportFormat[] = ["css", "json", "array"];
+export const PREMIUM_EXPORT_FORMATS: ExportFormat[] = ["scss", "tailwind", "svg", "png"];
+export const ALL_EXPORT_FORMATS: ExportFormat[] = [...FREE_EXPORT_FORMATS, ...PREMIUM_EXPORT_FORMATS];
+
+// Feature limits
+export const FREE_SAVED_PALETTES_LIMIT = 10;
+export const PREMIUM_SAVED_PALETTES_LIMIT = Infinity;
+
 export interface ColorRole {
   id: string;
   name: string;

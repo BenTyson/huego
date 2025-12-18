@@ -261,7 +261,7 @@ export function isInGamut(oklch: OKLCH): boolean {
  * Reduce chroma until color is in gamut
  */
 export function forceInGamut(oklch: OKLCH): OKLCH {
-  let result = { ...oklch };
+  const result = { ...oklch };
   while (!isInGamut(result) && result.c > 0) {
     result.c = Math.max(0, result.c - 0.01);
   }

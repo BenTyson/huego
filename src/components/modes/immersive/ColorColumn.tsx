@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import type { Color } from "@/lib/types";
 
@@ -9,6 +9,7 @@ interface ColorColumnProps {
   index: number;
   isLocked: boolean;
   onToggleLock: () => void;
+  onColorChange: (hex: string) => void;
   isActive: boolean;
 }
 
@@ -17,10 +18,12 @@ export function ColorColumn({
   index,
   isLocked,
   onToggleLock,
+  onColorChange,
   isActive,
 }: ColorColumnProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [copied, setCopied] = useState(false);
+  const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -31,6 +34,15 @@ export function ColorColumn({
       console.error("Failed to copy:", err);
     }
   }, [color.hex]);
+
+  const handleEditClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    colorInputRef.current?.click();
+  }, []);
+
+  const handleColorInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onColorChange(e.target.value);
+  }, [onColorChange]);
 
   const textColor = color.contrastColor === "white" ? "#ffffff" : "#000000";
   const textColorMuted =
@@ -54,6 +66,51 @@ export function ColorColumn({
       onMouseLeave={() => setIsHovered(false)}
       onClick={onToggleLock}
     >
+      {/* Hidden color input */}
+      <input
+        ref={colorInputRef}
+        type="color"
+        value={color.hex}
+        onChange={handleColorInput}
+        className="sr-only"
+        aria-label={`Edit color ${index + 1}`}
+      />
+
+      {/* Edit button */}
+      <motion.button
+        className="absolute top-4 left-4 md:top-6 md:left-6 p-2 rounded-lg transition-colors"
+        style={{
+          backgroundColor: isHovered
+            ? color.contrastColor === "white"
+              ? "rgba(255,255,255,0.15)"
+              : "rgba(0,0,0,0.1)"
+            : "transparent",
+        }}
+        initial={false}
+        animate={{
+          opacity: isHovered ? 0.9 : 0,
+          scale: isHovered ? 1 : 0.8,
+        }}
+        transition={{ duration: 0.2 }}
+        onClick={handleEditClick}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={textColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+        </svg>
+      </motion.button>
+
       {/* Lock indicator */}
       <motion.div
         className="absolute top-4 right-4 md:top-6 md:right-6"

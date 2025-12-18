@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePaletteStore, useCanUndo, useCanRedo } from "@/store/palette";
+import { useIsPremium, useSavedPalettesLimit } from "@/store/subscription";
 import { copyShareUrl } from "@/lib/share";
 import { ExportModal } from "./ExportModal";
 import { AccessibilityPanel } from "./AccessibilityPanel";
+import { PricingModal } from "./PricingModal";
 import type { HarmonyType } from "@/lib/types";
 
 const harmonyOptions: { value: HarmonyType; label: string }[] = [
@@ -20,12 +22,15 @@ const harmonyOptions: { value: HarmonyType; label: string }[] = [
 export function ActionBar() {
   const { colors, undo, redo, harmonyType, setHarmonyType, savePalette, savedPalettes } =
     usePaletteStore();
+  const isPremium = useIsPremium();
+  const savedPalettesLimit = useSavedPalettesLimit();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
   const [showToast, setShowToast] = useState<string | null>(null);
   const [showHarmonyPicker, setShowHarmonyPicker] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showAccessibilityPanel, setShowAccessibilityPanel] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
 
   const showToastMessage = (message: string) => {
     setShowToast(message);
@@ -38,11 +43,17 @@ export function ActionBar() {
   };
 
   const handleSave = () => {
+    // Check limit for free users
+    if (!isPremium && savedPalettes.length >= savedPalettesLimit) {
+      setShowPricingModal(true);
+      return;
+    }
+
     const result = savePalette();
     if (result) {
       showToastMessage("Palette saved!");
     } else {
-      showToastMessage(`Limit reached (${savedPalettes.length}/10)`);
+      showToastMessage(`Limit reached (${savedPalettes.length}/${savedPalettesLimit})`);
     }
   };
 
@@ -246,12 +257,22 @@ export function ActionBar() {
       <ExportModal
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
+        onUpgradeClick={() => {
+          setShowExportModal(false);
+          setShowPricingModal(true);
+        }}
       />
 
       {/* Accessibility Panel */}
       <AccessibilityPanel
         isOpen={showAccessibilityPanel}
         onClose={() => setShowAccessibilityPanel(false)}
+      />
+
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
       />
 
       {/* Toast notification */}

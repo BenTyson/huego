@@ -4,6 +4,103 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Unreleased] - Sprint 5
+
+### Planned
+- Deploy to Vercel
+- Configure production environment variables
+- Create Stripe product and price
+- Create AdSense ad units
+- Submit to Google Search Console
+- Marketing and launch
+
+---
+
+## [0.4.0] - 2025-12-15
+
+### Sprint 4: Monetization
+
+#### Added
+
+**SEO Optimization**
+- Enhanced metadata with keywords, Open Graph, and Twitter cards
+- Sitemap generation (`/sitemap.xml`)
+- Robots.txt generation (`/robots.txt`)
+- JSON-LD structured data (WebApplication schema)
+- Environment variable for site URL
+
+**Subscription System** (`src/store/subscription.ts`)
+- Zustand store for premium state management
+- Subscription status tracking (active, canceled, past_due, trialing)
+- Feature gating helpers (canUseExportFormat, getSavedPalettesLimit)
+- localStorage persistence
+
+**Google AdSense Integration** (`src/components/ads/`)
+- `AdSenseScript` - Loads AdSense script (lazy)
+- `AdUnit` - Generic ad unit component
+- `BannerAd` - Banner ad wrapper for top/bottom placement
+- Development placeholder when no client ID configured
+- Auto-hidden for premium users
+
+**Stripe Checkout** (`src/app/api/`)
+- `/api/checkout` - Creates Stripe Checkout sessions
+- `/api/webhook` - Handles Stripe webhooks
+- `/api/subscription` - Gets subscription status, creates portal sessions
+- Client-side redirect to Stripe hosted checkout
+- Success/cancel pages with subscription verification
+
+**Premium Features Gating**
+- Free tier: 10 saved palettes, basic exports (CSS, JSON, Array)
+- Premium tier: Unlimited saves, all exports (+ SCSS, Tailwind, SVG, PNG), ad-free
+- Export modal shows lock icon on premium formats
+- Save button opens pricing modal when limit reached
+
+**Pricing UI** (`src/components/PricingModal.tsx`)
+- Feature comparison table (free vs premium)
+- One-click upgrade button
+- Stripe checkout integration
+- Manage subscription link for premium users
+
+**ModeToggle Upgrade Button**
+- "Pro" button for free users (gradient, clickable)
+- "Pro" badge for premium users (shows subscription management)
+
+#### Changed
+- ActionBar integrates with subscription store for save limits
+- ExportModal gates premium formats with lock icons
+- Immersive page includes banner ad for free users
+
+#### Environment Variables (see `.env.example`)
+```
+NEXT_PUBLIC_SITE_URL
+NEXT_PUBLIC_ADSENSE_CLIENT_ID
+NEXT_PUBLIC_ADSENSE_SLOT_BANNER_TOP
+NEXT_PUBLIC_ADSENSE_SLOT_BANNER_BOTTOM
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+STRIPE_PREMIUM_PRICE_ID
+```
+
+**Manual Color Picker**
+- Click-to-edit color support in Immersive, Context, and Mood modes
+- Pencil icon appears on hover
+- Native color picker opens without closing on interaction
+- Real-time palette updates while selecting
+
+#### Changed
+- Background/Surface colors now generate as light neutrals (not saturated)
+- Context mode preview selector moved to top-right for cleaner navigation
+- React keys updated to prevent component remounting during color edits
+
+#### Technical
+- Installed `stripe` and `@stripe/stripe-js` packages
+- Created lazy Stripe initialization to avoid build errors
+- Used Suspense boundary for checkout success page
+- All API routes handle missing env vars gracefully
+
+---
+
 ## [0.3.0] - 2025-12-15
 
 ### Sprint 3: Export & Accessibility
@@ -63,17 +160,6 @@ All notable changes to this project will be documented in this file.
 - Created `src/components/ExportModal.tsx` (249 lines)
 - Created `src/components/AccessibilityPanel.tsx` (389 lines)
 - Build verified passing with all new components
-
----
-
-## [Unreleased] - Sprint 4
-
-### Planned
-- Ad integration (Google AdSense)
-- Premium tier ($3/month)
-- Stripe checkout integration
-- SEO optimization
-- Launch prep
 
 ---
 
@@ -221,7 +307,7 @@ All notable changes to this project will be documented in this file.
 | Sprint 1 complete | ✅ | 2025-12-14 |
 | Sprint 2 complete | ✅ | 2025-12-14 |
 | Sprint 3 complete | ✅ | 2025-12-15 |
-| Sprint 4 complete | ⏳ | - |
+| Sprint 4 complete | ✅ | 2025-12-16 |
 | Public launch | ⏳ | - |
 
 ---

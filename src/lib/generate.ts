@@ -69,21 +69,39 @@ function generateRandom(locked: (Color | null)[], size: number): Color[] {
     let oklch: OKLCH;
 
     if (i === 0) {
-      // First color: random but vibrant
+      // First color (Primary): vibrant, medium lightness
       oklch = {
-        l: randomInRange(0.45, 0.7),
-        c: randomInRange(0.1, 0.2),
+        l: randomInRange(0.45, 0.65),
+        c: randomInRange(0.12, 0.2),
+        h: baseHue,
+      };
+    } else if (i === 1) {
+      // Second color (Secondary): related hue, slightly different
+      oklch = {
+        l: randomInRange(0.5, 0.7),
+        c: randomInRange(0.1, 0.18),
+        h: (baseHue + randomInRange(20, 60)) % 360,
+      };
+    } else if (i === 2) {
+      // Third color (Accent): can be more vibrant/contrasting
+      oklch = {
+        l: randomInRange(0.5, 0.7),
+        c: randomInRange(0.12, 0.22),
+        h: (baseHue + randomInRange(90, 180)) % 360,
+      };
+    } else if (i === 3) {
+      // Fourth color (Background): very light, low chroma (near white)
+      oklch = {
+        l: randomInRange(0.92, 0.97),
+        c: randomInRange(0.01, 0.03),
         h: baseHue,
       };
     } else {
-      // Subsequent colors: spread across hue wheel with varied lightness
-      const hueShift = randomInRange(30, 330);
-      const previousHue = colors[i - 1].oklch.h;
-
+      // Fifth color (Surface): light, low chroma (slightly tinted white)
       oklch = {
-        l: randomInRange(0.3, 0.85),
-        c: randomInRange(0.05, 0.2),
-        h: (previousHue + hueShift) % 360,
+        l: randomInRange(0.85, 0.92),
+        c: randomInRange(0.02, 0.05),
+        h: baseHue,
       };
     }
 
@@ -92,7 +110,7 @@ function generateRandom(locked: (Color | null)[], size: number): Color[] {
     colors.push(createColor(hex));
   }
 
-  // Sort by lightness for visual balance
+  // Sort by lightness for visual balance (dark to light)
   return sortByLightness(colors, locked);
 }
 
@@ -112,15 +130,24 @@ function generateAnalogous(locked: (Color | null)[], size: number): Color[] {
     }
 
     const hueOffset = (i - Math.floor(size / 2)) * spread;
-    const oklch = forceInGamut(
-      clampOklch({
-        l: randomInRange(0.35, 0.8),
-        c: randomInRange(0.08, 0.18),
-        h: (baseHue + hueOffset + 360) % 360,
-      })
-    );
+    let oklch: OKLCH;
 
-    colors.push(createColor(oklchToHex(oklch)));
+    if (i >= size - 2) {
+      // Last two colors: light backgrounds
+      oklch = {
+        l: i === size - 2 ? randomInRange(0.92, 0.97) : randomInRange(0.85, 0.92),
+        c: randomInRange(0.01, 0.04),
+        h: (baseHue + hueOffset + 360) % 360,
+      };
+    } else {
+      oklch = {
+        l: randomInRange(0.4, 0.7),
+        c: randomInRange(0.1, 0.18),
+        h: (baseHue + hueOffset + 360) % 360,
+      };
+    }
+
+    colors.push(createColor(oklchToHex(forceInGamut(clampOklch(oklch)))));
   }
 
   return sortByLightness(colors, locked);
@@ -145,19 +172,28 @@ function generateComplementary(
     }
 
     // Alternate between base and complement, with some variation
-    const isComplement = i >= Math.ceil(size / 2);
+    const isComplement = i >= Math.ceil(size / 2) && i < size - 2;
     const targetHue = isComplement ? complementHue : baseHue;
     const hueVariation = randomInRange(-15, 15);
 
-    const oklch = forceInGamut(
-      clampOklch({
-        l: randomInRange(0.35, 0.8),
-        c: randomInRange(0.08, 0.18),
-        h: (targetHue + hueVariation + 360) % 360,
-      })
-    );
+    let oklch: OKLCH;
 
-    colors.push(createColor(oklchToHex(oklch)));
+    if (i >= size - 2) {
+      // Last two colors: light backgrounds
+      oklch = {
+        l: i === size - 2 ? randomInRange(0.92, 0.97) : randomInRange(0.85, 0.92),
+        c: randomInRange(0.01, 0.04),
+        h: baseHue,
+      };
+    } else {
+      oklch = {
+        l: randomInRange(0.4, 0.7),
+        c: randomInRange(0.1, 0.18),
+        h: (targetHue + hueVariation + 360) % 360,
+      };
+    }
+
+    colors.push(createColor(oklchToHex(forceInGamut(clampOklch(oklch)))));
   }
 
   return sortByLightness(colors, locked);
@@ -181,15 +217,24 @@ function generateTriadic(locked: (Color | null)[], size: number): Color[] {
     const targetHue = hues[i % 3];
     const hueVariation = randomInRange(-10, 10);
 
-    const oklch = forceInGamut(
-      clampOklch({
-        l: randomInRange(0.35, 0.8),
-        c: randomInRange(0.08, 0.18),
-        h: (targetHue + hueVariation + 360) % 360,
-      })
-    );
+    let oklch: OKLCH;
 
-    colors.push(createColor(oklchToHex(oklch)));
+    if (i >= size - 2) {
+      // Last two colors: light backgrounds
+      oklch = {
+        l: i === size - 2 ? randomInRange(0.92, 0.97) : randomInRange(0.85, 0.92),
+        c: randomInRange(0.01, 0.04),
+        h: baseHue,
+      };
+    } else {
+      oklch = {
+        l: randomInRange(0.4, 0.7),
+        c: randomInRange(0.1, 0.18),
+        h: (targetHue + hueVariation + 360) % 360,
+      };
+    }
+
+    colors.push(createColor(oklchToHex(forceInGamut(clampOklch(oklch)))));
   }
 
   return sortByLightness(colors, locked);
@@ -217,15 +262,24 @@ function generateSplitComplementary(
     const targetHue = hues[i % 3];
     const hueVariation = randomInRange(-10, 10);
 
-    const oklch = forceInGamut(
-      clampOklch({
-        l: randomInRange(0.35, 0.8),
-        c: randomInRange(0.08, 0.18),
-        h: (targetHue + hueVariation + 360) % 360,
-      })
-    );
+    let oklch: OKLCH;
 
-    colors.push(createColor(oklchToHex(oklch)));
+    if (i >= size - 2) {
+      // Last two colors: light backgrounds
+      oklch = {
+        l: i === size - 2 ? randomInRange(0.92, 0.97) : randomInRange(0.85, 0.92),
+        c: randomInRange(0.01, 0.04),
+        h: baseHue,
+      };
+    } else {
+      oklch = {
+        l: randomInRange(0.4, 0.7),
+        c: randomInRange(0.1, 0.18),
+        h: (targetHue + hueVariation + 360) % 360,
+      };
+    }
+
+    colors.push(createColor(oklchToHex(forceInGamut(clampOklch(oklch)))));
   }
 
   return sortByLightness(colors, locked);

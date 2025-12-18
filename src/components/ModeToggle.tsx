@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useIsPremium } from "@/store/subscription";
+import { PricingModal } from "./PricingModal";
 import type { Mode } from "@/lib/types";
 
 interface ModeOption {
@@ -65,49 +68,104 @@ const modes: ModeOption[] = [
 
 export function ModeToggle() {
   const pathname = usePathname();
+  const isPremium = useIsPremium();
+  const [showPricingModal, setShowPricingModal] = useState(false);
 
   // Determine current mode from pathname
   const currentMode = modes.find((m) => pathname.startsWith(m.href))?.id || "immersive";
 
   return (
-    <motion.nav
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-    >
-      <div className="flex items-center gap-1 p-1 rounded-full bg-black/30 backdrop-blur-md border border-white/10">
-        {modes.map((mode) => {
-          const isActive = currentMode === mode.id;
-          return (
-            <Link
-              key={mode.id}
-              href={mode.href}
-              className="relative"
-            >
-              <motion.div
-                className={`
-                  flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium
-                  transition-colors duration-200
-                  ${isActive ? "text-white" : "text-white/60 hover:text-white/80"}
-                `}
-              >
-                {isActive && (
+    <>
+      <motion.nav
+        className="fixed top-4 left-1/2 -translate-x-1/2 z-50"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 p-1 rounded-full bg-black/30 backdrop-blur-md border border-white/10">
+            {modes.map((mode) => {
+              const isActive = currentMode === mode.id;
+              return (
+                <Link
+                  key={mode.id}
+                  href={mode.href}
+                  className="relative"
+                >
                   <motion.div
-                    className="absolute inset-0 rounded-full bg-white/20"
-                    layoutId="activeMode"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-2">
-                  {mode.icon}
-                  <span className="hidden sm:inline">{mode.label}</span>
-                </span>
-              </motion.div>
-            </Link>
-          );
-        })}
-      </div>
-    </motion.nav>
+                    className={`
+                      flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium
+                      transition-colors duration-200
+                      ${isActive ? "text-white" : "text-white/60 hover:text-white/80"}
+                    `}
+                  >
+                    {isActive && (
+                      <motion.div
+                        className="absolute inset-0 rounded-full bg-white/20"
+                        layoutId="activeMode"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                      {mode.icon}
+                      <span className="hidden sm:inline">{mode.label}</span>
+                    </span>
+                  </motion.div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Upgrade button for free users */}
+          {!isPremium && (
+            <motion.button
+              onClick={() => setShowPricingModal(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg shadow-orange-500/20"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              <span className="hidden sm:inline">Pro</span>
+            </motion.button>
+          )}
+
+          {/* Premium badge */}
+          {isPremium && (
+            <motion.button
+              onClick={() => setShowPricingModal(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-400 text-sm font-medium"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="none"
+              >
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              <span className="hidden sm:inline">Pro</span>
+            </motion.button>
+          )}
+        </div>
+      </motion.nav>
+
+      {/* Pricing Modal */}
+      <PricingModal
+        isOpen={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
+      />
+    </>
   );
 }

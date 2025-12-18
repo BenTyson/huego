@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePaletteStore } from "@/store/palette";
+import { useIsPremium } from "@/store/subscription";
 import {
   exportOptions,
   exportPalette,
@@ -14,17 +15,25 @@ import {
   exportSVG,
   type ExportFormat,
 } from "@/lib/export";
+import { FREE_EXPORT_FORMATS } from "@/lib/types";
 
 interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onUpgradeClick?: () => void;
 }
 
-export function ExportModal({ isOpen, onClose }: ExportModalProps) {
+export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProps) {
   const { colors } = usePaletteStore();
+  const isPremium = useIsPremium();
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("css");
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
+
+  const isFormatLocked = (format: ExportFormat) => {
+    if (isPremium) return false;
+    return !FREE_EXPORT_FORMATS.includes(format as typeof FREE_EXPORT_FORMATS[number]);
+  };
 
   const getPreview = useCallback((): string => {
     switch (selectedFormat) {
@@ -113,20 +122,49 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
                   Format
                 </div>
                 <div className="space-y-1">
-                  {exportOptions.map((option) => (
-                    <button
-                      key={option.id}
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                        selectedFormat === option.id
-                          ? "bg-white/10 text-white"
-                          : "text-zinc-400 hover:text-white hover:bg-white/5"
-                      }`}
-                      onClick={() => setSelectedFormat(option.id)}
-                    >
-                      <div className="font-medium text-sm">{option.label}</div>
-                      <div className="text-xs opacity-60">{option.description}</div>
-                    </button>
-                  ))}
+                  {exportOptions.map((option) => {
+                    const locked = isFormatLocked(option.id);
+                    return (
+                      <button
+                        key={option.id}
+                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors relative ${
+                          selectedFormat === option.id && !locked
+                            ? "bg-white/10 text-white"
+                            : locked
+                            ? "text-zinc-500 cursor-not-allowed"
+                            : "text-zinc-400 hover:text-white hover:bg-white/5"
+                        }`}
+                        onClick={() => {
+                          if (locked && onUpgradeClick) {
+                            onUpgradeClick();
+                          } else if (!locked) {
+                            setSelectedFormat(option.id);
+                          }
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium text-sm">{option.label}</div>
+                          {locked && (
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              className="text-amber-500"
+                            >
+                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="text-xs opacity-60">
+                          {locked ? "Premium" : option.description}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

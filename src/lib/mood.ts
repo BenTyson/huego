@@ -149,7 +149,7 @@ function normalizeHue(hue: number): number {
   return ((hue % 360) + 360) % 360;
 }
 
-function hueInRange(hue: number, range: [number, number]): boolean {
+function _hueInRange(hue: number, range: [number, number]): boolean {
   const [min, max] = range;
   if (min <= max) {
     return hue >= min && hue <= max;
@@ -229,7 +229,7 @@ function applyRefinements(
 
   // Adjust hue range based on temperature
   // Warmer = shift toward red/orange, Cooler = shift toward blue
-  let hueShift = temperature * 30;
+  const hueShift = temperature * 30;
   const adjustedHueRange: [number, number] = [
     normalizeHue(profile.hueRange[0] + hueShift),
     normalizeHue(profile.hueRange[1] + hueShift),

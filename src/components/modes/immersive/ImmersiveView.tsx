@@ -3,10 +3,11 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePaletteStore } from "@/store/palette";
+import { createColor } from "@/lib/colors";
 import { ColorColumn } from "./ColorColumn";
 
 export function ImmersiveView() {
-  const { colors, locked, generate, toggleLock } = usePaletteStore();
+  const { colors, locked, generate, toggleLock, setColor } = usePaletteStore();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showHint, setShowHint] = useState(true);
 
@@ -23,6 +24,11 @@ export function ImmersiveView() {
     setShowHint(false);
   }, [generate]);
 
+  const handleColorChange = useCallback((index: number, hex: string) => {
+    const newColor = createColor(hex);
+    setColor(index, newColor);
+  }, [setColor]);
+
   return (
     <div className="relative h-screen w-screen overflow-hidden">
       {/* Color columns */}
@@ -34,11 +40,12 @@ export function ImmersiveView() {
         <AnimatePresence mode="sync">
           {colors.map((color, index) => (
             <ColorColumn
-              key={`${color.hex}-${index}`}
+              key={index}
               color={color}
               index={index}
               isLocked={locked[index]}
               onToggleLock={() => toggleLock(index)}
+              onColorChange={(hex) => handleColorChange(index, hex)}
               isActive={activeIndex === index}
             />
           ))}

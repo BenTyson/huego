@@ -14,6 +14,7 @@ export default function SharedPalettePage() {
   const [error, setError] = useState(false);
   const { setColors: loadColors } = usePaletteStore();
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const id = params.id as string;
     if (!id) {
