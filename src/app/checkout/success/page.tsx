@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSubscriptionStore } from "@/store/subscription";
 import { motion } from "framer-motion";
 
+const BRAND_COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981"];
+
 function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,14 +21,12 @@ function CheckoutSuccessContent() {
       return;
     }
 
-    // Fetch subscription details from our API
     async function verifySubscription() {
       try {
         const response = await fetch(`/api/subscription?session_id=${sessionId}`);
         const data = await response.json();
 
         if (response.ok && data.isPremium) {
-          // Update local subscription state
           setSubscription({
             isPremium: true,
             status: data.status,
@@ -35,11 +35,7 @@ function CheckoutSuccessContent() {
             currentPeriodEnd: data.currentPeriodEnd,
           });
           setStatus("success");
-
-          // Redirect to app after 3 seconds
-          setTimeout(() => {
-            router.push("/immersive");
-          }, 3000);
+          setTimeout(() => router.push("/immersive"), 3000);
         } else {
           setStatus("error");
         }
@@ -55,83 +51,86 @@ function CheckoutSuccessContent() {
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md w-full bg-zinc-900 rounded-2xl p-8 text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-sm w-full text-center"
       >
         {status === "loading" && (
           <>
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-zinc-800 animate-pulse" />
-            <h1 className="text-2xl font-bold text-white mb-2">
-              Verifying your subscription...
-            </h1>
-            <p className="text-zinc-400">Please wait a moment.</p>
+            <div className="flex gap-1 justify-center mb-8">
+              {BRAND_COLORS.map((color, i) => (
+                <motion.div
+                  key={i}
+                  className="w-8 h-16 rounded-lg"
+                  style={{ backgroundColor: color }}
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.1 }}
+                />
+              ))}
+            </div>
+            <p className="text-zinc-400">Activating your account...</p>
           </>
         )}
 
         {status === "success" && (
           <>
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", bounce: 0.5 }}
-              className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center"
-            >
-              <svg
-                className="w-8 h-8 text-green-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
+            <div className="flex gap-1 justify-center mb-8">
+              {BRAND_COLORS.map((color, i) => (
+                <motion.div
+                  key={i}
+                  className="w-8 h-16 rounded-lg"
+                  style={{ backgroundColor: color }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", delay: i * 0.08 }}
                 />
-              </svg>
-            </motion.div>
+              ))}
+            </div>
             <h1 className="text-2xl font-bold text-white mb-2">
-              Welcome to Premium!
+              You&apos;re all set
             </h1>
-            <p className="text-zinc-400 mb-6">
-              Your subscription is now active. Enjoy unlimited saves, all export formats, and an ad-free experience.
+            <p className="text-zinc-400 mb-8">
+              Unlimited saves. All exports. No ads.
             </p>
-            <p className="text-sm text-zinc-500">
-              Redirecting you back to HueGo...
+            <motion.button
+              onClick={() => router.push("/immersive")}
+              className="px-6 py-3 bg-white text-zinc-900 rounded-lg font-medium"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Start creating
+            </motion.button>
+            <p className="text-xs text-zinc-600 mt-4">
+              Redirecting automatically...
             </p>
           </>
         )}
 
         {status === "error" && (
           <>
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-500/20 flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-red-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
+            <div className="flex gap-1 justify-center mb-8 opacity-30">
+              {BRAND_COLORS.map((color, i) => (
+                <div
+                  key={i}
+                  className="w-8 h-16 rounded-lg"
+                  style={{ backgroundColor: color }}
                 />
-              </svg>
+              ))}
             </div>
             <h1 className="text-2xl font-bold text-white mb-2">
               Something went wrong
             </h1>
             <p className="text-zinc-400 mb-6">
-              We couldn&apos;t verify your subscription. Please contact support if you were charged.
+              We couldn&apos;t verify your subscription. Contact support if you were charged.
             </p>
-            <button
+            <motion.button
               onClick={() => router.push("/immersive")}
-              className="px-6 py-3 bg-white text-black rounded-lg font-medium hover:bg-zinc-200 transition-colors"
+              className="px-6 py-3 bg-zinc-800 text-white rounded-lg font-medium"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               Return to HueGo
-            </button>
+            </motion.button>
           </>
         )}
       </motion.div>
@@ -142,9 +141,14 @@ function CheckoutSuccessContent() {
 function LoadingFallback() {
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-zinc-900 rounded-2xl p-8 text-center">
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-zinc-800 animate-pulse" />
-        <h1 className="text-2xl font-bold text-white mb-2">Loading...</h1>
+      <div className="flex gap-1">
+        {BRAND_COLORS.map((color, i) => (
+          <div
+            key={i}
+            className="w-8 h-16 rounded-lg animate-pulse"
+            style={{ backgroundColor: color, opacity: 0.4 }}
+          />
+        ))}
       </div>
     </div>
   );

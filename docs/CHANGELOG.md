@@ -4,19 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [Unreleased] - Sprint 5
+## [0.5.0] - 2025-12-18
 
-### Planned
-- Deploy to Vercel
-- Configure production environment variables
-- Create Stripe product and price
-- Create AdSense ad units
-- Submit to Google Search Console
-- Marketing and launch
+### Sprint 5: Deployment
+
+#### Added
+- Railway deployment (https://huego-production.up.railway.app)
+- Stripe product "HueGo Pro" with live webhook
+- On-brand checkout success page with animated palette
+
+#### Changed
+- Hosting from Vercel to Railway
+- package.json start script uses Railway PORT env var
+- Docs streamlined for AI agent efficiency
+
+#### Environment Variables (Production)
+```
+NEXT_PUBLIC_SITE_URL
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+STRIPE_PREMIUM_PRICE_ID
+```
 
 ---
 
-## [0.4.0] - 2025-12-15
+## [0.4.0] - 2025-12-16
 
 ### Sprint 4: Monetization
 
@@ -308,7 +321,8 @@ STRIPE_PREMIUM_PRICE_ID
 | Sprint 2 complete | ✅ | 2025-12-14 |
 | Sprint 3 complete | ✅ | 2025-12-15 |
 | Sprint 4 complete | ✅ | 2025-12-16 |
-| Public launch | ⏳ | - |
+| Sprint 5 complete | ✅ | 2025-12-18 |
+| Production live | ✅ | 2025-12-18 |
 
 ---
 
