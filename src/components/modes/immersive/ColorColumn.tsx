@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import type { Color } from "@/lib/types";
 
@@ -24,12 +24,26 @@ export function ColorColumn({
   const [isHovered, setIsHovered] = useState(false);
   const [copied, setCopied] = useState(false);
   const colorInputRef = useRef<HTMLInputElement>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) {
+        clearTimeout(copyTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(color.hex);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      // Clear any existing timer before setting a new one
+      if (copyTimerRef.current) {
+        clearTimeout(copyTimerRef.current);
+      }
+      copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
@@ -44,11 +58,13 @@ export function ColorColumn({
     onColorChange(e.target.value);
   }, [onColorChange]);
 
-  const textColor = color.contrastColor === "white" ? "#ffffff" : "#000000";
-  const textColorMuted =
-    color.contrastColor === "white"
+  // Memoize text colors based on contrast color
+  const { textColor, textColorMuted } = useMemo(() => ({
+    textColor: color.contrastColor === "white" ? "#ffffff" : "#000000",
+    textColorMuted: color.contrastColor === "white"
       ? "rgba(255,255,255,0.6)"
-      : "rgba(0,0,0,0.5)";
+      : "rgba(0,0,0,0.5)",
+  }), [color.contrastColor]);
 
   return (
     <motion.div

@@ -149,15 +149,6 @@ function normalizeHue(hue: number): number {
   return ((hue % 360) + 360) % 360;
 }
 
-function _hueInRange(hue: number, range: [number, number]): boolean {
-  const [min, max] = range;
-  if (min <= max) {
-    return hue >= min && hue <= max;
-  }
-  // Wrapping case (e.g., 280 to 60)
-  return hue >= min || hue <= max;
-}
-
 function randomHueInRange(range: [number, number]): number {
   const [min, max] = range;
   if (min <= max) {

@@ -1,34 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ModeToggle } from "@/components/ModeToggle";
-import { ActionBar } from "@/components/ActionBar";
-import { ContextView } from "@/components/modes/context";
-import { useKeyboard } from "@/hooks/useKeyboard";
+import dynamic from "next/dynamic";
+import { ModePageLayout } from "@/components/layout/ModePageLayout";
+
+const ContextView = dynamic(
+  () => import("@/components/modes/context").then((mod) => mod.ContextView),
+  { ssr: false }
+);
 
 export default function ContextPage() {
-  const [mounted, setMounted] = useState(false);
-
-  useKeyboard();
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="h-screen w-screen bg-zinc-900 flex items-center justify-center">
-        <div className="text-zinc-500 animate-pulse">Loading...</div>
-      </div>
-    );
-  }
-
   return (
-    <>
-      <ModeToggle />
+    <ModePageLayout enableGenerate>
       <ContextView />
-      <ActionBar />
-    </>
+    </ModePageLayout>
   );
 }

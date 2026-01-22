@@ -2,17 +2,16 @@
 
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePaletteStore } from "@/store/palette";
+import { usePaletteStore, useColors } from "@/store/palette";
 import { createColor } from "@/lib/colors";
-import {
-  moodProfiles,
-  getMoodGrid,
-  generateMoodPalette,
-  type RefinementValues,
-} from "@/lib/mood";
+import { generateMoodPalette, type RefinementValues } from "@/lib/mood";
+import { MoodSelectionPanel } from "./MoodSelectionPanel";
+import { RefinementSliders } from "./RefinementSliders";
 
 export function MoodView() {
-  const { colors, setColors, setColor } = usePaletteStore();
+  // Use individual selectors for optimized re-renders
+  const colors = useColors();
+  const { setColors, setColor } = usePaletteStore();
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [refinements, setRefinements] = useState<RefinementValues>({
     temperature: 0,
@@ -22,17 +21,18 @@ export function MoodView() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const colorInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const handleColorChange = useCallback((index: number, hex: string) => {
-    const newColor = createColor(hex);
-    setColor(index, newColor);
-  }, [setColor]);
+  const handleColorChange = useCallback(
+    (index: number, hex: string) => {
+      const newColor = createColor(hex);
+      setColor(index, newColor);
+    },
+    [setColor]
+  );
 
   const handleEditClick = useCallback((index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     colorInputRefs.current[index]?.click();
   }, []);
-
-  const moodGrid = getMoodGrid();
 
   const handleMoodSelect = useCallback(
     (moodId: string) => {
@@ -79,133 +79,18 @@ export function MoodView() {
           </p>
 
           {/* Mood Grid */}
-          <div className="space-y-3 mb-8">
-            {moodGrid.map((row, rowIndex) => (
-              <div key={rowIndex} className="grid grid-cols-4 gap-2">
-                {row.map((mood) => (
-                  <motion.button
-                    key={mood.id}
-                    className={`relative p-3 rounded-xl text-center transition-all ${
-                      selectedMood === mood.id
-                        ? "bg-white text-zinc-900"
-                        : "bg-white/10 text-white hover:bg-white/20"
-                    }`}
-                    onClick={() => handleMoodSelect(mood.id)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <span className="text-sm font-medium">{mood.name}</span>
-                    {selectedMood === mood.id && (
-                      <motion.div
-                        className="absolute inset-0 rounded-xl border-2 border-white"
-                        layoutId="selectedMood"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
-                  </motion.button>
-                ))}
-              </div>
-            ))}
-          </div>
+          <MoodSelectionPanel
+            selectedMood={selectedMood}
+            onMoodSelect={handleMoodSelect}
+          />
 
           {/* Refinement Sliders */}
-          <AnimatePresence>
-            {selectedMood && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="space-y-6"
-              >
-                <h3 className="text-sm font-medium text-zinc-400">
-                  Fine-tune your palette
-                </h3>
-
-                {/* Temperature Slider */}
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-zinc-500">Cooler</span>
-                    <span className="text-sm text-white font-medium">Temperature</span>
-                    <span className="text-sm text-zinc-500">Warmer</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="-1"
-                    max="1"
-                    step="0.1"
-                    value={refinements.temperature}
-                    onChange={(e) =>
-                      handleRefinementChange("temperature", parseFloat(e.target.value))
-                    }
-                    className="w-full h-2 bg-gradient-to-r from-blue-500 via-zinc-500 to-orange-500 rounded-full appearance-none cursor-pointer slider-thumb"
-                  />
-                </div>
-
-                {/* Vibrancy Slider */}
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-zinc-500">Subtle</span>
-                    <span className="text-sm text-white font-medium">Vibrancy</span>
-                    <span className="text-sm text-zinc-500">Vibrant</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="-1"
-                    max="1"
-                    step="0.1"
-                    value={refinements.vibrancy}
-                    onChange={(e) =>
-                      handleRefinementChange("vibrancy", parseFloat(e.target.value))
-                    }
-                    className="w-full h-2 bg-gradient-to-r from-zinc-600 via-zinc-400 to-pink-500 rounded-full appearance-none cursor-pointer slider-thumb"
-                  />
-                </div>
-
-                {/* Brightness Slider */}
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-zinc-500">Dark</span>
-                    <span className="text-sm text-white font-medium">Brightness</span>
-                    <span className="text-sm text-zinc-500">Light</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="-1"
-                    max="1"
-                    step="0.1"
-                    value={refinements.brightness}
-                    onChange={(e) =>
-                      handleRefinementChange("brightness", parseFloat(e.target.value))
-                    }
-                    className="w-full h-2 bg-gradient-to-r from-zinc-800 via-zinc-500 to-white rounded-full appearance-none cursor-pointer slider-thumb"
-                  />
-                </div>
-
-                {/* Regenerate Button */}
-                <motion.button
-                  className="w-full py-3 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
-                  onClick={handleRegenerate}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                    <path d="M3 3v5h5" />
-                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                    <path d="M16 16h5v5" />
-                  </svg>
-                  Generate New Variation
-                </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <RefinementSliders
+            visible={!!selectedMood}
+            refinements={refinements}
+            onRefinementChange={handleRefinementChange}
+            onRegenerate={handleRegenerate}
+          />
         </motion.div>
       </div>
 
@@ -213,7 +98,9 @@ export function MoodView() {
       <div className="flex-1 flex flex-col md:flex-row min-h-0">
         <AnimatePresence mode="sync">
           {colors.map((color, index) => {
-            const textColor = color.contrastColor === "white" ? "#ffffff" : "#000000";
+            // Memoize text color calculations
+            const textColor =
+              color.contrastColor === "white" ? "#ffffff" : "#000000";
             const isHovered = hoveredIndex === index;
             return (
               <motion.div
@@ -228,7 +115,9 @@ export function MoodView() {
               >
                 {/* Hidden color input */}
                 <input
-                  ref={(el) => { colorInputRefs.current[index] = el; }}
+                  ref={(el) => {
+                    colorInputRefs.current[index] = el;
+                  }}
                   type="color"
                   value={color.hex}
                   onChange={(e) => handleColorChange(index, e.target.value)}

@@ -258,14 +258,32 @@ export function isInGamut(oklch: OKLCH): boolean {
 }
 
 /**
- * Reduce chroma until color is in gamut
+ * Reduce chroma until color is in gamut using binary search
+ * O(log n) vs O(n) for linear reduction
  */
 export function forceInGamut(oklch: OKLCH): OKLCH {
-  const result = { ...oklch };
-  while (!isInGamut(result) && result.c > 0) {
-    result.c = Math.max(0, result.c - 0.01);
+  // If already in gamut, return as-is
+  if (isInGamut(oklch)) {
+    return oklch;
   }
-  return result;
+
+  // Binary search for maximum in-gamut chroma
+  let low = 0;
+  let high = oklch.c;
+  const epsilon = 0.001; // Precision threshold
+
+  while (high - low > epsilon) {
+    const mid = (low + high) / 2;
+    const testColor = { ...oklch, c: mid };
+
+    if (isInGamut(testColor)) {
+      low = mid; // Can try higher chroma
+    } else {
+      high = mid; // Need lower chroma
+    }
+  }
+
+  return { ...oklch, c: low };
 }
 
 /**
@@ -331,6 +349,21 @@ export function generateColorName(hsl: HSL): string {
   else if (s > 80) satMod = "Vivid ";
 
   return `${lightMod}${satMod}${hueName}`.trim();
+}
+
+/**
+ * Get text colors for a given background based on contrast requirements
+ * Returns primary and muted text color values
+ */
+export function getTextColorsForBackground(contrastColor: "white" | "black"): {
+  textColor: string;
+  textColorMuted: string;
+} {
+  return {
+    textColor: contrastColor === "white" ? "#ffffff" : "#000000",
+    textColorMuted:
+      contrastColor === "white" ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)",
+  };
 }
 
 /**

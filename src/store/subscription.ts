@@ -14,7 +14,6 @@ interface SubscriptionState extends Subscription {
   // Helpers
   canUseExportFormat: (format: ExportFormat) => boolean;
   getSavedPalettesLimit: () => number;
-  isFeatureLocked: (feature: "unlimited_saves" | "advanced_exports" | "ad_free") => boolean;
 }
 
 const initialState: Subscription = {
@@ -55,20 +54,6 @@ export const useSubscriptionStore = create<SubscriptionState>()(
       getSavedPalettesLimit: () => {
         const { isPremium } = get();
         return isPremium ? Infinity : 10;
-      },
-
-      isFeatureLocked: (feature) => {
-        const { isPremium } = get();
-        if (isPremium) return false;
-
-        switch (feature) {
-          case "unlimited_saves":
-          case "advanced_exports":
-          case "ad_free":
-            return true;
-          default:
-            return true;
-        }
       },
     }),
     {

@@ -2,12 +2,15 @@
 
 import { useCallback, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePaletteStore } from "@/store/palette";
+import { usePaletteStore, useColors, useLocked } from "@/store/palette";
 import { createColor } from "@/lib/colors";
 import { ColorColumn } from "./ColorColumn";
 
 export function ImmersiveView() {
-  const { colors, locked, generate, toggleLock, setColor } = usePaletteStore();
+  // Use individual selectors for optimized re-renders
+  const colors = useColors();
+  const locked = useLocked();
+  const { generate, toggleLock, setColor } = usePaletteStore();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showHint, setShowHint] = useState(true);
 

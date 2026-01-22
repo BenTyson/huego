@@ -1,7 +1,7 @@
 # HueGo - Session Start Guide
 
 > **Read this before doing anything.**
-> Last Updated: 2025-12-18
+> Last Updated: 2026-01-22
 > Production: https://huego-production.up.railway.app
 > Dev: `npm run dev` (port 3377)
 
@@ -42,7 +42,7 @@ No database. localStorage only.
 ```
 src/
 ├── app/
-│   ├── immersive/     # Main mode
+│   ├── immersive/     # Main mode (uses ModePageLayout)
 │   ├── context/       # Preview mode
 │   ├── mood/          # Mood-based generation
 │   ├── play/          # Swipe mode
@@ -53,20 +53,36 @@ src/
 │   │   └── subscription/
 │   └── checkout/      # Success/cancel pages
 ├── components/
+│   ├── ActionBar/     # Split into sub-components
+│   │   ├── index.tsx
+│   │   ├── HarmonySelector.tsx
+│   │   ├── UndoRedoButtons.tsx
+│   │   ├── SaveButton.tsx
+│   │   ├── UtilityButtons.tsx
+│   │   └── Toast.tsx
+│   ├── layout/
+│   │   └── ModePageLayout.tsx  # Common mode wrapper
+│   ├── ui/
+│   │   ├── ColorEditButton.tsx
+│   │   └── HydrationLoader.tsx
+│   ├── modes/
+│   │   ├── immersive/
+│   │   ├── context/   # +PaletteSidebar, PreviewTypeSelector
+│   │   ├── mood/      # +MoodSelectionPanel, RefinementSliders
+│   │   └── playground/
 │   ├── ModeToggle.tsx
-│   ├── ActionBar.tsx
 │   ├── ExportModal.tsx
 │   ├── AccessibilityPanel.tsx
-│   ├── PricingModal.tsx
-│   └── modes/         # Mode-specific components
+│   └── PricingModal.tsx
 ├── lib/
-│   ├── colors.ts      # Color conversions
+│   ├── colors.ts      # Color conversions + getTextColorsForBackground
 │   ├── generate.ts    # Palette algorithms
 │   ├── export.ts      # Export formats
+│   ├── mood.ts        # Mood profiles
 │   ├── stripe.ts      # Stripe server
 │   └── accessibility.ts
 └── store/
-    ├── palette.ts     # Main state
+    ├── palette.ts     # Main state + selector hooks
     └── subscription.ts # Premium state
 ```
 

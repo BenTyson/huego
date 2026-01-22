@@ -371,45 +371,6 @@ export function generateRandomColor(): Color {
 }
 
 /**
- * Adjust a color's lightness
- */
-export function adjustLightness(color: Color, amount: number): Color {
-  const oklch = forceInGamut(
-    clampOklch({
-      ...color.oklch,
-      l: color.oklch.l + amount,
-    })
-  );
-  return createColor(oklchToHex(oklch));
-}
-
-/**
- * Adjust a color's chroma (saturation)
- */
-export function adjustChroma(color: Color, amount: number): Color {
-  const oklch = forceInGamut(
-    clampOklch({
-      ...color.oklch,
-      c: color.oklch.c + amount,
-    })
-  );
-  return createColor(oklchToHex(oklch));
-}
-
-/**
- * Adjust a color's hue
- */
-export function adjustHue(color: Color, degrees: number): Color {
-  const oklch = forceInGamut(
-    clampOklch({
-      ...color.oklch,
-      h: (color.oklch.h + degrees + 360) % 360,
-    })
-  );
-  return createColor(oklchToHex(oklch));
-}
-
-/**
  * Generate unique ID for palettes
  */
 export function generatePaletteId(): string {

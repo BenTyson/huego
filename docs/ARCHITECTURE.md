@@ -77,7 +77,10 @@ createColor(hex: string): Color  // Creates full Color object
 
 // Gamut handling
 isInGamut(oklch: OKLCH): boolean
-forceInGamut(oklch: OKLCH): OKLCH  // Reduces chroma until valid
+forceInGamut(oklch: OKLCH): OKLCH  // Binary search for max in-gamut chroma
+
+// Text color utility
+getTextColorsForBackground(contrastColor): { textColor, textColorMuted }
 ```
 
 ---
@@ -253,47 +256,72 @@ copyShareUrl(colors: Color[]): Promise<boolean>
 
 ### Mode Pages
 
-Each mode follows the same pattern:
+Each mode uses the `ModePageLayout` wrapper for consistent behavior:
 
 ```tsx
 // src/app/[mode]/page.tsx
 "use client";
 
+import dynamic from "next/dynamic";
+import { ModePageLayout } from "@/components/layout/ModePageLayout";
+
+const ModeView = dynamic(
+  () => import("@/components/modes/[mode]").then((mod) => mod.ModeView),
+  { ssr: false }
+);
+
 export default function ModePage() {
-  const [mounted, setMounted] = useState(false);
-
-  useKeyboard({ /* options */ });
-
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) return <Loading />;
-
   return (
-    <>
-      <ModeToggle />
-      <ModeView />     {/* Mode-specific component */}
-      <ActionBar />
-    </>
+    <ModePageLayout enableGenerate={true}>
+      <ModeView />
+    </ModePageLayout>
   );
 }
 ```
+
+### Layout Components
+
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| `ModePageLayout` | Wrapper with hydration, keyboard, ActionBar | `src/components/layout/` |
+| `HydrationLoader` | Loading state for SSR hydration | `src/components/ui/` |
 
 ### Shared Components
 
 | Component | Purpose | Location |
 |-----------|---------|----------|
-| `ModeToggle` | Mode switcher in header | All modes |
-| `ActionBar` | Bottom bar with actions | All modes |
-| `useKeyboard` | Keyboard shortcut handler | All modes |
+| `ModeToggle` | Mode switcher in header | `src/components/` |
+| `ActionBar` | Bottom bar with actions | `src/components/ActionBar/` |
+| `useKeyboard` | Keyboard shortcut handler | `src/hooks/` |
+
+### ActionBar Sub-Components
+
+The ActionBar is split into focused sub-components:
+
+| Component | Purpose |
+|-----------|---------|
+| `ActionBar/index.tsx` | Main layout, modal state management |
+| `ActionBar/HarmonySelector.tsx` | Harmony type dropdown |
+| `ActionBar/UndoRedoButtons.tsx` | Undo/redo controls |
+| `ActionBar/SaveButton.tsx` | Save palette with limit checking |
+| `ActionBar/UtilityButtons.tsx` | Export, accessibility, share buttons |
+| `ActionBar/Toast.tsx` | Toast notification component |
 
 ### Mode-Specific Components
 
 | Mode | Main Component | Sub-Components |
 |------|----------------|----------------|
 | Immersive | `ImmersiveView` | `ColorColumn` |
-| Context | `ContextView` | `WebsitePreview`, `MobileAppPreview`, `DashboardPreview` |
-| Mood | `MoodView` | (inline) |
+| Context | `ContextView` | `PaletteSidebar`, `PreviewTypeSelector`, `WebsitePreview`, `MobileAppPreview`, `DashboardPreview` |
+| Mood | `MoodView` | `MoodSelectionPanel`, `RefinementSliders` |
 | Playground | `PlaygroundView` | (inline) |
+
+### UI Components
+
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| `ColorEditButton` | Reusable color picker trigger | `src/components/ui/` |
+| `HydrationLoader` | SSR hydration loading state | `src/components/ui/` |
 
 ---
 
@@ -336,20 +364,47 @@ Using Framer Motion throughout:
 
 ### Current Optimizations
 
-1. **Zustand selectors** - Prevent unnecessary re-renders
+1. **Zustand selectors** - Individual selector hooks prevent unnecessary re-renders
    ```typescript
-   export const useColors = () => usePaletteStore((state) => state.colors);
+   // Use individual selectors instead of destructuring multiple values
+   const colors = useColors();
+   const locked = useLocked();
+   const harmonyType = useHarmonyType();
    ```
 
-2. **Client-side only** - All modes use `"use client"` + mounted check to prevent hydration mismatch
+2. **Binary search gamut clamping** - `forceInGamut()` uses O(log n) binary search instead of O(n) linear reduction
 
-3. **Lazy color generation** - Colors only generated when needed
+3. **Lazy loading modals** - `ExportModal`, `AccessibilityPanel`, `PricingModal` loaded via `dynamic()` with `{ ssr: false }`
 
-4. **Minimal localStorage** - History not persisted
+4. **Code splitting** - Mode view components loaded via `dynamic()` imports
 
-### Future Optimizations (Sprint 3)
+5. **useMemo for text colors** - Color calculations memoized in components
 
-- Memoize color conversions
+6. **Timer cleanup** - All `setTimeout` calls properly cleaned up on unmount to prevent memory leaks
+
+7. **Client-side only** - All modes use `"use client"` + mounted check via `ModePageLayout`
+
+8. **Minimal localStorage** - History not persisted
+
+### Memory Leak Prevention
+
+Timers in components must be cleaned up:
+```typescript
+const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+useEffect(() => {
+  return () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  };
+}, []);
+
+// When setting timer, clear existing first
+if (timerRef.current) clearTimeout(timerRef.current);
+timerRef.current = setTimeout(() => { ... }, 2000);
+```
+
+### Future Optimizations
+
 - Virtualize long lists (saved palettes)
 - Optimize animation performance
 - Add loading states for heavy operations

@@ -1,7 +1,7 @@
 // Export utilities for HueGo
 // Generates various output formats for palettes
 
-import type { Color } from "./types";
+import type { Color, ExportFormat } from "./types";
 
 // ============================================
 // CSS Variables Export
@@ -269,14 +269,8 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 // Export Format Types
 // ============================================
 
-export type ExportFormat =
-  | "css"
-  | "scss"
-  | "tailwind"
-  | "json"
-  | "array"
-  | "svg"
-  | "png";
+// Re-export ExportFormat from types.ts for backward compatibility
+export type { ExportFormat } from "./types";
 
 export interface ExportOption {
   id: ExportFormat;

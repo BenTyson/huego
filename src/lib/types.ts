@@ -45,13 +45,6 @@ export type HarmonyType =
   | "split-complementary"
   | "monochromatic";
 
-export interface UserPreferences {
-  defaultMode: Mode;
-  darkMode: boolean;
-  recentPalettes: Palette[];
-  savedPalettes: Palette[];
-}
-
 // Subscription types for premium features
 export type SubscriptionStatus = "active" | "canceled" | "past_due" | "trialing" | null;
 
@@ -74,19 +67,3 @@ export const ALL_EXPORT_FORMATS: ExportFormat[] = [...FREE_EXPORT_FORMATS, ...PR
 // Feature limits
 export const FREE_SAVED_PALETTES_LIMIT = 10;
 export const PREMIUM_SAVED_PALETTES_LIMIT = Infinity;
-
-export interface ColorRole {
-  id: string;
-  name: string;
-  description: string;
-}
-
-export const COLOR_ROLES: ColorRole[] = [
-  { id: "primary", name: "Primary", description: "Main brand color" },
-  { id: "secondary", name: "Secondary", description: "Supporting color" },
-  { id: "accent", name: "Accent", description: "Highlight color" },
-  { id: "background", name: "Background", description: "Page background" },
-  { id: "surface", name: "Surface", description: "Card/component background" },
-  { id: "text", name: "Text", description: "Primary text color" },
-  { id: "textSecondary", name: "Text Secondary", description: "Muted text" },
-];
