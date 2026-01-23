@@ -477,6 +477,68 @@ Response: { url: string } // Stripe checkout URL
 
 ---
 
+## Export System (`src/lib/export.ts`)
+
+### Export Formats
+
+| Format | Type | Copyable | Premium |
+|--------|------|----------|---------|
+| **CSS** | Text | Yes | No |
+| **SCSS** | Text | Yes | Yes |
+| **Tailwind** | Text | Yes | Yes |
+| **JSON** | Text | Yes | No |
+| **Array** | Text | Yes | Yes |
+| **SVG** | Text | Yes | Yes |
+| **PNG** | Binary | No | Yes |
+| **PDF** | Binary | No | Yes |
+| **ASE** | Binary | No | Yes |
+
+### Key Functions
+
+```typescript
+// Text exports
+exportCSS(colors: Color[], prefix?: string): string
+exportSCSS(colors: Color[], prefix?: string): string
+exportTailwind(colors: Color[]): string
+exportJSON(colors: Color[], pretty?: boolean): string
+exportArray(colors: Color[]): string
+exportSVG(colors: Color[], width?: number, height?: number): string
+
+// Binary exports
+exportPNG(colors: Color[], width?: number, height?: number): Promise<Blob | null>
+exportPDF(colors: Color[]): Promise<Blob>
+exportASE(colors: Color[]): Blob
+
+// Main export function
+exportPalette(format: ExportFormat, colors: Color[], action: "copy" | "download"): Promise<boolean>
+```
+
+### PDF Export
+
+Uses `jspdf` for client-side generation:
+- Landscape A4 layout
+- Color swatches with hex/name labels
+- Details table with HEX, RGB, HSL, contrast info
+- HueGo branding footer
+
+### ASE Export (Adobe Swatch Exchange)
+
+Binary format structure:
+```
+Header: "ASEF" (4 bytes)
+Version: 1.0 (4 bytes)
+Block count: N (4 bytes)
+Per color:
+  - Block type: 0x0001 (color entry)
+  - Block length
+  - Name (UTF-16BE with null terminator)
+  - Color model: "RGB "
+  - RGB values (3 floats, 0-1 range)
+  - Color type: 0 (global)
+```
+
+---
+
 ## Performance Optimizations
 
 1. **Zustand selectors** - Individual hooks prevent unnecessary re-renders

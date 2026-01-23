@@ -2,6 +2,7 @@
 // Generates various output formats for palettes
 
 import type { Color, ExportFormat } from "./types";
+import jsPDF from "jspdf";
 
 // ============================================
 // CSS Variables Export
@@ -226,6 +227,175 @@ export async function exportPNG(
 }
 
 // ============================================
+// PDF Export
+// ============================================
+
+export async function exportPDF(colors: Color[]): Promise<Blob> {
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // Header
+  doc.setFontSize(28);
+  doc.setTextColor(30, 30, 30);
+  doc.text("HueGo Palette", 20, 25);
+
+  // Color swatches
+  const swatchWidth = (pageWidth - 40) / colors.length;
+  const swatchHeight = 70;
+  const swatchY = 45;
+
+  colors.forEach((color, i) => {
+    const x = 20 + i * swatchWidth;
+
+    // Draw swatch rectangle
+    doc.setFillColor(color.rgb.r, color.rgb.g, color.rgb.b);
+    doc.rect(x, swatchY, swatchWidth - 2, swatchHeight, "F");
+
+    // Hex label on swatch
+    doc.setFontSize(14);
+    if (color.contrastColor === "white") {
+      doc.setTextColor(255, 255, 255);
+    } else {
+      doc.setTextColor(0, 0, 0);
+    }
+    doc.text(color.hex, x + (swatchWidth - 2) / 2, swatchY + swatchHeight / 2, {
+      align: "center",
+    });
+
+    // Color name below hex
+    doc.setFontSize(10);
+    doc.text(color.name, x + (swatchWidth - 2) / 2, swatchY + swatchHeight / 2 + 8, {
+      align: "center",
+    });
+  });
+
+  // Color details table
+  const tableY = swatchY + swatchHeight + 20;
+  doc.setTextColor(30, 30, 30);
+  doc.setFontSize(12);
+  doc.text("Color Details", 20, tableY);
+
+  doc.setFontSize(9);
+  const colWidth = (pageWidth - 40) / colors.length;
+  const headerY = tableY + 10;
+
+  // Table headers for each color
+  colors.forEach((color, i) => {
+    const x = 20 + i * colWidth;
+    const lineHeight = 5;
+
+    // Color index
+    doc.setFont("helvetica", "bold");
+    doc.text(`Color ${i + 1}`, x, headerY);
+
+    doc.setFont("helvetica", "normal");
+    // Hex
+    doc.text(`HEX: ${color.hex}`, x, headerY + lineHeight);
+    // RGB
+    doc.text(`RGB: ${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b}`, x, headerY + lineHeight * 2);
+    // HSL
+    doc.text(
+      `HSL: ${Math.round(color.hsl.h)}°, ${Math.round(color.hsl.s)}%, ${Math.round(color.hsl.l)}%`,
+      x,
+      headerY + lineHeight * 3
+    );
+    // Contrast
+    doc.text(`Contrast: ${color.contrastColor}`, x, headerY + lineHeight * 4);
+  });
+
+  // Footer
+  doc.setFontSize(8);
+  doc.setTextColor(128, 128, 128);
+  doc.text("Generated with HueGo - huego.app", 20, pageHeight - 10);
+
+  return doc.output("blob");
+}
+
+// ============================================
+// ASE Export (Adobe Swatch Exchange)
+// ============================================
+
+export function exportASE(colors: Color[]): Blob {
+  // Calculate total size needed
+  let totalSize = 12; // Header (4) + version (4) + block count (4)
+
+  colors.forEach((color) => {
+    // Block type (2) + block length (4) + name length (2) + name UTF-16BE + null (2)
+    // + color model (4) + RGB floats (12) + color type (2)
+    const nameLen = color.name.length + 1; // +1 for null terminator
+    const blockDataSize = 2 + nameLen * 2 + 4 + 12 + 2;
+    totalSize += 2 + 4 + blockDataSize; // block type + block length + data
+  });
+
+  const buffer = new ArrayBuffer(totalSize);
+  const view = new DataView(buffer);
+  let offset = 0;
+
+  // Header: "ASEF"
+  view.setUint8(offset++, 0x41); // A
+  view.setUint8(offset++, 0x53); // S
+  view.setUint8(offset++, 0x45); // E
+  view.setUint8(offset++, 0x46); // F
+
+  // Version 1.0
+  view.setUint16(offset, 1, false);
+  offset += 2;
+  view.setUint16(offset, 0, false);
+  offset += 2;
+
+  // Block count
+  view.setUint32(offset, colors.length, false);
+  offset += 4;
+
+  // Color entries
+  colors.forEach((color) => {
+    // Block type (0x0001 = color entry)
+    view.setUint16(offset, 0x0001, false);
+    offset += 2;
+
+    // Block length (everything after this field)
+    const nameLen = color.name.length + 1; // +1 for null terminator
+    const blockLen = 2 + nameLen * 2 + 4 + 12 + 2;
+    view.setUint32(offset, blockLen, false);
+    offset += 4;
+
+    // Name length (in UTF-16 code units, including null)
+    view.setUint16(offset, nameLen, false);
+    offset += 2;
+
+    // Name (UTF-16BE)
+    for (let i = 0; i < color.name.length; i++) {
+      view.setUint16(offset, color.name.charCodeAt(i), false);
+      offset += 2;
+    }
+    // Null terminator
+    view.setUint16(offset, 0, false);
+    offset += 2;
+
+    // Color model "RGB "
+    view.setUint8(offset++, 0x52); // R
+    view.setUint8(offset++, 0x47); // G
+    view.setUint8(offset++, 0x42); // B
+    view.setUint8(offset++, 0x20); // space
+
+    // RGB values (0-1 floats, big-endian)
+    view.setFloat32(offset, color.rgb.r / 255, false);
+    offset += 4;
+    view.setFloat32(offset, color.rgb.g / 255, false);
+    offset += 4;
+    view.setFloat32(offset, color.rgb.b / 255, false);
+    offset += 4;
+
+    // Color type (0 = global)
+    view.setUint16(offset, 0, false);
+    offset += 2;
+  });
+
+  return new Blob([buffer], { type: "application/octet-stream" });
+}
+
+// ============================================
 // Download Helpers
 // ============================================
 
@@ -330,6 +500,20 @@ export const exportOptions: ExportOption[] = [
     extension: ".png",
     mimeType: "image/png",
   },
+  {
+    id: "pdf",
+    label: "PDF Document",
+    description: "Printable presentation with color details",
+    extension: ".pdf",
+    mimeType: "application/pdf",
+  },
+  {
+    id: "ase",
+    label: "Adobe Swatch (ASE)",
+    description: "For Photoshop, Illustrator, InDesign",
+    extension: ".ase",
+    mimeType: "application/octet-stream",
+  },
 ];
 
 // ============================================
@@ -374,6 +558,22 @@ export async function exportPalette(
         return true;
       }
       // For copy, we can't copy PNG to clipboard easily
+      return false;
+    case "pdf":
+      blob = await exportPDF(colors);
+      if (action === "download") {
+        downloadBlob(blob, `huego-palette${option.extension}`);
+        return true;
+      }
+      // For copy, we can't copy PDF to clipboard easily
+      return false;
+    case "ase":
+      blob = exportASE(colors);
+      if (action === "download") {
+        downloadBlob(blob, `huego-palette${option.extension}`);
+        return true;
+      }
+      // For copy, ASE is binary - can't copy to clipboard
       return false;
     default:
       return false;

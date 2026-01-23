@@ -57,11 +57,11 @@ export interface Subscription {
 }
 
 // Export format types
-export type ExportFormat = "css" | "scss" | "tailwind" | "json" | "array" | "svg" | "png";
+export type ExportFormat = "css" | "scss" | "tailwind" | "json" | "array" | "svg" | "png" | "pdf" | "ase";
 
 // Free vs Premium export formats
 export const FREE_EXPORT_FORMATS: ExportFormat[] = ["css", "json"];
-export const PREMIUM_EXPORT_FORMATS: ExportFormat[] = ["array", "scss", "tailwind", "svg", "png"];
+export const PREMIUM_EXPORT_FORMATS: ExportFormat[] = ["array", "scss", "tailwind", "svg", "png", "pdf", "ase"];
 export const ALL_EXPORT_FORMATS: ExportFormat[] = [...FREE_EXPORT_FORMATS, ...PREMIUM_EXPORT_FORMATS];
 
 // Feature limits

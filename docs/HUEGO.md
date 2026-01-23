@@ -60,7 +60,9 @@ Competitors are functional but boring. We differentiate on:
 - Lighter/darker, saturated/muted, adjacent hues, complementary
 
 ### Export
-- 7 formats: CSS, SCSS, Tailwind, JSON, Array, SVG, PNG
+- 9 formats: CSS, SCSS, Tailwind, JSON, Array, SVG, PNG, PDF, ASE
+- PDF: Presentation-ready document with color details
+- ASE: Adobe Swatch Exchange for Photoshop/Illustrator/InDesign
 - Semantic naming (primary, secondary, accent, background, surface)
 
 ### Accessibility
@@ -78,7 +80,7 @@ All sprints complete:
 |--------|-------|--------|
 | 1 | Foundation - Color engine, OKLCH, Zustand store | ✅ |
 | 2 | All Modes - 4 modes with shared state | ✅ |
-| 3 | Export & A11y - 7 formats, WCAG, color blindness sim | ✅ |
+| 3 | Export & A11y - 9 formats, WCAG, color blindness sim | ✅ |
 | 4 | Monetization - Stripe, premium gating, SEO | ✅ |
 | 5 | Deployment - Railway, auto-deploy from main | ✅ |
 | 6 | V1 Launch Prep - Memory leak fixes, performance, refactoring | ✅ |

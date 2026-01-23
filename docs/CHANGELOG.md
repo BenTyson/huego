@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.7.1] - 2026-01-23
+
+### PDF & ASE Export Formats
+
+Added two professional export formats for premium users.
+
+#### Added
+
+**PDF Export** (`src/lib/export.ts`)
+- Professional presentation-ready PDF generation
+- Landscape A4 layout with color swatches
+- Color details table (HEX, RGB, HSL, contrast)
+- HueGo branding/footer
+- Uses `jspdf` for client-side generation
+
+**ASE Export** (`src/lib/export.ts`)
+- Adobe Swatch Exchange binary format
+- Compatible with Photoshop, Illustrator, InDesign
+- UTF-16BE color names
+- Proper ASEF header and RGB float values
+
+#### Changed
+
+- `ExportFormat` type now includes `"pdf" | "ase"`
+- `PREMIUM_EXPORT_FORMATS` updated to include PDF and ASE
+- `ExportModal` hides "Copy Code" button for binary formats (png, pdf, ase)
+
+#### Technical
+
+- New dependency: `jspdf` (client-side PDF generation)
+- Build passes with no new lint errors
+
+---
+
 ## [0.7.0] - 2026-01-22
 
 ### Sprint 6: Value & Monetization Enhancement
@@ -81,7 +115,7 @@ Major feature release adding import, extraction, gradients, and quick actions.
 |---------|------|---------|
 | Modes | 2 (Immersive, Playground) | All 5 |
 | Harmonies | 3 (Random, Analogous, Complementary) | All 6 |
-| Exports | 2 (CSS, JSON) | All 7+ |
+| Exports | 2 (CSS, JSON) | All 9 |
 | Saved Palettes | 5 | Unlimited |
 | Image Extractions | 3/session | Unlimited |
 | Gradients | - | Full access |

@@ -1,7 +1,7 @@
 # HueGo - Session Start Guide
 
 > **Read this before doing anything.**
-> Last Updated: 2026-01-22
+> Last Updated: 2026-01-23
 > Production: https://huego-production.up.railway.app
 > Dev: `npm run dev` (port 3377)
 
@@ -157,7 +157,7 @@ type HarmonyType = "random" | "analogous" | "complementary"
 
 type Mode = "immersive" | "context" | "mood" | "playground" | "gradient";
 
-type ExportFormat = "css" | "scss" | "tailwind" | "json" | "array" | "svg" | "png";
+type ExportFormat = "css" | "scss" | "tailwind" | "json" | "array" | "svg" | "png" | "pdf" | "ase";
 
 type GradientType = "linear" | "radial" | "conic" | "mesh";
 
@@ -178,7 +178,7 @@ FREE_SAVED_PALETTES_LIMIT: 5
 |---------|------|---------|
 | Modes | 2 | 5 |
 | Harmonies | 3 | 6 |
-| Exports | 2 | 7+ |
+| Exports | 2 | 9 |
 | Saved Palettes | 5 | Unlimited |
 | Image Extractions | 3/session | Unlimited |
 | Gradients | - | Full |

@@ -11,6 +11,7 @@
   "dependencies": {
     "@stripe/stripe-js": "^8.6.0",
     "framer-motion": "^12.23.26",
+    "jspdf": "^4.0.0",
     "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1",

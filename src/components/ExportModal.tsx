@@ -52,6 +52,10 @@ export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProp
         return exportSVG(colors);
       case "png":
         return "/* PNG preview not available - click Download to save */";
+      case "pdf":
+        return "/* PDF preview not available - click Download to save */";
+      case "ase":
+        return "/* ASE (Adobe Swatch Exchange) preview not available - click Download to save */";
       default:
         return "";
     }
@@ -221,7 +225,7 @@ export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProp
               >
                 Cancel
               </button>
-              {selectedFormat !== "png" && (
+              {!["png", "pdf", "ase"].includes(selectedFormat) && (
                 <button
                   onClick={handleCopy}
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-zinc-800 text-white hover:bg-zinc-700 transition-colors flex items-center gap-2"
