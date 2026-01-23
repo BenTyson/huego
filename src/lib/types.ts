@@ -68,6 +68,13 @@ export const ALL_EXPORT_FORMATS: ExportFormat[] = [...FREE_EXPORT_FORMATS, ...PR
 export const FREE_SAVED_PALETTES_LIMIT = 5;
 export const PREMIUM_SAVED_PALETTES_LIMIT = Infinity;
 
+// Palette size limits
+export const MIN_PALETTE_SIZE = 2;
+export const MAX_PALETTE_SIZE = 10;
+export const DEFAULT_PALETTE_SIZE = 5;
+export const FREE_MAX_PALETTE_SIZE = 7;
+export const PREMIUM_MAX_PALETTE_SIZE = 10;
+
 // Free vs Premium modes
 export const FREE_MODES: Mode[] = ["immersive", "playground"];
 export const PREMIUM_MODES: Mode[] = ["context", "mood", "gradient"];

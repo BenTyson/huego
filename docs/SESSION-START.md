@@ -9,20 +9,28 @@
 
 ## Status
 
-**Phase: Live / Monitoring**
+**Phase: Building - Competitive Roadmap**
 
-All sprints complete (1-7). Product is live with full feature set.
+Phase 1 complete. Implementing features to close gaps with Coolors.co.
 
 **Current state:**
 - 5 modes (Immersive, Playground, Context, Mood, Gradient)
+- Variable palette size (2-10 colors)
+- Dark/light theme support
+- Color psychology info panel
 - Import/extraction/gradients/suggestions all working
 - Server-side subscription validation active
 - Stripe in test mode
 
-**Next actions (when ready):**
-- Flip Stripe to live mode for real payments
-- Apply for AdSense (needs traffic first)
-- Add analytics if optimizing
+**Phase 1 Complete:**
+- Variable palette size (2-10 colors, free: 2-7)
+- Dark mode with system preference detection
+- Color psychology panel with cultural context
+
+**Next (Phase 2 - Community):**
+- Supabase database setup
+- Palette Explorer page
+- Publish palette flow
 
 ---
 
@@ -63,6 +71,7 @@ src/
 │   ├── ActionBar/        # Bottom action bar
 │   │   ├── index.tsx
 │   │   ├── HarmonySelector.tsx
+│   │   ├── PaletteSizeSelector.tsx  # +/- color controls
 │   │   ├── UndoRedoButtons.tsx
 │   │   ├── SaveButton.tsx
 │   │   ├── UtilityButtons.tsx
@@ -73,12 +82,14 @@ src/
 │   │   ├── ColorEditButton.tsx  # With suggestions popover
 │   │   └── HydrationLoader.tsx
 │   ├── modes/
-│   │   ├── immersive/
+│   │   ├── immersive/    # ImmersiveView, ColorColumn
 │   │   ├── context/
 │   │   ├── mood/
 │   │   ├── playground/
 │   │   └── gradient/     # GradientView.tsx
 │   ├── ModeToggle.tsx
+│   ├── ThemeToggle.tsx   # Dark/light mode toggle
+│   ├── ColorInfoPanel.tsx # Color psychology slide-out
 │   ├── ExportModal.tsx
 │   ├── AccessibilityPanel.tsx
 │   ├── PricingModal.tsx
@@ -87,8 +98,9 @@ src/
 │   └── HistoryBrowser.tsx
 ├── lib/
 │   ├── colors.ts         # Color conversions
+│   ├── color-psychology.ts # Color meanings & culture
 │   ├── generate.ts       # Palette algorithms
-│   ├── export.ts         # Export formats
+│   ├── export.ts         # Export formats (9 total)
 │   ├── mood.ts           # Mood profiles
 │   ├── import.ts         # Import parsing
 │   ├── extract.ts        # Image extraction (k-means)
@@ -100,8 +112,9 @@ src/
 │   ├── share.ts
 │   └── types.ts          # Core types + tier constants
 ├── store/
-│   ├── palette.ts        # Main state + batch ops
-│   └── subscription.ts   # Premium state + verification
+│   ├── palette.ts        # Main state + paletteSize
+│   ├── subscription.ts   # Premium state + verification
+│   └── theme.ts          # Dark/light theme state
 └── hooks/
     └── useKeyboard.ts    # All keyboard shortcuts
 ```
@@ -161,6 +174,8 @@ type ExportFormat = "css" | "scss" | "tailwind" | "json" | "array" | "svg" | "pn
 
 type GradientType = "linear" | "radial" | "conic" | "mesh";
 
+type ThemeMode = "light" | "dark" | "system";
+
 // Tier constants (from types.ts)
 FREE_MODES: ["immersive", "playground"]
 PREMIUM_MODES: ["context", "mood", "gradient"]
@@ -168,6 +183,13 @@ FREE_HARMONIES: ["random", "analogous", "complementary"]
 PREMIUM_HARMONIES: ["triadic", "split-complementary", "monochromatic"]
 FREE_EXPORT_FORMATS: ["css", "json"]
 FREE_SAVED_PALETTES_LIMIT: 5
+
+// Palette size constants
+MIN_PALETTE_SIZE: 2
+MAX_PALETTE_SIZE: 10
+DEFAULT_PALETTE_SIZE: 5
+FREE_MAX_PALETTE_SIZE: 7
+PREMIUM_MAX_PALETTE_SIZE: 10
 ```
 
 ---
@@ -176,6 +198,7 @@ FREE_SAVED_PALETTES_LIMIT: 5
 
 | Feature | Free | Premium |
 |---------|------|---------|
+| Palette Size | 2-7 colors | 2-10 colors |
 | Modes | 2 | 5 |
 | Harmonies | 3 | 6 |
 | Exports | 2 | 9 |
@@ -191,14 +214,15 @@ FREE_SAVED_PALETTES_LIMIT: 5
 | Key | Action |
 |-----|--------|
 | `Space` | Generate new palette |
-| `1-5` | Copy color's hex |
-| `Shift+1-5` | Toggle lock |
+| `1-9, 0` | Copy color's hex (0=10th) |
+| `Shift+1-9, 0` | Toggle lock |
 | `C` | Copy all hex codes |
 | `R` | Shuffle colors |
 | `I` | Invert palette |
 | `D` | Desaturate (-20%) |
 | `V` | Vibrant (+20%) |
 | `H` | History browser |
+| `T` | Toggle dark/light theme |
 | `Ctrl+Z` | Undo |
 | `Ctrl+Y` | Redo |
 

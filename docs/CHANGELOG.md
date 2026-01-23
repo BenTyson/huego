@@ -4,6 +4,64 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.8.0] - 2026-01-23
+
+### Phase 1: Foundation Enhancements (Competitive Roadmap)
+
+Closing competitive gaps with Coolors.co while amplifying HueGo's unique strengths. Implements variable palette sizes, dark mode, and color psychology insights.
+
+#### Added
+
+**Variable Palette Size** (`src/store/palette.ts`, `src/components/ActionBar/PaletteSizeSelector.tsx`)
+- Dynamic palette size from 2-10 colors (was fixed at 5)
+- +/- controls in ActionBar to add/remove colors
+- Free tier: 2-7 colors
+- Premium tier: 2-10 colors
+- Keyboard shortcuts extended to 1-9 and 0 (for 10th color)
+- New store actions: `setPaletteSize()`, `addColor()`, `removeColor()`
+- New constants: `MIN_PALETTE_SIZE`, `MAX_PALETTE_SIZE`, `FREE_MAX_PALETTE_SIZE`, `PREMIUM_MAX_PALETTE_SIZE`
+
+**Dark Mode Theme System** (`src/store/theme.ts`, `src/components/ThemeToggle.tsx`)
+- Three theme modes: light, dark, system (auto-detect)
+- CSS custom properties for comprehensive theming
+- `prefers-color-scheme` media query support
+- Theme persisted to localStorage
+- Keyboard shortcut: `T` to toggle theme
+- New variables: `--glass`, `--glass-border`, `--overlay`, `--card`, `--popover`, etc.
+
+**Color Psychology Panel** (`src/lib/color-psychology.ts`, `src/components/ColorInfoPanel.tsx`)
+- Comprehensive color psychology data for 9 color families
+- Emotions, traits, use cases, and industry associations per color
+- Cultural context (Western, Eastern, Universal meanings)
+- Saturation effects (muted/balanced/vibrant)
+- Lightness effects (dark/medium/light/pastel)
+- Neutral color handling (black, gray, white)
+- Info button on each color column to open psychology panel
+- Slide-out panel with detailed color analysis
+
+#### Changed
+
+- `PaletteState` interface now includes `paletteSize` property
+- `generatePalette()` respects dynamic size from store
+- Keyboard shortcuts 1-9 and 0 work for variable palette sizes
+- `SubscriptionStore` includes `getMaxPaletteSize()` and `canUsePaletteSize()` helpers
+- `globals.css` restructured with light/dark theme variables
+- `ModeToggle` now includes `ThemeToggle` component
+- `ColorColumn` has new info button alongside edit button
+
+#### Technical
+
+- 8 new files created
+- 10 files modified
+- New store: `src/store/theme.ts`
+- New component: `src/components/ActionBar/PaletteSizeSelector.tsx`
+- New component: `src/components/ThemeToggle.tsx`
+- New component: `src/components/ColorInfoPanel.tsx`
+- New lib: `src/lib/color-psychology.ts`
+- Build passes with no lint errors
+
+---
+
 ## [0.7.1] - 2026-01-23
 
 ### PDF & ASE Export Formats

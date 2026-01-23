@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useIsPremium } from "@/store/subscription";
 import { PricingModal } from "./PricingModal";
+import { ThemeToggle } from "./ThemeToggle";
 import type { Mode } from "@/lib/types";
 import { FREE_MODES } from "@/lib/types";
 
@@ -209,6 +210,9 @@ export function ModeToggle() {
               <span className="hidden sm:inline">Pro</span>
             </motion.button>
           )}
+
+          {/* Theme toggle */}
+          <ThemeToggle />
         </div>
       </motion.nav>
 

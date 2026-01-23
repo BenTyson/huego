@@ -41,10 +41,21 @@ Competitors are functional but boring. We differentiate on:
 ## Key Features
 
 ### Palette Generation
+- **Variable palette size**: 2-10 colors (Coolors parity)
 - 6 harmony types (random, analogous, complementary, triadic, split-complementary, monochromatic)
 - OKLCH color space for perceptual uniformity
 - Lock colors to preserve during regeneration
 - Undo/redo with visual history browser
+
+### Color Psychology (Unique)
+- Meaning and emotions for each color
+- Industry recommendations
+- Cultural context (Western vs Eastern)
+- Saturation/lightness effect analysis
+
+### Theming
+- Dark/light mode with system preference detection
+- Keyboard shortcut `T` to toggle
 
 ### Import & Extraction
 - **Import**: Paste hex codes, CSS variables, Tailwind config, or JSON
@@ -74,7 +85,7 @@ Competitors are functional but boring. We differentiate on:
 
 ## Implementation Status
 
-All sprints complete:
+All sprints complete. Now implementing competitive roadmap.
 
 | Sprint | Focus | Status |
 |--------|-------|--------|
@@ -85,6 +96,17 @@ All sprints complete:
 | 5 | Deployment - Railway, auto-deploy from main | ✅ |
 | 6 | V1 Launch Prep - Memory leak fixes, performance, refactoring | ✅ |
 | 7 | Value Enhancement - Import, extraction, gradients, suggestions, shortcuts | ✅ |
+
+### Competitive Roadmap (vs Coolors.co)
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| 1 | Variable palette size, dark mode, color psychology | ✅ |
+| 2 | Community explorer (Supabase + palette browsing) | Pending |
+| 3 | AI color assistant (Claude API) | Pending |
+| 4 | Platform integrations (Figma, Chrome, VS Code) | Pending |
+| 5 | SVG recolor, expanded templates | Pending |
+| 6 | Projects/collections, zen mode | Pending |
 
 ---
 
@@ -120,14 +142,15 @@ No database. localStorage only.
 | Key | Action |
 |-----|--------|
 | `Space` | Generate new palette |
-| `1-5` | Copy color's hex |
-| `Shift+1-5` | Toggle lock |
+| `1-9, 0` | Copy color's hex (0=10th) |
+| `Shift+1-9, 0` | Toggle lock |
 | `C` | Copy all hex codes |
 | `R` | Shuffle colors |
 | `I` | Invert palette |
 | `D` | Desaturate (-20%) |
 | `V` | Vibrant (+20%) |
 | `H` | History browser |
+| `T` | Toggle theme |
 | `Ctrl+Z` | Undo |
 | `Ctrl+Y` | Redo |
 
@@ -137,9 +160,23 @@ No database. localStorage only.
 
 | Competitor | Our Advantage |
 |------------|---------------|
-| Coolors | Multiple modes, image extraction, gradients |
-| Adobe Color | Not locked to ecosystem, mesh gradients |
+| Coolors | Mood-based generation, mesh gradients, color psychology, accessibility simulation |
+| Adobe Color | Not locked to ecosystem, mesh gradients, better UX |
 | Khroma | Immediate, simpler, more export options |
+
+### Gap Analysis (vs Coolors)
+
+| Feature | Coolors | HueGo | Status |
+|---------|---------|-------|--------|
+| Variable palette (2-10) | Yes | Yes | ✅ Parity |
+| Dark mode | Yes | Yes | ✅ Parity |
+| Color info/psychology | Basic | Rich | ✅ Advantage |
+| Mood-based generation | No | Yes | ✅ Advantage |
+| Mesh gradients | No | Yes | ✅ Advantage |
+| Accessibility sim | Basic | 5 types | ✅ Advantage |
+| Community palettes | 10M+ | Pending | Phase 2 |
+| AI assistant | Yes | Pending | Phase 3 |
+| Figma plugin | Yes | Pending | Phase 4 |
 
 ---
 

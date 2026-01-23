@@ -4,6 +4,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Subscription, ExportFormat } from "@/lib/types";
+import { FREE_MAX_PALETTE_SIZE, PREMIUM_MAX_PALETTE_SIZE, MIN_PALETTE_SIZE } from "@/lib/types";
 
 interface SubscriptionState extends Subscription {
   // Verification state
@@ -19,6 +20,8 @@ interface SubscriptionState extends Subscription {
   // Helpers
   canUseExportFormat: (format: ExportFormat) => boolean;
   getSavedPalettesLimit: () => number;
+  getMaxPaletteSize: () => number;
+  canUsePaletteSize: (size: number) => boolean;
   canUseMode: (mode: string) => boolean;
   canUseHarmony: (harmony: string) => boolean;
   canUseAccessibilityFeature: (feature: string) => boolean;
@@ -129,6 +132,18 @@ export const useSubscriptionStore = create<SubscriptionState>()(
         return isPremium ? Infinity : FREE_SAVED_PALETTES_LIMIT;
       },
 
+      getMaxPaletteSize: () => {
+        const { isPremium } = get();
+        return isPremium ? PREMIUM_MAX_PALETTE_SIZE : FREE_MAX_PALETTE_SIZE;
+      },
+
+      canUsePaletteSize: (size: number) => {
+        const { isPremium } = get();
+        if (size < MIN_PALETTE_SIZE) return false;
+        const maxSize = isPremium ? PREMIUM_MAX_PALETTE_SIZE : FREE_MAX_PALETTE_SIZE;
+        return size <= maxSize;
+      },
+
       canUseMode: (mode: string) => {
         const { isPremium } = get();
         return isPremium || FREE_MODES.includes(mode);
@@ -166,6 +181,10 @@ export const useCanUseExportFormat = (format: ExportFormat) =>
   useSubscriptionStore((state) => state.canUseExportFormat(format));
 export const useSavedPalettesLimit = () =>
   useSubscriptionStore((state) => state.getSavedPalettesLimit());
+export const useMaxPaletteSize = () =>
+  useSubscriptionStore((state) => state.getMaxPaletteSize());
+export const useCanUsePaletteSize = (size: number) =>
+  useSubscriptionStore((state) => state.canUsePaletteSize(size));
 export const useCanUseMode = (mode: string) =>
   useSubscriptionStore((state) => state.canUseMode(mode));
 export const useCanUseHarmony = (harmony: string) =>

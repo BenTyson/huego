@@ -4,11 +4,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Color, Mode, Palette, HarmonyType } from "@/lib/types";
+import { DEFAULT_PALETTE_SIZE, MIN_PALETTE_SIZE, MAX_PALETTE_SIZE } from "@/lib/types";
 import { generatePalette, generatePaletteId } from "@/lib/generate";
 import { createColor, hexToOklch, oklchToHex, forceInGamut } from "@/lib/colors";
 import { useSubscriptionStore } from "./subscription";
 
-const PALETTE_SIZE = 5;
 const MAX_HISTORY = 50;
 
 interface PaletteState {
@@ -17,6 +17,7 @@ interface PaletteState {
   locked: boolean[];
   mode: Mode;
   harmonyType: HarmonyType;
+  paletteSize: number;
 
   // History for undo
   history: Palette[];
@@ -32,6 +33,9 @@ interface PaletteState {
   setColors: (colors: Color[]) => void;
   setMode: (mode: Mode) => void;
   setHarmonyType: (type: HarmonyType) => void;
+  setPaletteSize: (size: number) => void;
+  addColor: () => void;
+  removeColor: () => void;
   undo: () => void;
   redo: () => void;
   savePalette: () => Palette | null;
@@ -48,8 +52,8 @@ interface PaletteState {
 }
 
 // Generate initial palette
-const initialColors = generatePalette("random", [], PALETTE_SIZE);
-const initialLocked = Array(PALETTE_SIZE).fill(false);
+const initialColors = generatePalette("random", [], DEFAULT_PALETTE_SIZE);
+const initialLocked = Array(DEFAULT_PALETTE_SIZE).fill(false);
 
 export const usePaletteStore = create<PaletteState>()(
   persist(
@@ -59,13 +63,14 @@ export const usePaletteStore = create<PaletteState>()(
       locked: initialLocked,
       mode: "immersive",
       harmonyType: "random",
+      paletteSize: DEFAULT_PALETTE_SIZE,
       history: [],
       historyIndex: -1,
       savedPalettes: [],
 
       // Generate new palette (respecting locks)
       generate: () => {
-        const { colors, locked, harmonyType, history, historyIndex } = get();
+        const { colors, locked, harmonyType, paletteSize, history, historyIndex } = get();
 
         // Save current state to history
         const currentPalette: Palette = {
@@ -89,7 +94,7 @@ export const usePaletteStore = create<PaletteState>()(
         const lockedColors = colors.map((color, i) =>
           locked[i] ? color : null
         );
-        const newColors = generatePalette(harmonyType, lockedColors, PALETTE_SIZE);
+        const newColors = generatePalette(harmonyType, lockedColors, paletteSize);
 
         set({
           colors: newColors,
@@ -127,6 +132,69 @@ export const usePaletteStore = create<PaletteState>()(
       // Change harmony type
       setHarmonyType: (harmonyType: HarmonyType) => {
         set({ harmonyType });
+      },
+
+      // Set palette size and regenerate colors
+      setPaletteSize: (size: number) => {
+        const { colors, locked, harmonyType } = get();
+        const newSize = Math.max(MIN_PALETTE_SIZE, Math.min(MAX_PALETTE_SIZE, size));
+
+        if (newSize === colors.length) return;
+
+        let newColors: Color[];
+        let newLocked: boolean[];
+
+        if (newSize > colors.length) {
+          // Adding colors - generate new ones for the new positions
+          const lockedColors = [...colors.map((c, i) => locked[i] ? c : null)];
+          // Pad with nulls for new positions
+          while (lockedColors.length < newSize) {
+            lockedColors.push(null);
+          }
+          newColors = generatePalette(harmonyType, lockedColors, newSize);
+          newLocked = [...locked, ...Array(newSize - colors.length).fill(false)];
+        } else {
+          // Removing colors - keep existing ones
+          newColors = colors.slice(0, newSize);
+          newLocked = locked.slice(0, newSize);
+        }
+
+        set({
+          colors: newColors,
+          locked: newLocked,
+          paletteSize: newSize,
+        });
+      },
+
+      // Add a single color
+      addColor: () => {
+        const { colors, locked, paletteSize, harmonyType } = get();
+        const maxSize = useSubscriptionStore.getState().getMaxPaletteSize();
+
+        if (colors.length >= maxSize) return;
+
+        const newSize = colors.length + 1;
+        const lockedColors = [...colors.map((c, i) => locked[i] ? c : null), null];
+        const newColors = generatePalette(harmonyType, lockedColors, newSize);
+
+        set({
+          colors: newColors,
+          locked: [...locked, false],
+          paletteSize: newSize,
+        });
+      },
+
+      // Remove the last color
+      removeColor: () => {
+        const { colors, locked } = get();
+
+        if (colors.length <= MIN_PALETTE_SIZE) return;
+
+        set({
+          colors: colors.slice(0, -1),
+          locked: locked.slice(0, -1),
+          paletteSize: colors.length - 1,
+        });
       },
 
       // Undo to previous palette
@@ -194,6 +262,7 @@ export const usePaletteStore = create<PaletteState>()(
         set({
           colors: palette.colors,
           locked: palette.locked,
+          paletteSize: palette.colors.length,
         });
       },
 
@@ -214,10 +283,11 @@ export const usePaletteStore = create<PaletteState>()(
 
       // Reset to initial state
       reset: () => {
-        const newColors = generatePalette("random", [], PALETTE_SIZE);
+        const newColors = generatePalette("random", [], DEFAULT_PALETTE_SIZE);
         set({
           colors: newColors,
-          locked: Array(PALETTE_SIZE).fill(false),
+          locked: Array(DEFAULT_PALETTE_SIZE).fill(false),
+          paletteSize: DEFAULT_PALETTE_SIZE,
           history: [],
           historyIndex: -1,
         });
@@ -297,6 +367,7 @@ export const usePaletteStore = create<PaletteState>()(
         locked: state.locked,
         mode: state.mode,
         harmonyType: state.harmonyType,
+        paletteSize: state.paletteSize,
         savedPalettes: state.savedPalettes,
         // Don't persist history to keep localStorage small
       }),
@@ -309,6 +380,7 @@ export const useColors = () => usePaletteStore((state) => state.colors);
 export const useLocked = () => usePaletteStore((state) => state.locked);
 export const useMode = () => usePaletteStore((state) => state.mode);
 export const useHarmonyType = () => usePaletteStore((state) => state.harmonyType);
+export const usePaletteSize = () => usePaletteStore((state) => state.paletteSize);
 export const useSavedPalettes = () => usePaletteStore((state) => state.savedPalettes);
 export const useHistory = () => usePaletteStore((state) => state.history);
 export const useHistoryIndex = () => usePaletteStore((state) => state.historyIndex);

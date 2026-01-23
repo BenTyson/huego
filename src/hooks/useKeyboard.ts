@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from "react";
 import { usePaletteStore } from "@/store/palette";
+import { useThemeStore } from "@/store/theme";
 
 interface KeyboardOptions {
   enableGenerate?: boolean;
@@ -102,10 +103,10 @@ export function useKeyboard(options: KeyboardOptions = {}) {
         }
       }
 
-      // Number keys 1-5 - Copy that color's hex (Shift + number = toggle lock)
+      // Number keys 1-9 and 0 (for 10) - Copy that color's hex (Shift + number = toggle lock)
       if (!e.metaKey && !e.ctrlKey) {
-        const num = parseInt(e.key);
-        if (num >= 1 && num <= 5) {
+        const num = e.key === "0" ? 10 : parseInt(e.key);
+        if (num >= 1 && num <= 10 && num <= colors.length) {
           if (e.shiftKey && enableLock) {
             // Shift + number = toggle lock
             toggleLock(num - 1);
@@ -156,6 +157,18 @@ export function useKeyboard(options: KeyboardOptions = {}) {
         if (e.key === "h" && !e.metaKey && !e.ctrlKey) {
           e.preventDefault();
           onShowHistory?.();
+          return;
+        }
+
+        // T - Toggle theme
+        if (e.key === "t" && !e.metaKey && !e.ctrlKey) {
+          e.preventDefault();
+          useThemeStore.getState().toggleTheme();
+          onShowToast?.(
+            useThemeStore.getState().resolvedTheme === "dark"
+              ? "Dark mode"
+              : "Light mode"
+          );
           return;
         }
       }

@@ -216,6 +216,121 @@ meshToCSS(points: MeshPoint[]): string
 
 ---
 
+## Color Psychology (`src/lib/color-psychology.ts`)
+
+### Overview
+
+Comprehensive color psychology data for understanding color meanings, emotions, and cultural context.
+
+### Key Types
+
+```typescript
+interface ColorPsychology {
+  hueRange: [number, number];  // Hue range in degrees
+  name: string;
+  meaning: string;
+  emotions: string[];
+  useCases: string[];
+  industries: string[];
+  cultures: {
+    western: string;
+    eastern: string;
+    general: string;
+  };
+  positiveTraits: string[];
+  negativeTraits: string[];
+}
+
+interface ColorAnalysis {
+  baseColor: ColorPsychology | null;
+  neutral: NeutralInfo | null;
+  saturation: SaturationEffect;
+  lightness: LightnessEffect;
+  isNeutral: boolean;
+  summary: string;
+}
+```
+
+### Key Functions
+
+```typescript
+getColorPsychology(hue: number): ColorPsychology
+getSaturationEffect(saturation: number): SaturationEffect
+getLightnessEffect(lightness: number): LightnessEffect
+isNeutralColor(saturation: number): boolean
+getNeutralInfo(lightness: number): NeutralInfo
+analyzeColor(hue: number, saturation: number, lightness: number): ColorAnalysis
+```
+
+### Color Families
+
+| Hue Range | Name | Primary Meaning |
+|-----------|------|-----------------|
+| 0-15 | Red | Energy, passion, urgency |
+| 15-45 | Orange | Creativity, enthusiasm |
+| 45-70 | Yellow | Happiness, optimism |
+| 70-150 | Green | Nature, growth, health |
+| 150-200 | Cyan/Teal | Communication, clarity |
+| 200-260 | Blue | Trust, stability, calm |
+| 260-290 | Purple | Luxury, creativity, wisdom |
+| 290-330 | Magenta/Pink | Femininity, romance |
+| 330-360 | Rose | Love, warmth, elegance |
+
+### Related Files
+
+- Component: `src/components/ColorInfoPanel.tsx`
+- Integration: `src/components/modes/immersive/ColorColumn.tsx`
+
+---
+
+## Theme System (`src/store/theme.ts`)
+
+### Overview
+
+Dark/light theme management with system preference detection.
+
+### Key Types
+
+```typescript
+type ThemeMode = "light" | "dark" | "system";
+type ResolvedTheme = "light" | "dark";
+
+interface ThemeState {
+  mode: ThemeMode;
+  resolvedTheme: ResolvedTheme;
+  setMode: (mode: ThemeMode) => void;
+  toggleTheme: () => void;
+  initializeTheme: () => void;
+}
+```
+
+### Key Functions
+
+```typescript
+getSystemPreference(): ResolvedTheme
+resolveTheme(mode: ThemeMode): ResolvedTheme
+applyTheme(theme: ResolvedTheme): void
+```
+
+### CSS Variables
+
+Theme applies class `light` or `dark` to `<html>` element. CSS variables defined in `globals.css`:
+
+| Variable | Dark | Light |
+|----------|------|-------|
+| `--background` | #0a0a0a | #ffffff |
+| `--foreground` | #fafafa | #09090b |
+| `--glass` | rgba(0,0,0,0.3) | rgba(255,255,255,0.8) |
+| `--glass-border` | rgba(255,255,255,0.1) | rgba(0,0,0,0.1) |
+
+### Related Files
+
+- Component: `src/components/ThemeToggle.tsx`
+- CSS: `src/app/globals.css`
+- Integration: `src/components/ModeToggle.tsx`
+
+---
+
 ## Color Suggestions (`src/lib/suggestions.ts`)
 
 ### Suggestion Categories
@@ -259,6 +374,7 @@ interface PaletteState {
   locked: boolean[];
   mode: Mode;
   harmonyType: HarmonyType;
+  paletteSize: number;  // 2-10, dynamic
 
   // History (for undo/redo)
   history: Palette[];
@@ -274,6 +390,9 @@ interface PaletteState {
   setColors: (colors: Color[]) => void;
   setMode: (mode: Mode) => void;
   setHarmonyType: (type: HarmonyType) => void;
+  setPaletteSize: (size: number) => void;
+  addColor: () => void;
+  removeColor: () => void;
   undo: () => void;
   redo: () => void;
   savePalette: () => Palette | null;
@@ -298,6 +417,7 @@ useColors(): Color[]
 useLocked(): boolean[]
 useMode(): Mode
 useHarmonyType(): HarmonyType
+usePaletteSize(): number
 useSavedPalettes(): Palette[]
 useHistory(): Palette[]
 useHistoryIndex(): number
@@ -436,14 +556,15 @@ useKeyboard(options: KeyboardOptions): {
 | Key | Action | Condition |
 |-----|--------|-----------|
 | `Space` | Generate palette | `enableGenerate` |
-| `1-5` | Copy color hex | `enableCopy` |
-| `Shift+1-5` | Toggle lock | `enableLock` |
+| `1-9, 0` | Copy color hex (0=10th) | `enableCopy` |
+| `Shift+1-9, 0` | Toggle lock | `enableLock` |
 | `C` | Copy all | `enableCopy` |
 | `R` | Shuffle | `enableBatchOps` |
 | `I` | Invert | `enableBatchOps` |
 | `D` | Desaturate | `enableBatchOps` |
 | `V` | Vibrant | `enableBatchOps` |
 | `H` | History | `enableBatchOps` |
+| `T` | Toggle theme | `enableBatchOps` |
 | `Ctrl+Z` | Undo | `enableUndo` |
 | `Ctrl+Y` | Redo | `enableUndo` |
 

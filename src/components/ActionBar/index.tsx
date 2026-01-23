@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { HarmonySelector } from "./HarmonySelector";
+import { PaletteSizeSelector } from "./PaletteSizeSelector";
 import { UndoRedoButtons } from "./UndoRedoButtons";
 import { SaveButton } from "./SaveButton";
 import { UtilityButtons } from "./UtilityButtons";
@@ -72,6 +73,7 @@ export function ActionBar() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
+        <PaletteSizeSelector onUpgradeClick={() => setShowPricingModal(true)} />
         <HarmonySelector onUpgradeClick={() => setShowPricingModal(true)} />
         <UndoRedoButtons onShowHistory={() => setShowHistoryBrowser(true)} />
         <SaveButton

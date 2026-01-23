@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePaletteStore, useColors, useLocked } from "@/store/palette";
 import { createColor } from "@/lib/colors";
 import { ColorColumn } from "./ColorColumn";
+import { ColorInfoPanel } from "@/components/ColorInfoPanel";
+import type { Color } from "@/lib/types";
 
 export function ImmersiveView() {
   // Use individual selectors for optimized re-renders
@@ -13,6 +15,8 @@ export function ImmersiveView() {
   const { generate, toggleLock, setColor } = usePaletteStore();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showHint, setShowHint] = useState(true);
+  const [infoColor, setInfoColor] = useState<Color | null>(null);
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
 
   // Hide hint after first generation
   useEffect(() => {
@@ -32,6 +36,11 @@ export function ImmersiveView() {
     setColor(index, newColor);
   }, [setColor]);
 
+  const handleShowInfo = useCallback((color: Color) => {
+    setInfoColor(color);
+    setShowInfoPanel(true);
+  }, []);
+
   return (
     <div className="relative h-screen w-screen overflow-hidden">
       {/* Color columns */}
@@ -49,6 +58,7 @@ export function ImmersiveView() {
               isLocked={locked[index]}
               onToggleLock={() => toggleLock(index)}
               onColorChange={(hex) => handleColorChange(index, hex)}
+              onShowInfo={() => handleShowInfo(color)}
               isActive={activeIndex === index}
             />
           ))}
@@ -127,6 +137,13 @@ export function ImmersiveView() {
           <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
         </svg>
       </motion.button>
+
+      {/* Color Psychology Info Panel */}
+      <ColorInfoPanel
+        isOpen={showInfoPanel}
+        onClose={() => setShowInfoPanel(false)}
+        color={infoColor}
+      />
     </div>
   );
 }
