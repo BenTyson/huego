@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePaletteStore } from "@/store/palette";
+import { useIsPremium } from "@/store/subscription";
 import {
   getPaletteContrasts,
   checkColorAccessibility,
@@ -16,7 +17,12 @@ import {
 interface AccessibilityPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  onUpgradeClick?: () => void;
 }
+
+// Free tier blindness types
+const FREE_BLINDNESS_TYPES: ColorBlindnessType[] = ["normal", "protanopia", "deuteranopia"];
+const PREMIUM_BLINDNESS_TYPES: ColorBlindnessType[] = ["tritanopia", "achromatopsia"];
 
 type Tab = "contrast" | "colorblind";
 
@@ -34,10 +40,16 @@ const levelLabels: Record<WCAGLevel, string> = {
   fail: "Fail",
 };
 
-export function AccessibilityPanel({ isOpen, onClose }: AccessibilityPanelProps) {
+export function AccessibilityPanel({ isOpen, onClose, onUpgradeClick }: AccessibilityPanelProps) {
   const { colors } = usePaletteStore();
+  const isPremium = useIsPremium();
   const [activeTab, setActiveTab] = useState<Tab>("contrast");
   const [selectedBlindness, setSelectedBlindness] = useState<ColorBlindnessType>("normal");
+
+  const isBlindnessLocked = (type: ColorBlindnessType) => {
+    if (isPremium) return false;
+    return PREMIUM_BLINDNESS_TYPES.includes(type);
+  };
 
   const contrastPairs = useMemo(() => getPaletteContrasts(colors), [colors]);
   const colorAccessibility = useMemo(
@@ -208,7 +220,23 @@ export function AccessibilityPanel({ isOpen, onClose }: AccessibilityPanelProps)
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="flex items-center gap-2">
                         <span className="w-3 h-3 rounded bg-green-500" />
-                        <span className="text-zinc-400">AAA: 7:1+ (enhanced)</span>
+                        <span className="text-zinc-400 flex items-center gap-1">
+                          AAA: 7:1+ (enhanced)
+                          {!isPremium && (
+                            <svg
+                              width="10"
+                              height="10"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              className="text-amber-500"
+                            >
+                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                          )}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="w-3 h-3 rounded bg-yellow-500" />
@@ -223,6 +251,17 @@ export function AccessibilityPanel({ isOpen, onClose }: AccessibilityPanelProps)
                         <span className="text-zinc-400">Fail: Below 3:1</span>
                       </div>
                     </div>
+                    {!isPremium && (
+                      <button
+                        onClick={onUpgradeClick}
+                        className="mt-3 text-xs text-amber-500 hover:text-amber-400 flex items-center gap-1"
+                      >
+                        Upgrade for AAA checking & all blindness types
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -233,27 +272,56 @@ export function AccessibilityPanel({ isOpen, onClose }: AccessibilityPanelProps)
                       Simulation Type
                     </h3>
                     <div className="grid grid-cols-2 gap-2">
-                      {colorBlindnessOptions.map((option) => (
-                        <button
-                          key={option.id}
-                          className={`p-3 rounded-lg text-left transition-colors ${
-                            selectedBlindness === option.id
-                              ? "bg-white/10 border border-white/20"
-                              : "bg-zinc-800/50 hover:bg-zinc-800"
-                          }`}
-                          onClick={() => setSelectedBlindness(option.id)}
-                        >
-                          <div className="text-sm font-medium text-white">
-                            {option.name}
-                          </div>
-                          <div className="text-xs text-zinc-500 mt-0.5">
-                            {option.description}
-                          </div>
-                          <div className="text-xs text-zinc-600 mt-1">
-                            {option.prevalence}
-                          </div>
-                        </button>
-                      ))}
+                      {colorBlindnessOptions.map((option) => {
+                        const locked = isBlindnessLocked(option.id);
+                        return (
+                          <button
+                            key={option.id}
+                            className={`p-3 rounded-lg text-left transition-colors relative ${
+                              selectedBlindness === option.id && !locked
+                                ? "bg-white/10 border border-white/20"
+                                : locked
+                                ? "bg-zinc-800/30 cursor-not-allowed opacity-60"
+                                : "bg-zinc-800/50 hover:bg-zinc-800"
+                            }`}
+                            onClick={() => {
+                              if (locked && onUpgradeClick) {
+                                onUpgradeClick();
+                              } else if (!locked) {
+                                setSelectedBlindness(option.id);
+                              }
+                            }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm font-medium text-white">
+                                {option.name}
+                              </div>
+                              {locked && (
+                                <svg
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  className="text-amber-500"
+                                >
+                                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                              )}
+                            </div>
+                            <div className="text-xs text-zinc-500 mt-0.5">
+                              {locked ? "Premium" : option.description}
+                            </div>
+                            {!locked && (
+                              <div className="text-xs text-zinc-600 mt-1">
+                                {option.prevalence}
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 

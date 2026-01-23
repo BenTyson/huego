@@ -5,10 +5,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Color, Mode, Palette, HarmonyType } from "@/lib/types";
 import { generatePalette, generatePaletteId } from "@/lib/generate";
+import { createColor, hexToOklch, oklchToHex, forceInGamut } from "@/lib/colors";
+import { useSubscriptionStore } from "./subscription";
 
 const PALETTE_SIZE = 5;
 const MAX_HISTORY = 50;
-const MAX_SAVED_PALETTES = 10; // Free tier limit
 
 interface PaletteState {
   // Current palette
@@ -38,6 +39,12 @@ interface PaletteState {
   loadPalette: (palette: Palette) => void;
   reorderColors: (fromIndex: number, toIndex: number) => void;
   reset: () => void;
+
+  // Batch operations
+  shuffle: () => void;
+  invert: () => void;
+  adjustChroma: (delta: number) => void; // +/- percentage
+  adjustLightness: (delta: number) => void; // +/- percentage
 }
 
 // Generate initial palette
@@ -152,7 +159,10 @@ export const usePaletteStore = create<PaletteState>()(
       savePalette: () => {
         const { colors, locked, mode, savedPalettes } = get();
 
-        if (savedPalettes.length >= MAX_SAVED_PALETTES) {
+        // Get limit from subscription store
+        const limit = useSubscriptionStore.getState().getSavedPalettesLimit();
+
+        if (savedPalettes.length >= limit) {
           return null; // Premium feature needed
         }
 
@@ -212,6 +222,73 @@ export const usePaletteStore = create<PaletteState>()(
           historyIndex: -1,
         });
       },
+
+      // Shuffle colors randomly
+      shuffle: () => {
+        const { colors, locked } = get();
+        const newColors = [...colors];
+        const newLocked = [...locked];
+
+        // Fisher-Yates shuffle
+        for (let i = newColors.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [newColors[i], newColors[j]] = [newColors[j], newColors[i]];
+          [newLocked[i], newLocked[j]] = [newLocked[j], newLocked[i]];
+        }
+
+        set({ colors: newColors, locked: newLocked });
+      },
+
+      // Invert palette (swap light/dark)
+      invert: () => {
+        const { colors } = get();
+        const newColors = colors.map((color) => {
+          const oklch = color.oklch;
+          // Invert lightness: 1 - l
+          const invertedOklch = forceInGamut({
+            l: 1 - oklch.l,
+            c: oklch.c,
+            h: oklch.h,
+          });
+          return createColor(oklchToHex(invertedOklch));
+        });
+
+        set({ colors: newColors });
+      },
+
+      // Adjust chroma (saturation) by percentage
+      adjustChroma: (delta: number) => {
+        const { colors } = get();
+        const newColors = colors.map((color) => {
+          const oklch = color.oklch;
+          // Adjust chroma by delta percentage
+          const newChroma = Math.max(0, Math.min(0.4, oklch.c * (1 + delta / 100)));
+          const adjustedOklch = forceInGamut({
+            ...oklch,
+            c: newChroma,
+          });
+          return createColor(oklchToHex(adjustedOklch));
+        });
+
+        set({ colors: newColors });
+      },
+
+      // Adjust lightness by percentage
+      adjustLightness: (delta: number) => {
+        const { colors } = get();
+        const newColors = colors.map((color) => {
+          const oklch = color.oklch;
+          // Adjust lightness by delta percentage
+          const newLightness = Math.max(0, Math.min(1, oklch.l + delta / 100));
+          const adjustedOklch = forceInGamut({
+            ...oklch,
+            l: newLightness,
+          });
+          return createColor(oklchToHex(adjustedOklch));
+        });
+
+        set({ colors: newColors });
+      },
     }),
     {
       name: "huego-palette",
@@ -233,6 +310,8 @@ export const useLocked = () => usePaletteStore((state) => state.locked);
 export const useMode = () => usePaletteStore((state) => state.mode);
 export const useHarmonyType = () => usePaletteStore((state) => state.harmonyType);
 export const useSavedPalettes = () => usePaletteStore((state) => state.savedPalettes);
+export const useHistory = () => usePaletteStore((state) => state.history);
+export const useHistoryIndex = () => usePaletteStore((state) => state.historyIndex);
 export const useCanUndo = () => usePaletteStore((state) => state.historyIndex >= 0);
 export const useCanRedo = () =>
   usePaletteStore((state) => state.historyIndex < state.history.length - 1);

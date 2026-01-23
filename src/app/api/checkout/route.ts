@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripeServer, PREMIUM_PRICE, CHECKOUT_URLS } from "@/lib/stripe";
+import { getStripeServer, PREMIUM_PRICES, CHECKOUT_URLS } from "@/lib/stripe";
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   // Check if Stripe is configured
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PREMIUM_PRICE_ID) {
     return NextResponse.json(
@@ -11,6 +11,20 @@ export async function POST(_request: NextRequest) {
   }
 
   try {
+    const body = await request.json().catch(() => ({}));
+    const billingPeriod = body.billingPeriod || "monthly";
+
+    // Get the appropriate price ID
+    const priceConfig = billingPeriod === "annual" ? PREMIUM_PRICES.annual : PREMIUM_PRICES.monthly;
+    const priceId = priceConfig.priceId;
+
+    if (!priceId) {
+      return NextResponse.json(
+        { error: `Price ID not configured for ${billingPeriod} billing` },
+        { status: 503 }
+      );
+    }
+
     const stripe = getStripeServer();
 
     // Create Stripe Checkout session
@@ -19,7 +33,7 @@ export async function POST(_request: NextRequest) {
       payment_method_types: ["card"],
       line_items: [
         {
-          price: PREMIUM_PRICE.priceId,
+          price: priceId,
           quantity: 1,
         },
       ],
@@ -33,6 +47,7 @@ export async function POST(_request: NextRequest) {
       subscription_data: {
         metadata: {
           product: "huego-premium",
+          billingPeriod,
         },
       },
     });

@@ -27,7 +27,7 @@ export interface Color {
   contrastColor: "white" | "black";
 }
 
-export type Mode = "immersive" | "context" | "mood" | "playground";
+export type Mode = "immersive" | "context" | "mood" | "playground" | "gradient";
 
 export interface Palette {
   id: string;
@@ -60,10 +60,18 @@ export interface Subscription {
 export type ExportFormat = "css" | "scss" | "tailwind" | "json" | "array" | "svg" | "png";
 
 // Free vs Premium export formats
-export const FREE_EXPORT_FORMATS: ExportFormat[] = ["css", "json", "array"];
-export const PREMIUM_EXPORT_FORMATS: ExportFormat[] = ["scss", "tailwind", "svg", "png"];
+export const FREE_EXPORT_FORMATS: ExportFormat[] = ["css", "json"];
+export const PREMIUM_EXPORT_FORMATS: ExportFormat[] = ["array", "scss", "tailwind", "svg", "png"];
 export const ALL_EXPORT_FORMATS: ExportFormat[] = [...FREE_EXPORT_FORMATS, ...PREMIUM_EXPORT_FORMATS];
 
 // Feature limits
-export const FREE_SAVED_PALETTES_LIMIT = 10;
+export const FREE_SAVED_PALETTES_LIMIT = 5;
 export const PREMIUM_SAVED_PALETTES_LIMIT = Infinity;
+
+// Free vs Premium modes
+export const FREE_MODES: Mode[] = ["immersive", "playground"];
+export const PREMIUM_MODES: Mode[] = ["context", "mood", "gradient"];
+
+// Free vs Premium harmonies
+export const FREE_HARMONIES: HarmonyType[] = ["random", "analogous", "complementary"];
+export const PREMIUM_HARMONIES: HarmonyType[] = ["triadic", "split-complementary", "monochromatic"];

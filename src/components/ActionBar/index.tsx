@@ -22,12 +22,27 @@ const PricingModal = dynamic(
   () => import("../PricingModal").then((mod) => mod.PricingModal),
   { ssr: false }
 );
+const ImportModal = dynamic(
+  () => import("../ImportModal").then((mod) => mod.ImportModal),
+  { ssr: false }
+);
+const ImageDropZone = dynamic(
+  () => import("../ImageDropZone").then((mod) => mod.ImageDropZone),
+  { ssr: false }
+);
+const HistoryBrowser = dynamic(
+  () => import("../HistoryBrowser").then((mod) => mod.HistoryBrowser),
+  { ssr: false }
+);
 
 export function ActionBar() {
   const [showToast, setShowToast] = useState<string | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showAccessibilityPanel, setShowAccessibilityPanel] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showExtractModal, setShowExtractModal] = useState(false);
+  const [showHistoryBrowser, setShowHistoryBrowser] = useState(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Cleanup timer on unmount
@@ -57,8 +72,8 @@ export function ActionBar() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <HarmonySelector />
-        <UndoRedoButtons />
+        <HarmonySelector onUpgradeClick={() => setShowPricingModal(true)} />
+        <UndoRedoButtons onShowHistory={() => setShowHistoryBrowser(true)} />
         <SaveButton
           onShowToast={showToastMessage}
           onShowPricing={() => setShowPricingModal(true)}
@@ -67,6 +82,8 @@ export function ActionBar() {
           onShowToast={showToastMessage}
           onShowExport={() => setShowExportModal(true)}
           onShowAccessibility={() => setShowAccessibilityPanel(true)}
+          onShowImport={() => setShowImportModal(true)}
+          onShowExtract={() => setShowExtractModal(true)}
         />
       </motion.div>
 
@@ -82,10 +99,32 @@ export function ActionBar() {
       <AccessibilityPanel
         isOpen={showAccessibilityPanel}
         onClose={() => setShowAccessibilityPanel(false)}
+        onUpgradeClick={() => {
+          setShowAccessibilityPanel(false);
+          setShowPricingModal(true);
+        }}
       />
       <PricingModal
         isOpen={showPricingModal}
         onClose={() => setShowPricingModal(false)}
+      />
+      <ImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onShowToast={showToastMessage}
+      />
+      <ImageDropZone
+        isOpen={showExtractModal}
+        onClose={() => setShowExtractModal(false)}
+        onShowToast={showToastMessage}
+        onUpgradeClick={() => {
+          setShowExtractModal(false);
+          setShowPricingModal(true);
+        }}
+      />
+      <HistoryBrowser
+        isOpen={showHistoryBrowser}
+        onClose={() => setShowHistoryBrowser(false)}
       />
 
       {/* Toast notification */}

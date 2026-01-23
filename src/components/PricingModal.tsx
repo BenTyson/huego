@@ -10,15 +10,19 @@ interface PricingModalProps {
   onClose: () => void;
 }
 
+type BillingPeriod = "monthly" | "annual";
+
 const features = [
-  { name: "4 Palette Modes", free: true, premium: true },
-  { name: "6 Harmony Types", free: true, premium: true },
+  { name: "Palette Modes", free: "2 (Immersive, Play)", premium: "All 4" },
+  { name: "Harmony Types", free: "3 basic", premium: "All 6" },
   { name: "URL Sharing", free: true, premium: true },
-  { name: "Save Palettes", free: "10 max", premium: "Unlimited" },
+  { name: "Save Palettes", free: "5 max", premium: "Unlimited" },
   { name: "Basic Exports (CSS, JSON)", free: true, premium: true },
   { name: "Pro Exports (SCSS, Tailwind, SVG, PNG)", free: false, premium: true },
-  { name: "WCAG Contrast Checker", free: true, premium: true },
-  { name: "Color Blindness Simulation", free: true, premium: true },
+  { name: "WCAG Contrast (AA)", free: true, premium: true },
+  { name: "WCAG Contrast (AAA) + Full Blindness", free: false, premium: true },
+  { name: "Image Color Extraction", free: "3/session", premium: "Unlimited" },
+  { name: "Gradient Generation", free: false, premium: true },
   { name: "Ad-Free Experience", free: false, premium: true },
 ];
 
@@ -27,6 +31,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
   const { customerId } = useSubscriptionStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("annual");
 
   const handleUpgrade = async () => {
     setLoading(true);
@@ -36,6 +41,7 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ billingPeriod }),
       });
 
       const data = await response.json();
@@ -153,14 +159,55 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
                 </div>
               ) : (
                 <>
+                  {/* Billing Period Toggle */}
+                  <div className="flex justify-center mb-4">
+                    <div className="flex items-center gap-2 p-1 rounded-full bg-zinc-800">
+                      <button
+                        onClick={() => setBillingPeriod("monthly")}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                          billingPeriod === "monthly"
+                            ? "bg-white text-zinc-900"
+                            : "text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        onClick={() => setBillingPeriod("annual")}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${
+                          billingPeriod === "annual"
+                            ? "bg-white text-zinc-900"
+                            : "text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        Annual
+                        <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded-full">
+                          Save 40%
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Pricing Card */}
                   <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-xl p-6 mb-6 border border-amber-500/30">
                     <div className="flex items-baseline gap-1 mb-2">
-                      <span className="text-4xl font-bold text-white">$3</span>
-                      <span className="text-zinc-400">/month</span>
+                      {billingPeriod === "monthly" ? (
+                        <>
+                          <span className="text-4xl font-bold text-white">$5</span>
+                          <span className="text-zinc-400">/month</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-4xl font-bold text-white">$36</span>
+                          <span className="text-zinc-400">/year</span>
+                          <span className="ml-2 text-sm text-green-400">($3/month)</span>
+                        </>
+                      )}
                     </div>
                     <p className="text-zinc-300 text-sm">
-                      Unlock all premium features and support indie development.
+                      {billingPeriod === "annual"
+                        ? "Best value! Save $24/year with annual billing."
+                        : "Unlock all premium features and support indie development."}
                     </p>
                   </div>
 

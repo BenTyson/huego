@@ -4,6 +4,119 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.7.0] - 2026-01-22
+
+### Sprint 6: Value & Monetization Enhancement
+
+Major feature release adding import, extraction, gradients, and quick actions.
+
+#### Added
+
+**Palette Import System** (`src/lib/import.ts`, `src/components/ImportModal.tsx`)
+- Paste hex codes (comma/space/newline separated)
+- Paste CSS variables (auto-detected)
+- Paste Tailwind config colors
+- Paste JSON color arrays/objects
+- Format auto-detection with preview
+- ActionBar integration via import button
+
+**Image Color Extraction** (`src/lib/extract.ts`, `src/components/ImageDropZone.tsx`)
+- Drag-and-drop or click to upload
+- K-means clustering algorithm for dominant colors
+- OKLCH harmonization of extracted colors
+- Session-based limits (3 free, unlimited premium)
+- Real-time extraction preview
+
+**Gradient Generation Mode** (`src/lib/gradient.ts`, `src/components/modes/gradient/`)
+- New `/gradient` route (premium only)
+- Four gradient types: linear, radial, conic, mesh
+- Angle/position controls
+- Live gradient preview
+- CSS export for all gradient types
+- Mesh gradient generation (trending design feature)
+
+**Smart Color Suggestions** (`src/lib/suggestions.ts`)
+- Enhanced ColorEditButton with suggestion popover
+- Six suggestion categories:
+  - Lighter variations (10% steps)
+  - Darker variations (10% steps)
+  - More saturated
+  - Less saturated (muted)
+  - Adjacent hues
+  - Complementary colors
+- One-click apply from suggestions
+
+**Quick Actions & Keyboard Shortcuts**
+- `1-5`: Copy that color's hex code
+- `Shift+1-5`: Toggle lock on that color
+- `R`: Shuffle/reorder colors randomly
+- `I`: Invert palette (swap light/dark)
+- `D`: Desaturate all (-20% chroma)
+- `V`: Vibrant all (+20% chroma)
+- `H`: Open history browser
+
+**History Browser** (`src/components/HistoryBrowser.tsx`)
+- Visual palette thumbnails
+- Click to restore any previous state
+- Current palette indicator
+- Timestamp display
+- Keyboard shortcut `H` to open
+
+**Server-Side Subscription Validation**
+- `/api/verify-subscription` endpoint
+- `/api/export` validates premium before export
+- Prevents localStorage subscription spoofing
+- 5-minute verification cache
+
+#### Changed
+
+**Pricing Update**
+- Monthly: $3 → $5/month
+- New annual option: $36/year ($3/month effective, "Save 40%")
+- Billing period toggle in PricingModal
+
+**Feature Gating (Balanced)**
+
+| Feature | Free | Premium |
+|---------|------|---------|
+| Modes | 2 (Immersive, Playground) | All 5 |
+| Harmonies | 3 (Random, Analogous, Complementary) | All 6 |
+| Exports | 2 (CSS, JSON) | All 7+ |
+| Saved Palettes | 5 | Unlimited |
+| Image Extractions | 3/session | Unlimited |
+| Gradients | - | Full access |
+| Accessibility | Basic (AA, 2 blindness types) | Full (AAA, all types) |
+
+**Mode Restrictions**
+- Context mode: Premium only (lock icon shown)
+- Mood mode: Premium only (lock icon shown)
+- Gradient mode: Premium only (new)
+
+**Harmony Restrictions**
+- Triadic: Premium only (lock icon shown)
+- Split-Complementary: Premium only (lock icon shown)
+- Monochromatic: Premium only (lock icon shown)
+
+**Accessibility Restrictions**
+- AAA contrast: Premium only
+- Tritanopia simulation: Premium only
+- Achromatopsia simulation: Premium only
+
+**Store Updates**
+- `palette.ts`: Added batch operations (shuffle, invert, adjustChroma, adjustLightness)
+- `subscription.ts`: Added verification methods, helper functions for gating
+
+#### Technical
+
+- 20+ files modified
+- 12 new files created
+- New API routes: `/api/export`, `/api/verify-subscription`
+- New lib files: `import.ts`, `extract.ts`, `gradient.ts`, `suggestions.ts`
+- New components: `ImportModal`, `ImageDropZone`, `GradientView`, `HistoryBrowser`
+- Build passes with no lint errors
+
+---
+
 ## [0.6.0] - 2026-01-22
 
 ### V1 Launch Prep: Codebase Audit & Optimization
@@ -52,7 +165,6 @@ All notable changes to this project will be documented in this file.
 - 16 files modified
 - 14 new files created
 - Build passes with no new lint errors
-- Codebase quality score: 8.5/10 → improved
 
 ---
 
@@ -117,35 +229,12 @@ STRIPE_PREMIUM_PRICE_ID
 **Premium Features Gating**
 - Free tier: 10 saved palettes, basic exports (CSS, JSON, Array)
 - Premium tier: Unlimited saves, all exports (+ SCSS, Tailwind, SVG, PNG), ad-free
-- Export modal shows lock icon on premium formats
-- Save button opens pricing modal when limit reached
 
 **Pricing UI** (`src/components/PricingModal.tsx`)
 - Feature comparison table (free vs premium)
 - One-click upgrade button
 - Stripe checkout integration
 - Manage subscription link for premium users
-
-**ModeToggle Upgrade Button**
-- "Pro" button for free users (gradient, clickable)
-- "Pro" badge for premium users (shows subscription management)
-
-#### Changed
-- ActionBar integrates with subscription store for save limits
-- ExportModal gates premium formats with lock icons
-- Immersive page includes banner ad for free users
-
-#### Environment Variables (see `.env.example`)
-```
-NEXT_PUBLIC_SITE_URL
-NEXT_PUBLIC_ADSENSE_CLIENT_ID
-NEXT_PUBLIC_ADSENSE_SLOT_BANNER_TOP
-NEXT_PUBLIC_ADSENSE_SLOT_BANNER_BOTTOM
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-STRIPE_SECRET_KEY
-STRIPE_WEBHOOK_SECRET
-STRIPE_PREMIUM_PRICE_ID
-```
 
 **Manual Color Picker**
 - Click-to-edit color support in Immersive, Context, and Mood modes
@@ -154,6 +243,8 @@ STRIPE_PREMIUM_PRICE_ID
 - Real-time palette updates while selecting
 
 #### Changed
+- ActionBar integrates with subscription store for save limits
+- ExportModal gates premium formats with lock icons
 - Background/Surface colors now generate as light neutrals (not saturated)
 - Context mode preview selector moved to top-right for cleaner navigation
 - React keys updated to prevent component remounting during color edits
@@ -173,14 +264,7 @@ STRIPE_PREMIUM_PRICE_ID
 #### Added
 
 **Export System** (`src/lib/export.ts`)
-- 7 export formats:
-  - CSS Variables (`:root` custom properties)
-  - SCSS Variables (with semantic aliases + map)
-  - Tailwind Config (extend theme colors)
-  - JSON (structured data with all color info)
-  - JavaScript Array (simple hex array)
-  - SVG Image (vector palette with labels)
-  - PNG Image (canvas-based, 1200x300)
+- 7 export formats: CSS, SCSS, Tailwind, JSON, Array, SVG, PNG
 - Copy to clipboard support
 - Direct file download
 - Semantic color naming (primary, secondary, accent, background, surface)
@@ -190,41 +274,16 @@ STRIPE_PREMIUM_PRICE_ID
 - Live code preview
 - Palette strip visualization
 - Copy Code / Download buttons
-- Responsive layout (mobile-friendly)
 
 **Accessibility Panel** (`src/components/AccessibilityPanel.tsx`)
-- Two-tab interface: WCAG Contrast / Color Blindness
-- WCAG Contrast tab:
-  - Individual color contrast (vs white & black)
-  - Color pair contrast matrix
-  - AAA/AA/AA-Large/Fail indicators with color coding
-  - WCAG 2.1 guidelines legend
-- Color Blindness tab:
-  - 5 simulation types (Normal, Protanopia, Deuteranopia, Tritanopia, Achromatopsia)
-  - Side-by-side original vs simulated view
-  - Confusable pairs warning (similarity threshold 85%)
-  - Success message when all colors distinguishable
-  - Prevalence statistics for each type
+- WCAG Contrast tab with AAA/AA/AA-Large/Fail indicators
+- Color Blindness tab with 5 simulation types
+- Confusable pairs warning
 
 **Accessibility Utilities** (`src/lib/accessibility.ts`)
-- `checkContrast()` - WCAG contrast ratio calculation
-- `getPaletteContrasts()` - All pair combinations sorted by ratio
-- `checkColorAccessibility()` - Test color against white/black
-- `simulateColorBlindness()` - Matrix-based color transformation
-- `simulatePaletteColorBlindness()` - Apply simulation to entire palette
-- `findConfusablePairs()` - Identify potentially confusable colors
-- Scientific color blindness transformation matrices
-
-#### Changed
-- ActionBar now includes Export and Accessibility buttons
-- Icon set expanded (accessibility icon added)
-
-#### Technical
-- Created `src/lib/export.ts` (395 lines)
-- Created `src/lib/accessibility.ts` (285 lines)
-- Created `src/components/ExportModal.tsx` (249 lines)
-- Created `src/components/AccessibilityPanel.tsx` (389 lines)
-- Build verified passing with all new components
+- Contrast ratio calculation
+- Color blindness simulation (matrix-based)
+- Confusable pairs detection
 
 ---
 
@@ -235,49 +294,19 @@ STRIPE_PREMIUM_PRICE_ID
 #### Added
 
 **Context Mode** (`/context`)
-- Split view layout with palette sidebar
-- Three preview types with switcher:
-  - Website preview (hero, nav, feature cards)
-  - Mobile App preview (iOS-style finance UI)
-  - Dashboard preview (charts, stats, sidebar)
-- Auto color role mapping (Primary, Secondary, Accent, Background, Surface)
-- Real-time preview updates
+- Split view with palette sidebar
+- Three preview types: Website, Mobile App, Dashboard
+- Auto color role mapping
 
 **Mood Mode** (`/mood`)
-- 12 mood profiles:
-  - Row 1: Calm, Bold, Playful, Professional
-  - Row 2: Warm, Cool, Retro, Futuristic
-  - Row 3: Natural, Urban, Luxurious, Minimal
-- Three refinement sliders:
-  - Temperature (cooler ↔ warmer)
-  - Vibrancy (subtle ↔ vibrant)
-  - Brightness (dark ↔ light)
-- "Generate New Variation" button
-- Mood-to-color mapping system (`src/lib/mood.ts`)
+- 12 mood profiles
+- Temperature/Vibrancy/Brightness sliders
+- Mood-to-color mapping system
 
 **Playground Mode** (`/play`)
 - Tinder-style swipe interface
 - Card stack with depth effect
-- Swipe right to add, left to skip
-- Building palette visualization (5 slots)
-- Click to remove colors
-- "Start Over" reset button
-- Completion celebration
-
-#### Changed
-- Mode toggle now shows all 4 modes with animated indicator
-- Keyboard shortcuts disabled in Mood/Playground (use UI instead)
-
-#### Technical
-- Created `src/lib/mood.ts` for mood profile definitions
-- Created `src/components/modes/context/` directory:
-  - `ContextView.tsx`
-  - `WebsitePreview.tsx`
-  - `MobileAppPreview.tsx`
-  - `DashboardPreview.tsx`
-- Created `src/components/modes/mood/MoodView.tsx`
-- Created `src/components/modes/playground/PlaygroundView.tsx`
-- Added custom slider thumb styles in `globals.css`
+- Building palette visualization
 
 ---
 
@@ -289,78 +318,32 @@ STRIPE_PREMIUM_PRICE_ID
 
 **Project Setup**
 - Next.js 16 with App Router
-- Tailwind CSS 4
-- Zustand for state management
-- Framer Motion for animations
-- TypeScript configuration
+- Tailwind CSS 4, Zustand, Framer Motion
 
 **Color Engine** (`src/lib/colors.ts`)
-- HEX ↔ RGB conversion
-- RGB ↔ HSL conversion
-- RGB ↔ OKLCH conversion (perceptually uniform)
+- HEX ↔ RGB ↔ HSL ↔ OKLCH conversions
 - Contrast ratio calculation
-- Automatic contrast color detection
-- Gamut clamping for OKLCH
+- Gamut clamping
 
 **Palette Generation** (`src/lib/generate.ts`)
-- 6 harmony types:
-  - Random (with aesthetic constraints)
-  - Analogous (adjacent hues)
-  - Complementary (opposite hues)
-  - Triadic (evenly spaced)
-  - Split-complementary
-  - Monochromatic (single hue)
-- Lock support (preserve specific colors)
+- 6 harmony types
+- Lock support
 - Automatic lightness sorting
 
 **State Management** (`src/store/palette.ts`)
 - Global palette state with Zustand
 - localStorage persistence
 - Undo/redo history (50 states)
-- Saved palettes (10 max free tier)
-- Mode and harmony type tracking
 
 **Immersive Mode** (`/immersive`)
 - Full-screen 5-column layout
-- Click to lock/unlock colors
-- Hover to reveal hex code
-- Click hex to copy
-- Smooth color transitions
-- Mobile responsive (stacked layout)
-- Spacebar hint for new users
-
-**Shared Components**
-- `ModeToggle` - Mode switcher with animated indicator
-- `ActionBar` - Bottom bar with:
-  - Harmony type selector
-  - Undo/redo buttons
-  - Save button
-  - Share button
+- Click to lock/unlock, hover for hex, click to copy
 
 **Keyboard Shortcuts** (`src/hooks/useKeyboard.ts`)
-- `Space` - Generate new palette
-- `1-5` - Toggle lock on color
-- `C` - Copy all hex codes
-- `Cmd/Ctrl + Z` - Undo
-- `Cmd/Ctrl + Shift + Z` - Redo
+- Space, 1-5, C, Ctrl+Z, Ctrl+Shift+Z
 
 **URL Sharing** (`src/lib/share.ts`)
-- Palette encoding (hex codes joined by `-`)
-- Share page (`/p/[id]`)
-- "Use This Palette" / "Start Fresh" options
-
-**Metadata**
-- SEO-optimized meta tags
-- Open Graph tags
-- Twitter cards
-
-#### Technical Details
-- TypeScript strict mode
-- Path aliases configured (`@/`)
-- Dark theme by default
-- No-select utility class
-- Color transition utility class
-- Hide scrollbar utility class
+- Palette encoding, share page (`/p/[id]`)
 
 ---
 
@@ -374,8 +357,16 @@ STRIPE_PREMIUM_PRICE_ID
 | Sprint 3 complete | ✅ | 2025-12-15 |
 | Sprint 4 complete | ✅ | 2025-12-16 |
 | Sprint 5 complete | ✅ | 2025-12-18 |
-| Production live | ✅ | 2025-12-18 |
 | V1 Launch Prep complete | ✅ | 2026-01-22 |
+| Sprint 6 complete | ✅ | 2026-01-22 |
+
+---
+
+## Related Docs
+
+- [Product Overview](/docs/HUEGO.md)
+- [Technical Architecture](/docs/ARCHITECTURE.md)
+- [Session Start Guide](/docs/SESSION-START.md)
 
 ---
 

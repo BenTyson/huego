@@ -15,7 +15,8 @@ import {
   exportSVG,
   type ExportFormat,
 } from "@/lib/export";
-import { FREE_EXPORT_FORMATS } from "@/lib/types";
+import { FREE_EXPORT_FORMATS, PREMIUM_EXPORT_FORMATS } from "@/lib/types";
+import { AdUnit } from "./ads/AdUnit";
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -199,6 +200,18 @@ export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProp
                 </div>
               </div>
             </div>
+
+            {/* Ad Banner for free users */}
+            {!isPremium && (
+              <div className="border-t border-zinc-800 p-3 bg-zinc-900/50">
+                <AdUnit
+                  slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_EXPORT || "export-modal"}
+                  format="horizontal"
+                  responsive={true}
+                  className="min-h-[90px]"
+                />
+              </div>
+            )}
 
             {/* Footer */}
             <div className="flex items-center justify-end gap-3 p-4 border-t border-zinc-800">

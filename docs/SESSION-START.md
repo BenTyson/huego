@@ -11,14 +11,18 @@
 
 **Phase: Live / Monitoring**
 
-All sprints complete. Product is live. Stripe in test mode.
+All sprints complete (1-7). Product is live with full feature set.
+
+**Current state:**
+- 5 modes (Immersive, Playground, Context, Mood, Gradient)
+- Import/extraction/gradients/suggestions all working
+- Server-side subscription validation active
+- Stripe in test mode
 
 **Next actions (when ready):**
 - Flip Stripe to live mode for real payments
 - Apply for AdSense (needs traffic first)
 - Add analytics if optimizing
-
-**Live features:** 4 modes, 6 harmony types, manual color picker, 7 export formats, WCAG checker, color blindness sim, Stripe checkout ($5/mo), Railway auto-deploy.
 
 ---
 
@@ -42,18 +46,21 @@ No database. localStorage only.
 ```
 src/
 ├── app/
-│   ├── immersive/     # Main mode (uses ModePageLayout)
-│   ├── context/       # Preview mode
-│   ├── mood/          # Mood-based generation
-│   ├── play/          # Swipe mode
-│   ├── p/[id]/        # Shared palettes
+│   ├── immersive/        # Main mode (free)
+│   ├── context/          # Preview mode (premium)
+│   ├── mood/             # Mood-based (premium)
+│   ├── play/             # Swipe mode (free)
+│   ├── gradient/         # Gradient mode (premium)
+│   ├── p/[id]/           # Shared palettes
 │   ├── api/
-│   │   ├── checkout/  # Stripe checkout
-│   │   ├── webhook/   # Stripe webhooks
+│   │   ├── checkout/     # Stripe checkout
+│   │   ├── export/       # Server-validated export
+│   │   ├── verify-subscription/  # Subscription validation
+│   │   ├── webhook/      # Stripe webhooks
 │   │   └── subscription/
-│   └── checkout/      # Success/cancel pages
+│   └── checkout/         # Success/cancel pages
 ├── components/
-│   ├── ActionBar/     # Split into sub-components
+│   ├── ActionBar/        # Bottom action bar
 │   │   ├── index.tsx
 │   │   ├── HarmonySelector.tsx
 │   │   ├── UndoRedoButtons.tsx
@@ -61,29 +68,42 @@ src/
 │   │   ├── UtilityButtons.tsx
 │   │   └── Toast.tsx
 │   ├── layout/
-│   │   └── ModePageLayout.tsx  # Common mode wrapper
+│   │   └── ModePageLayout.tsx
 │   ├── ui/
-│   │   ├── ColorEditButton.tsx
+│   │   ├── ColorEditButton.tsx  # With suggestions popover
 │   │   └── HydrationLoader.tsx
 │   ├── modes/
 │   │   ├── immersive/
-│   │   ├── context/   # +PaletteSidebar, PreviewTypeSelector
-│   │   ├── mood/      # +MoodSelectionPanel, RefinementSliders
-│   │   └── playground/
+│   │   ├── context/
+│   │   ├── mood/
+│   │   ├── playground/
+│   │   └── gradient/     # GradientView.tsx
 │   ├── ModeToggle.tsx
 │   ├── ExportModal.tsx
 │   ├── AccessibilityPanel.tsx
-│   └── PricingModal.tsx
+│   ├── PricingModal.tsx
+│   ├── ImportModal.tsx   # Palette import
+│   ├── ImageDropZone.tsx # Image extraction
+│   └── HistoryBrowser.tsx
 ├── lib/
-│   ├── colors.ts      # Color conversions + getTextColorsForBackground
-│   ├── generate.ts    # Palette algorithms
-│   ├── export.ts      # Export formats
-│   ├── mood.ts        # Mood profiles
-│   ├── stripe.ts      # Stripe server
-│   └── accessibility.ts
-└── store/
-    ├── palette.ts     # Main state + selector hooks
-    └── subscription.ts # Premium state
+│   ├── colors.ts         # Color conversions
+│   ├── generate.ts       # Palette algorithms
+│   ├── export.ts         # Export formats
+│   ├── mood.ts           # Mood profiles
+│   ├── import.ts         # Import parsing
+│   ├── extract.ts        # Image extraction (k-means)
+│   ├── gradient.ts       # Gradient generation
+│   ├── suggestions.ts    # Color suggestions
+│   ├── accessibility.ts
+│   ├── stripe.ts
+│   ├── stripe-client.ts
+│   ├── share.ts
+│   └── types.ts          # Core types + tier constants
+├── store/
+│   ├── palette.ts        # Main state + batch ops
+│   └── subscription.ts   # Premium state + verification
+└── hooks/
+    └── useKeyboard.ts    # All keyboard shortcuts
 ```
 
 ---
@@ -98,6 +118,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PREMIUM_PRICE_ID=price_...
+STRIPE_PREMIUM_ANNUAL_PRICE_ID=price_...
 ```
 
 ---
@@ -134,8 +155,52 @@ interface Color {
 type HarmonyType = "random" | "analogous" | "complementary"
   | "triadic" | "split-complementary" | "monochromatic";
 
-type Mode = "immersive" | "context" | "mood" | "playground";
+type Mode = "immersive" | "context" | "mood" | "playground" | "gradient";
+
+type ExportFormat = "css" | "scss" | "tailwind" | "json" | "array" | "svg" | "png";
+
+type GradientType = "linear" | "radial" | "conic" | "mesh";
+
+// Tier constants (from types.ts)
+FREE_MODES: ["immersive", "playground"]
+PREMIUM_MODES: ["context", "mood", "gradient"]
+FREE_HARMONIES: ["random", "analogous", "complementary"]
+PREMIUM_HARMONIES: ["triadic", "split-complementary", "monochromatic"]
+FREE_EXPORT_FORMATS: ["css", "json"]
+FREE_SAVED_PALETTES_LIMIT: 5
 ```
+
+---
+
+## Feature Gating
+
+| Feature | Free | Premium |
+|---------|------|---------|
+| Modes | 2 | 5 |
+| Harmonies | 3 | 6 |
+| Exports | 2 | 7+ |
+| Saved Palettes | 5 | Unlimited |
+| Image Extractions | 3/session | Unlimited |
+| Gradients | - | Full |
+| Accessibility | Basic | Full |
+
+---
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `Space` | Generate new palette |
+| `1-5` | Copy color's hex |
+| `Shift+1-5` | Toggle lock |
+| `C` | Copy all hex codes |
+| `R` | Shuffle colors |
+| `I` | Invert palette |
+| `D` | Desaturate (-20%) |
+| `V` | Vibrant (+20%) |
+| `H` | History browser |
+| `Ctrl+Z` | Undo |
+| `Ctrl+Y` | Redo |
 
 ---
 
@@ -146,6 +211,7 @@ type Mode = "immersive" | "context" | "mood" | "playground";
 3. Over-engineer - keep it simple
 4. Skip mobile testing
 5. Change locked decisions
+6. Fake premium via localStorage - server validates
 
 ---
 
@@ -161,6 +227,6 @@ git add -A && git commit -m "message" && git push origin main
 
 ## Related Docs
 
-- `/docs/HUEGO.md` - Product vision
-- `/docs/ARCHITECTURE.md` - Technical details
-- `/docs/CHANGELOG.md` - History
+- [Product Overview](/docs/HUEGO.md) - Vision and features
+- [Architecture](/docs/ARCHITECTURE.md) - Technical deep-dive
+- [Changelog](/docs/CHANGELOG.md) - Version history

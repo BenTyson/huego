@@ -7,12 +7,14 @@ import { usePathname } from "next/navigation";
 import { useIsPremium } from "@/store/subscription";
 import { PricingModal } from "./PricingModal";
 import type { Mode } from "@/lib/types";
+import { FREE_MODES } from "@/lib/types";
 
 interface ModeOption {
   id: Mode;
   label: string;
   href: string;
   icon: React.ReactNode;
+  premium?: boolean;
 }
 
 const modes: ModeOption[] = [
@@ -30,6 +32,7 @@ const modes: ModeOption[] = [
     id: "context",
     label: "Context",
     href: "/context",
+    premium: true,
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <rect x="3" y="3" width="7" height="9" />
@@ -43,12 +46,26 @@ const modes: ModeOption[] = [
     id: "mood",
     label: "Mood",
     href: "/mood",
+    premium: true,
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <circle cx="12" cy="12" r="10" />
         <path d="M8 14s1.5 2 4 2 4-2 4-2" />
         <line x1="9" y1="9" x2="9.01" y2="9" />
         <line x1="15" y1="9" x2="15.01" y2="9" />
+      </svg>
+    ),
+  },
+  {
+    id: "gradient",
+    label: "Gradient",
+    href: "/gradient",
+    premium: true,
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M3 9h18" />
+        <path d="M3 15h18" />
       </svg>
     ),
   },
@@ -86,6 +103,40 @@ export function ModeToggle() {
           <div className="flex items-center gap-1 p-1 rounded-full bg-black/30 backdrop-blur-md border border-white/10">
             {modes.map((mode) => {
               const isActive = currentMode === mode.id;
+              const isLocked = mode.premium && !isPremium;
+
+              // If locked, render a button that opens pricing modal
+              if (isLocked) {
+                return (
+                  <button
+                    key={mode.id}
+                    onClick={() => setShowPricingModal(true)}
+                    className="relative"
+                  >
+                    <motion.div
+                      className="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium text-white/40 hover:text-white/60 transition-colors duration-200"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        {mode.icon}
+                        <span className="hidden sm:inline">{mode.label}</span>
+                        <svg
+                          width="10"
+                          height="10"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          className="text-amber-500"
+                        >
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                      </span>
+                    </motion.div>
+                  </button>
+                );
+              }
+
               return (
                 <Link
                   key={mode.id}

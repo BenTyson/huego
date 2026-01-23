@@ -7,30 +7,34 @@
 ## System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Next.js App Router                        │
-├─────────────────────────────────────────────────────────────────┤
-│  /immersive    /context      /mood        /play      /p/[id]   │
-│      │             │           │            │            │       │
-│      └─────────────┴───────────┴────────────┴────────────┘       │
-│                              │                                   │
-│                    ┌─────────▼─────────┐                        │
-│                    │   Zustand Store   │                        │
-│                    │   (palette.ts)    │                        │
-│                    └─────────┬─────────┘                        │
-│                              │                                   │
-│              ┌───────────────┼───────────────┐                  │
-│              │               │               │                   │
-│      ┌───────▼───────┐ ┌─────▼─────┐ ┌──────▼──────┐           │
-│      │  colors.ts    │ │generate.ts│ │   mood.ts   │           │
-│      │ (conversions) │ │(algorithms)│ │  (mapping)  │           │
-│      └───────────────┘ └───────────┘ └─────────────┘           │
-│                              │                                   │
-│                    ┌─────────▼─────────┐                        │
-│                    │   localStorage    │                        │
-│                    │   (persistence)   │                        │
-│                    └───────────────────┘                        │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Next.js App Router                            │
+├─────────────────────────────────────────────────────────────────────┤
+│  /immersive  /context  /mood  /play  /gradient  /p/[id]             │
+│       │          │       │      │        │          │                │
+│       └──────────┴───────┴──────┴────────┴──────────┘                │
+│                              │                                       │
+│                    ┌─────────▼─────────┐                            │
+│                    │   Zustand Stores  │                            │
+│                    │  palette.ts       │                            │
+│                    │  subscription.ts  │                            │
+│                    └─────────┬─────────┘                            │
+│                              │                                       │
+│      ┌───────────────────────┼───────────────────────┐              │
+│      │           │           │           │           │               │
+│  ┌───▼───┐  ┌────▼────┐  ┌───▼───┐  ┌────▼────┐  ┌───▼───┐         │
+│  │colors │  │generate │  │ mood  │  │ import  │  │extract│         │
+│  └───────┘  └─────────┘  └───────┘  └─────────┘  └───────┘         │
+│      │           │           │           │           │               │
+│  ┌───▼───┐  ┌────▼────┐  ┌───▼───┐  ┌────▼────┐  ┌───▼───┐         │
+│  │gradient│  │suggest │  │export │  │access.  │  │share  │         │
+│  └───────┘  └─────────┘  └───────┘  └─────────┘  └───────┘         │
+│                              │                                       │
+│                    ┌─────────▼─────────┐                            │
+│                    │   localStorage    │                            │
+│                    │   (persistence)   │                            │
+│                    └───────────────────┘                            │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -38,8 +42,6 @@
 ## Color Engine (`src/lib/colors.ts`)
 
 ### Color Spaces
-
-HueGo uses multiple color spaces for different purposes:
 
 | Space | Format | Use Case |
 |-------|--------|----------|
@@ -56,8 +58,6 @@ Traditional HSL/HSV color spaces have a problem: colors with the same "lightness
 - **C** (Chroma): 0-0.4, saturation amount
 - **H** (Hue): 0-360, color angle
 
-This means a palette generated in OKLCH will have balanced visual weights.
-
 ### Key Functions
 
 ```typescript
@@ -68,16 +68,18 @@ rgbToHsl(rgb: RGB): HSL
 hslToRgb(hsl: HSL): RGB
 rgbToOklch(rgb: RGB): OKLCH
 oklchToRgb(oklch: OKLCH): RGB
+hexToOklch(hex: string): OKLCH
+oklchToHex(oklch: OKLCH): string
 
 // Utilities
 getContrastColor(rgb: RGB): "white" | "black"
 getContrastRatio(rgb1: RGB, rgb2: RGB): number
 getLuminance(rgb: RGB): number
-createColor(hex: string): Color  // Creates full Color object
+createColor(hex: string): Color
 
-// Gamut handling
+// Gamut handling (O(log n) binary search)
 isInGamut(oklch: OKLCH): boolean
-forceInGamut(oklch: OKLCH): OKLCH  // Binary search for max in-gamut chroma
+forceInGamut(oklch: OKLCH): OKLCH
 
 // Text color utility
 getTextColorsForBackground(contrastColor): { textColor, textColorMuted }
@@ -103,7 +105,7 @@ getTextColorsForBackground(contrastColor): { textColor, textColorMuted }
 ```typescript
 generatePalette(
   harmonyType: HarmonyType,
-  locked: (Color | null)[],  // Locked colors preserved
+  locked: (Color | null)[],
   size: number = 5
 ): Color[]
 ```
@@ -115,11 +117,134 @@ generatePalette(
 5. Sort by lightness for visual balance
 6. Convert to full Color objects
 
-### Aesthetic Constraints
+---
 
-- Lightness: 0.3 - 0.85 (avoid pure black/white)
-- Chroma: 0.05 - 0.2 (avoid gray or oversaturated)
-- Hue variance based on harmony type
+## Import System (`src/lib/import.ts`)
+
+### Supported Formats
+
+| Format | Detection | Example |
+|--------|-----------|---------|
+| **Hex codes** | `#` prefix or 6-char hex | `#FF5733, #C70039` |
+| **CSS variables** | `--` prefix | `--primary: #FF5733;` |
+| **Tailwind** | `colors:` key | `colors: { primary: '#FF5733' }` |
+| **JSON** | Array or object structure | `["#FF5733", "#C70039"]` |
+
+### Key Functions
+
+```typescript
+interface ImportResult {
+  success: boolean;
+  colors: Color[];
+  format: ImportFormat | null;
+  error?: string;
+}
+
+importPalette(input: string): ImportResult
+detectFormat(input: string): ImportFormat | null
+parseHexList(input: string): Color[]
+parseCssVariables(input: string): Color[]
+parseTailwindConfig(input: string): Color[]
+parseJson(input: string): Color[]
+```
+
+---
+
+## Image Extraction (`src/lib/extract.ts`)
+
+### Algorithm: K-Means Clustering
+
+1. Load image onto canvas
+2. Sample pixels (every Nth pixel for performance)
+3. Run k-means with k=5 (palette size)
+4. Return dominant colors as OKLCH
+5. Harmonize for visual balance
+
+### Key Functions
+
+```typescript
+interface ExtractOptions {
+  count?: number;        // Default 5
+  quality?: number;      // Sample rate
+  harmonize?: boolean;   // Apply OKLCH harmonization
+}
+
+extractColorsFromImage(
+  imageSource: string | File,
+  options?: ExtractOptions
+): Promise<Color[]>
+
+harmonizeExtractedColors(colors: Color[]): Color[]
+
+// Session-based limits
+getExtractionCount(): number
+incrementExtractionCount(): void
+canExtract(isPremium: boolean): boolean  // 3 free, unlimited premium
+```
+
+---
+
+## Gradient Generation (`src/lib/gradient.ts`)
+
+### Gradient Types
+
+| Type | Description | CSS Output |
+|------|-------------|------------|
+| **Linear** | Straight line gradient | `linear-gradient(45deg, ...)` |
+| **Radial** | Circular gradient | `radial-gradient(circle at center, ...)` |
+| **Conic** | Sweep gradient | `conic-gradient(from 0deg at center, ...)` |
+| **Mesh** | Multi-point blend | Multiple overlaid radial gradients |
+
+### Key Functions
+
+```typescript
+interface GradientConfig {
+  type: GradientType;
+  colors: Color[];
+  angle?: number;         // Linear: 0-360
+  position?: { x: number; y: number };  // Radial/conic center
+  meshPoints?: MeshPoint[];  // Mesh gradient points
+}
+
+gradientToCSS(config: GradientConfig): string
+exportGradientAsCSS(config: GradientConfig, name?: string): string
+
+// Mesh gradient helpers
+generateMeshPoints(colors: Color[]): MeshPoint[]
+meshToCSS(points: MeshPoint[]): string
+```
+
+---
+
+## Color Suggestions (`src/lib/suggestions.ts`)
+
+### Suggestion Categories
+
+| Category | Algorithm | Count |
+|----------|-----------|-------|
+| **Lighter** | +10%, +20%, +30% lightness | 3 |
+| **Darker** | -10%, -20%, -30% lightness | 3 |
+| **Saturated** | +15%, +30% chroma | 2 |
+| **Muted** | -15%, -30% chroma | 2 |
+| **Adjacent** | ±30°, ±60° hue | 4 |
+| **Complement** | 180° hue shift | 1 |
+
+### Key Functions
+
+```typescript
+interface SuggestionGroup {
+  label: string;
+  colors: Color[];
+}
+
+generateSuggestions(color: Color): SuggestionGroup[]
+generateLighterVariations(color: Color): Color[]
+generateDarkerVariations(color: Color): Color[]
+generateSaturatedVariations(color: Color): Color[]
+generateMutedVariations(color: Color): Color[]
+generateAdjacentHues(color: Color): Color[]
+generateComplement(color: Color): Color
+```
 
 ---
 
@@ -130,17 +255,17 @@ generatePalette(
 ```typescript
 interface PaletteState {
   // Current state
-  colors: Color[];           // 5 colors
-  locked: boolean[];         // Per-color locks
-  mode: Mode;                // Current UI mode
-  harmonyType: HarmonyType;  // Generation algorithm
+  colors: Color[];
+  locked: boolean[];
+  mode: Mode;
+  harmonyType: HarmonyType;
 
   // History (for undo/redo)
-  history: Palette[];        // Up to 50 states
-  historyIndex: number;      // Current position
+  history: Palette[];
+  historyIndex: number;
 
   // Saved palettes
-  savedPalettes: Palette[];  // Up to 10 (free tier)
+  savedPalettes: Palette[];
 
   // Actions
   generate: () => void;
@@ -156,99 +281,67 @@ interface PaletteState {
   loadPalette: (palette: Palette) => void;
   reorderColors: (from: number, to: number) => void;
   reset: () => void;
+
+  // Batch operations
+  shuffle: () => void;
+  invert: () => void;
+  adjustChroma: (delta: number) => void;
+  adjustLightness: (delta: number) => void;
 }
 ```
 
-### Persistence
-
-Uses Zustand's `persist` middleware:
+### Selector Hooks
 
 ```typescript
-persist(
-  (set, get) => ({ ... }),
-  {
-    name: "huego-palette",
-    partialize: (state) => ({
-      colors: state.colors,
-      locked: state.locked,
-      mode: state.mode,
-      harmonyType: state.harmonyType,
-      savedPalettes: state.savedPalettes,
-      // Note: history NOT persisted (keep localStorage small)
-    }),
-  }
-)
+// Individual selectors for optimized re-renders
+useColors(): Color[]
+useLocked(): boolean[]
+useMode(): Mode
+useHarmonyType(): HarmonyType
+useSavedPalettes(): Palette[]
+useHistory(): Palette[]
+useHistoryIndex(): number
+useCanUndo(): boolean
+useCanRedo(): boolean
 ```
 
 ---
 
-## Mood System (`src/lib/mood.ts`)
+## Subscription Store (`src/store/subscription.ts`)
 
-### Mood Profiles
+### Server-Side Validation
 
-Each mood defines color generation constraints:
+The subscription store includes server-side verification to prevent localStorage spoofing:
 
 ```typescript
-interface MoodProfile {
-  id: string;
-  name: string;
-  hueRange: [number, number];        // Allowed hue range
-  saturationRange: [number, number]; // OKLCH chroma range
-  lightnessRange: [number, number];  // OKLCH lightness range
-  hueVariance: number;               // Spread within palette
+interface SubscriptionState {
+  isPremium: boolean;
+  status: SubscriptionStatus;
+  customerId: string | null;
+  subscriptionId: string | null;
+  currentPeriodEnd: number | null;
+  lastVerified: number | null;
+  isVerifying: boolean;
+
+  // Actions
+  verifySubscription: () => Promise<boolean>;
+
+  // Helpers
+  canUseExportFormat: (format: ExportFormat) => boolean;
+  canUseMode: (mode: string) => boolean;
+  canUseHarmony: (harmony: string) => boolean;
+  canUseAccessibilityFeature: (feature: string) => boolean;
+  getSavedPalettesLimit: () => number;
 }
 ```
 
-### Available Moods
+### Verification Flow
 
-| Mood | Hue Range | Characteristics |
-|------|-----------|-----------------|
-| Calm | 180-240 (blues) | Low saturation, high lightness |
-| Bold | 0-360 (any) | High saturation, medium lightness |
-| Playful | 280-60 (pink-yellow) | High saturation, bright |
-| Professional | 200-260 (blue) | Medium saturation, varied lightness |
-| Warm | 15-50 (orange) | Warm tones, comfortable |
-| Cool | 170-250 (cyan-blue) | Cool tones, fresh |
-| Retro | 20-60 (orange-yellow) | Desaturated, vintage feel |
-| Futuristic | 240-300 (purple-pink) | High saturation, tech feel |
-| Natural | 60-150 (green) | Earthy, organic |
-| Urban | 0-360 (any) | Very low saturation, dark |
-| Luxurious | 260-320 (purple) | Rich, deep colors |
-| Minimal | 0-360 (any) | Very low saturation, clean |
-
-### Refinement Sliders
-
-Three parameters adjust any mood:
-
-- **Temperature**: -1 (cooler) to +1 (warmer) - shifts hue
-- **Vibrancy**: -1 (subtle) to +1 (vibrant) - scales chroma
-- **Brightness**: -1 (dark) to +1 (light) - shifts lightness
-
----
-
-## URL Sharing (`src/lib/share.ts`)
-
-### Encoding Scheme
-
-Palettes are shared via URL-safe encoding:
-
-```
-/p/FF5733-C70039-900C3F-581845-FFC300
-     │       │       │       │       └─ Color 5
-     │       │       │       └───────── Color 4
-     │       │       └─────────────── Color 3
-     │       └────────────────────── Color 2
-     └─────────────────────────── Color 1
-```
-
-### Functions
-
-```typescript
-encodePalette(colors: Color[]): string    // Colors → URL segment
-decodePalette(encoded: string): Color[]   // URL segment → Colors
-generateShareUrl(colors: Color[]): string // Full shareable URL
-copyShareUrl(colors: Color[]): Promise<boolean>
-```
+1. Client calls `verifySubscription()`
+2. POST to `/api/verify-subscription` with subscription ID
+3. Server validates with Stripe API
+4. Response cached for 5 minutes
+5. Premium features gated based on verified status
 
 ---
 
@@ -256,7 +349,7 @@ copyShareUrl(colors: Color[]): Promise<boolean>
 
 ### Mode Pages
 
-Each mode uses the `ModePageLayout` wrapper for consistent behavior:
+All modes use `ModePageLayout` wrapper:
 
 ```tsx
 // src/app/[mode]/page.tsx
@@ -279,214 +372,135 @@ export default function ModePage() {
 }
 ```
 
-### Layout Components
+### Component Hierarchy
+
+```
+ModePageLayout
+├── HydrationLoader (loading state)
+├── ModeToggle (header)
+├── [ModeView] (dynamic)
+│   ├── ImmersiveView → ColorColumn[]
+│   ├── ContextView → PaletteSidebar, PreviewTypeSelector, [Preview]
+│   ├── MoodView → MoodSelectionPanel, RefinementSliders
+│   ├── PlaygroundView → SwipeCards
+│   └── GradientView → GradientPreview, GradientControls
+├── ActionBar
+│   ├── HarmonySelector
+│   ├── UndoRedoButtons
+│   ├── SaveButton
+│   └── UtilityButtons
+└── [Modals] (lazy loaded)
+    ├── ExportModal
+    ├── AccessibilityPanel
+    ├── PricingModal
+    ├── ImportModal
+    ├── ImageDropZone
+    └── HistoryBrowser
+```
+
+### Shared UI Components
 
 | Component | Purpose | Location |
 |-----------|---------|----------|
-| `ModePageLayout` | Wrapper with hydration, keyboard, ActionBar | `src/components/layout/` |
-| `HydrationLoader` | Loading state for SSR hydration | `src/components/ui/` |
-
-### Shared Components
-
-| Component | Purpose | Location |
-|-----------|---------|----------|
-| `ModeToggle` | Mode switcher in header | `src/components/` |
-| `ActionBar` | Bottom bar with actions | `src/components/ActionBar/` |
-| `useKeyboard` | Keyboard shortcut handler | `src/hooks/` |
-
-### ActionBar Sub-Components
-
-The ActionBar is split into focused sub-components:
-
-| Component | Purpose |
-|-----------|---------|
-| `ActionBar/index.tsx` | Main layout, modal state management |
-| `ActionBar/HarmonySelector.tsx` | Harmony type dropdown |
-| `ActionBar/UndoRedoButtons.tsx` | Undo/redo controls |
-| `ActionBar/SaveButton.tsx` | Save palette with limit checking |
-| `ActionBar/UtilityButtons.tsx` | Export, accessibility, share buttons |
-| `ActionBar/Toast.tsx` | Toast notification component |
-
-### Mode-Specific Components
-
-| Mode | Main Component | Sub-Components |
-|------|----------------|----------------|
-| Immersive | `ImmersiveView` | `ColorColumn` |
-| Context | `ContextView` | `PaletteSidebar`, `PreviewTypeSelector`, `WebsitePreview`, `MobileAppPreview`, `DashboardPreview` |
-| Mood | `MoodView` | `MoodSelectionPanel`, `RefinementSliders` |
-| Playground | `PlaygroundView` | (inline) |
-
-### UI Components
-
-| Component | Purpose | Location |
-|-----------|---------|----------|
-| `ColorEditButton` | Reusable color picker trigger | `src/components/ui/` |
+| `ColorEditButton` | Color picker with suggestions | `src/components/ui/` |
 | `HydrationLoader` | SSR hydration loading state | `src/components/ui/` |
+| `ModePageLayout` | Common mode wrapper | `src/components/layout/` |
 
 ---
 
-## Animation Patterns
+## Keyboard Shortcuts (`src/hooks/useKeyboard.ts`)
 
-Using Framer Motion throughout:
+### Implementation
 
-### Color Transitions
-```tsx
-<motion.div
-  style={{ backgroundColor: color.hex }}
-  initial={{ opacity: 0, scale: 0.95 }}
-  animate={{ opacity: 1, scale: 1 }}
-  transition={{ delay: index * 0.05, duration: 0.3 }}
-/>
+```typescript
+interface KeyboardOptions {
+  enableGenerate?: boolean;
+  enableUndo?: boolean;
+  enableLock?: boolean;
+  enableCopy?: boolean;
+  enableBatchOps?: boolean;
+  onCopyAll?: () => void;
+  onCopyColor?: (hex: string) => void;
+  onShowHistory?: () => void;
+  onShowToast?: (message: string) => void;
+}
+
+useKeyboard(options: KeyboardOptions): {
+  copyAllColors: () => Promise<void>;
+  copySingleColor: (index: number) => Promise<void>;
+}
 ```
 
-### Mode Toggle Indicator
-```tsx
-<motion.div
-  layoutId="activeMode"  // Shared layout animation
-  transition={{ type: "spring", bounce: 0.2 }}
-/>
+### Shortcut Map
+
+| Key | Action | Condition |
+|-----|--------|-----------|
+| `Space` | Generate palette | `enableGenerate` |
+| `1-5` | Copy color hex | `enableCopy` |
+| `Shift+1-5` | Toggle lock | `enableLock` |
+| `C` | Copy all | `enableCopy` |
+| `R` | Shuffle | `enableBatchOps` |
+| `I` | Invert | `enableBatchOps` |
+| `D` | Desaturate | `enableBatchOps` |
+| `V` | Vibrant | `enableBatchOps` |
+| `H` | History | `enableBatchOps` |
+| `Ctrl+Z` | Undo | `enableUndo` |
+| `Ctrl+Y` | Redo | `enableUndo` |
+
+---
+
+## API Routes
+
+### `/api/verify-subscription`
+
+```typescript
+POST /api/verify-subscription
+Body: { subscriptionId: string, customerId: string }
+Response: { valid: boolean, isPremium: boolean, status: string }
 ```
 
-### Swipe Cards (Playground)
-```tsx
-<motion.div
-  drag="x"
-  dragConstraints={{ left: 0, right: 0 }}
-  dragElastic={0.7}
-  onDragEnd={handleDragEnd}
-  exit={{ x: exitX, rotate: exitX > 0 ? 15 : -15 }}
-/>
+### `/api/export`
+
+```typescript
+POST /api/export
+Body: { format: ExportFormat, subscriptionId?: string, customerId?: string }
+Response: { allowed: boolean, error?: string }
+```
+
+### `/api/checkout`
+
+```typescript
+POST /api/checkout
+Body: { priceId: string }
+Response: { url: string } // Stripe checkout URL
 ```
 
 ---
 
-## Performance Considerations
+## Performance Optimizations
 
-### Current Optimizations
-
-1. **Zustand selectors** - Individual selector hooks prevent unnecessary re-renders
-   ```typescript
-   // Use individual selectors instead of destructuring multiple values
-   const colors = useColors();
-   const locked = useLocked();
-   const harmonyType = useHarmonyType();
-   ```
-
-2. **Binary search gamut clamping** - `forceInGamut()` uses O(log n) binary search instead of O(n) linear reduction
-
-3. **Lazy loading modals** - `ExportModal`, `AccessibilityPanel`, `PricingModal` loaded via `dynamic()` with `{ ssr: false }`
-
-4. **Code splitting** - Mode view components loaded via `dynamic()` imports
-
-5. **useMemo for text colors** - Color calculations memoized in components
-
-6. **Timer cleanup** - All `setTimeout` calls properly cleaned up on unmount to prevent memory leaks
-
-7. **Client-side only** - All modes use `"use client"` + mounted check via `ModePageLayout`
-
+1. **Zustand selectors** - Individual hooks prevent unnecessary re-renders
+2. **Binary search gamut clamping** - O(log n) instead of O(n)
+3. **Lazy loading modals** - `dynamic()` with `{ ssr: false }`
+4. **Code splitting** - Mode views loaded dynamically
+5. **useMemo for text colors** - Calculations memoized
+6. **Timer cleanup** - All `setTimeout` properly cleaned up
+7. **Client-side only** - Modes use mounted check via ModePageLayout
 8. **Minimal localStorage** - History not persisted
 
-### Memory Leak Prevention
+---
 
-Timers in components must be cleaned up:
-```typescript
-const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+## Security
 
-useEffect(() => {
-  return () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-  };
-}, []);
-
-// When setting timer, clear existing first
-if (timerRef.current) clearTimeout(timerRef.current);
-timerRef.current = setTimeout(() => { ... }, 2000);
-```
-
-### Future Optimizations
-
-- Virtualize long lists (saved palettes)
-- Optimize animation performance
-- Add loading states for heavy operations
+- **Server-side subscription validation** - Prevents localStorage spoofing
+- **No user data stored server-side** - Privacy by design
+- **URL params validated** - Before use in share URLs
+- **Stripe webhook signature verification** - Prevents fake events
 
 ---
 
-## Testing Strategy
+## Related Docs
 
-### Manual Testing Checklist
-
-1. **Palette Generation**
-   - [ ] All 6 harmony types work
-   - [ ] Locked colors preserved
-   - [ ] No out-of-gamut colors
-
-2. **Mode Switching**
-   - [ ] Palette persists across modes
-   - [ ] No flash/flicker during transition
-   - [ ] Mode toggle updates correctly
-
-3. **Persistence**
-   - [ ] Palette survives page refresh
-   - [ ] Saved palettes persist
-   - [ ] Mode preference persists
-
-4. **Sharing**
-   - [ ] URL encoding works
-   - [ ] Shared links load correctly
-   - [ ] Invalid URLs handled gracefully
-
-5. **Mobile**
-   - [ ] All modes responsive
-   - [ ] Touch interactions work
-   - [ ] No horizontal scroll
-
----
-
-## Error Handling
-
-### Current Approach
-
-- Color parsing: Returns `null` for invalid input
-- Out-of-gamut: `forceInGamut()` reduces chroma
-- Invalid share URLs: Error page with "Start Fresh" option
-
-### Future Improvements
-
-- Add error boundaries per mode
-- Better error messages
-- Telemetry for errors (post-MVP)
-
----
-
-## Security Considerations
-
-- No user data stored server-side
-- No authentication (MVP)
-- URL params validated before use
-- No external API calls
-
----
-
-## Deployment
-
-### Vercel (Recommended)
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
-
-# Production deploy
-vercel --prod
-```
-
-### Environment Variables
-
-None required for MVP.
-
-Future (monetization):
-- `NEXT_PUBLIC_STRIPE_KEY`
-- `STRIPE_SECRET_KEY`
-- `NEXT_PUBLIC_ADSENSE_ID`
+- [Product Overview](/docs/HUEGO.md) - Vision and features
+- [Session Start](/docs/SESSION-START.md) - Quick dev reference
+- [Changelog](/docs/CHANGELOG.md) - Version history
