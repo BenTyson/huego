@@ -11,15 +11,16 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 1 complete. Implementing features to close gaps with Coolors.co.
+Phase 2 complete. Community features live.
 
 **Current state:**
-- 5 modes (Immersive, Playground, Context, Mood, Gradient)
+- 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
 - Variable palette size (2-10 colors)
 - Dark/light theme support
 - Color psychology info panel
 - Import/extraction/gradients/suggestions all working
 - Server-side subscription validation active
+- Supabase community database active
 - Stripe in test mode
 
 **Phase 1 Complete:**
@@ -27,10 +28,17 @@ Phase 1 complete. Implementing features to close gaps with Coolors.co.
 - Dark mode with system preference detection
 - Color psychology panel with cultural context
 
-**Next (Phase 2 - Community):**
-- Supabase database setup
-- Palette Explorer page
-- Publish palette flow
+**Phase 2 Complete:**
+- Supabase database with published_palettes and palette_likes tables
+- Explore mode with infinite scroll palette grid
+- Publish modal with optional title/author/tags
+- Like/unlike with optimistic updates
+- Anonymous fingerprinting for rate limits
+
+**Next (Phase 3 - AI Assistant):**
+- Claude API integration
+- Natural language color requests
+- Smart palette suggestions
 
 ---
 
@@ -44,8 +52,9 @@ Phase 1 complete. Implementing features to close gaps with Coolors.co.
 | Animation | Framer Motion |
 | Hosting | Railway |
 | Payments | Stripe |
+| Database | Supabase (community features) |
 
-No database. localStorage only.
+localStorage for user state, Supabase for community palettes.
 
 ---
 
@@ -59,9 +68,14 @@ src/
 │   ├── mood/             # Mood-based (premium)
 │   ├── play/             # Swipe mode (free)
 │   ├── gradient/         # Gradient mode (premium)
+│   ├── explore/          # Community explorer (free)
 │   ├── p/[id]/           # Shared palettes
 │   ├── api/
 │   │   ├── checkout/     # Stripe checkout
+│   │   ├── community/    # Community API routes
+│   │   │   ├── palettes/ # GET list, POST publish
+│   │   │   │   └── [id]/like/  # POST toggle like
+│   │   │   └── publish/  # POST publish palette
 │   │   ├── export/       # Server-validated export
 │   │   ├── verify-subscription/  # Subscription validation
 │   │   ├── webhook/      # Stripe webhooks
@@ -74,7 +88,7 @@ src/
 │   │   ├── PaletteSizeSelector.tsx  # +/- color controls
 │   │   ├── UndoRedoButtons.tsx
 │   │   ├── SaveButton.tsx
-│   │   ├── UtilityButtons.tsx
+│   │   ├── UtilityButtons.tsx  # Includes Publish button
 │   │   └── Toast.tsx
 │   ├── layout/
 │   │   └── ModePageLayout.tsx
@@ -86,7 +100,8 @@ src/
 │   │   ├── context/
 │   │   ├── mood/
 │   │   ├── playground/
-│   │   └── gradient/     # GradientView.tsx
+│   │   ├── gradient/     # GradientView.tsx
+│   │   └── explore/      # ExploreView, FilterBar, Grid, Card
 │   ├── ModeToggle.tsx
 │   ├── ThemeToggle.tsx   # Dark/light mode toggle
 │   ├── ColorInfoPanel.tsx # Color psychology slide-out
@@ -95,7 +110,8 @@ src/
 │   ├── PricingModal.tsx
 │   ├── ImportModal.tsx   # Palette import
 │   ├── ImageDropZone.tsx # Image extraction
-│   └── HistoryBrowser.tsx
+│   ├── HistoryBrowser.tsx
+│   └── PublishModal.tsx  # Publish to community
 ├── lib/
 │   ├── colors.ts         # Color conversions
 │   ├── color-psychology.ts # Color meanings & culture
@@ -110,11 +126,15 @@ src/
 │   ├── stripe.ts
 │   ├── stripe-client.ts
 │   ├── share.ts
+│   ├── supabase.ts       # Supabase client
+│   ├── fingerprint.ts    # Anonymous user ID
+│   ├── community-types.ts # Community interfaces
 │   └── types.ts          # Core types + tier constants
 ├── store/
 │   ├── palette.ts        # Main state + paletteSize
 │   ├── subscription.ts   # Premium state + verification
-│   └── theme.ts          # Dark/light theme state
+│   ├── theme.ts          # Dark/light theme state
+│   └── community.ts      # Explorer state, likes, filters
 └── hooks/
     └── useKeyboard.ts    # All keyboard shortcuts
 ```
@@ -132,6 +152,10 @@ STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PREMIUM_PRICE_ID=price_...
 STRIPE_PREMIUM_ANNUAL_PRICE_ID=price_...
+
+# Supabase (required for community features)
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 ```
 
 ---
@@ -168,7 +192,7 @@ interface Color {
 type HarmonyType = "random" | "analogous" | "complementary"
   | "triadic" | "split-complementary" | "monochromatic";
 
-type Mode = "immersive" | "context" | "mood" | "playground" | "gradient";
+type Mode = "immersive" | "context" | "mood" | "playground" | "gradient" | "explore";
 
 type ExportFormat = "css" | "scss" | "tailwind" | "json" | "array" | "svg" | "png" | "pdf" | "ase";
 
@@ -177,8 +201,9 @@ type GradientType = "linear" | "radial" | "conic" | "mesh";
 type ThemeMode = "light" | "dark" | "system";
 
 // Tier constants (from types.ts)
-FREE_MODES: ["immersive", "playground"]
+FREE_MODES: ["immersive", "playground", "explore"]
 PREMIUM_MODES: ["context", "mood", "gradient"]
+FREE_PUBLISH_LIMIT: 3
 FREE_HARMONIES: ["random", "analogous", "complementary"]
 PREMIUM_HARMONIES: ["triadic", "split-complementary", "monochromatic"]
 FREE_EXPORT_FORMATS: ["css", "json"]
@@ -199,13 +224,16 @@ PREMIUM_MAX_PALETTE_SIZE: 10
 | Feature | Free | Premium |
 |---------|------|---------|
 | Palette Size | 2-7 colors | 2-10 colors |
-| Modes | 2 | 5 |
+| Modes | 3 (Immersive, Play, Explore) | 6 (all) |
 | Harmonies | 3 | 6 |
 | Exports | 2 | 9 |
 | Saved Palettes | 5 | Unlimited |
 | Image Extractions | 3/session | Unlimited |
 | Gradients | - | Full |
 | Accessibility | Basic | Full |
+| Publish to Community | 3 total | Unlimited |
+| Browse Community | Unlimited | Unlimited |
+| Like Palettes | Unlimited | Unlimited |
 
 ---
 
@@ -230,7 +258,7 @@ PREMIUM_MAX_PALETTE_SIZE: 10
 
 ## Do Not
 
-1. Add database/auth - localStorage is sufficient
+1. Add user auth - anonymous fingerprinting is sufficient for community
 2. Change the stack - it works
 3. Over-engineer - keep it simple
 4. Skip mobile testing

@@ -7,7 +7,7 @@
 
 ## What
 
-Color palette generator with 5 distinct UI modes, image extraction, gradient generation, and professional export tools.
+Color palette generator with 6 distinct UI modes, community palette explorer, image extraction, gradient generation, and professional export tools.
 
 ## Why
 
@@ -21,17 +21,18 @@ Competitors are functional but boring. We differentiate on:
 
 | Tier | Price | Features |
 |------|-------|----------|
-| **Free** | $0 | 2 modes, 3 harmonies, 2 exports, 5 saved palettes, 3 extractions/session |
-| **Pro** | $5/mo or $36/yr | All 5 modes, all 6 harmonies, all exports, unlimited saves, unlimited extractions, gradients, full accessibility |
+| **Free** | $0 | 3 modes (Immersive, Play, Explore), 3 harmonies, 2 exports, 5 saved palettes, 3 extractions/session, 3 publishes, unlimited browsing/liking |
+| **Pro** | $5/mo or $36/yr | All 6 modes, all 6 harmonies, all exports, unlimited saves, unlimited extractions, unlimited publishes, gradients, full accessibility |
 
 ---
 
-## The 5 Modes
+## The 6 Modes
 
 | Mode | URL | Purpose | Tier |
 |------|-----|---------|------|
 | **Immersive** | `/immersive` | Full-screen, spacebar to generate | Free |
 | **Playground** | `/play` | Swipe to discover | Free |
+| **Explore** | `/explore` | Browse community palettes | Free |
 | **Context** | `/context` | See palette on real designs | Premium |
 | **Mood** | `/mood` | Start with feelings, get colors | Premium |
 | **Gradient** | `/gradient` | Transform palettes to gradients | Premium |
@@ -81,6 +82,13 @@ Competitors are functional but boring. We differentiate on:
 - Color blindness simulation (5 types)
 - Confusable pairs detection
 
+### Community (New)
+- **Explore**: Browse community-published palettes
+- **Publish**: Share your palettes with optional name, author, tags
+- **Like**: Heart palettes you love (persisted locally)
+- **Search & Filter**: Find palettes by name, author, tags, sort by newest/popular/most liked
+- **Use Palette**: One-click load any community palette into editor
+
 ---
 
 ## Implementation Status
@@ -102,7 +110,7 @@ All sprints complete. Now implementing competitive roadmap.
 | Phase | Focus | Status |
 |-------|-------|--------|
 | 1 | Variable palette size, dark mode, color psychology | ✅ |
-| 2 | Community explorer (Supabase + palette browsing) | Pending |
+| 2 | Community explorer (Supabase + palette browsing) | ✅ |
 | 3 | AI color assistant (Claude API) | Pending |
 | 4 | Platform integrations (Figma, Chrome, VS Code) | Pending |
 | 5 | SVG recolor, expanded templates | Pending |
@@ -118,10 +126,11 @@ All sprints complete. Now implementing competitive roadmap.
 | Styling | Tailwind 4 |
 | State | Zustand |
 | Animation | Framer Motion |
+| Database | Supabase |
 | Hosting | Railway |
 | Payments | Stripe |
 
-No database. localStorage only.
+localStorage for user preferences, Supabase for community palettes.
 
 ---
 
@@ -174,7 +183,7 @@ No database. localStorage only.
 | Mood-based generation | No | Yes | ✅ Advantage |
 | Mesh gradients | No | Yes | ✅ Advantage |
 | Accessibility sim | Basic | 5 types | ✅ Advantage |
-| Community palettes | 10M+ | Pending | Phase 2 |
+| Community palettes | 10M+ | Yes (growing) | ✅ Parity |
 | AI assistant | Yes | Pending | Phase 3 |
 | Figma plugin | Yes | Pending | Phase 4 |
 

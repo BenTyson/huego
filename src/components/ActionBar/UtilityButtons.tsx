@@ -10,6 +10,7 @@ interface UtilityButtonsProps {
   onShowAccessibility: () => void;
   onShowImport: () => void;
   onShowExtract: () => void;
+  onShowPublish: () => void;
 }
 
 export function UtilityButtons({
@@ -18,6 +19,7 @@ export function UtilityButtons({
   onShowAccessibility,
   onShowImport,
   onShowExtract,
+  onShowPublish,
 }: UtilityButtonsProps) {
   const colors = useColors();
 
@@ -100,6 +102,7 @@ export function UtilityButtons({
         onClick={onShowAccessibility}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
+        title="Accessibility Check"
       >
         <svg
           width="16"
@@ -114,6 +117,27 @@ export function UtilityButtons({
           <path d="M12 10v4" />
           <path d="M9 14l3 3 3-3" />
           <path d="M8 11h8" />
+        </svg>
+      </motion.button>
+
+      {/* Publish to Community */}
+      <motion.button
+        className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/50 transition-colors"
+        onClick={onShowPublish}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        title="Publish to Community"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M22 2L11 13" />
+          <path d="M22 2L15 22L11 13L2 9L22 2Z" />
         </svg>
       </motion.button>
 

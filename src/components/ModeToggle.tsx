@@ -8,7 +8,6 @@ import { useIsPremium } from "@/store/subscription";
 import { PricingModal } from "./PricingModal";
 import { ThemeToggle } from "./ThemeToggle";
 import type { Mode } from "@/lib/types";
-import { FREE_MODES } from "@/lib/types";
 
 interface ModeOption {
   id: Mode;
@@ -79,6 +78,17 @@ const modes: ModeOption[] = [
         <rect x="2" y="4" width="20" height="16" rx="2" />
         <path d="M12 8v8" />
         <path d="M8 12h8" />
+      </svg>
+    ),
+  },
+  {
+    id: "explore",
+    label: "Explore",
+    href: "/explore",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
       </svg>
     ),
   },

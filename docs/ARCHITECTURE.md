@@ -676,9 +676,136 @@ Per color:
 ## Security
 
 - **Server-side subscription validation** - Prevents localStorage spoofing
-- **No user data stored server-side** - Privacy by design
+- **Anonymous fingerprinting** - No user accounts required
 - **URL params validated** - Before use in share URLs
 - **Stripe webhook signature verification** - Prevents fake events
+- **Rate limiting** - 10 publishes/hour per fingerprint
+
+---
+
+## Community System (`src/lib/supabase.ts`, `src/store/community.ts`)
+
+### Overview
+
+Community features for browsing, publishing, and liking palettes without user accounts.
+
+### Database Schema
+
+```sql
+-- Main palettes table
+published_palettes (
+  id UUID PRIMARY KEY,
+  colors JSONB NOT NULL,           -- Full Color[] array
+  hex_codes TEXT[] NOT NULL,       -- For search/indexing
+  color_count SMALLINT,            -- 2-10
+  title TEXT,                      -- Optional name
+  harmony_type TEXT,               -- Algorithm used
+  mood_tags TEXT[],                -- User-selected tags
+  author_fingerprint TEXT,         -- Anonymous ID
+  author_display_name TEXT,        -- Optional name
+  like_count INTEGER DEFAULT 0,    -- Denormalized count
+  view_count INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ,
+  share_code TEXT UNIQUE,          -- Hex-based URL slug
+  is_public BOOLEAN DEFAULT TRUE
+)
+
+-- Likes table (triggers update like_count)
+palette_likes (
+  id UUID PRIMARY KEY,
+  palette_id UUID REFERENCES published_palettes,
+  fingerprint TEXT,
+  created_at TIMESTAMPTZ,
+  UNIQUE(palette_id, fingerprint)
+)
+```
+
+### Key Types
+
+```typescript
+interface PublishedPalette {
+  id: string;
+  colors: Color[];
+  hex_codes: string[];
+  color_count: number;
+  title: string | null;
+  harmony_type: string | null;
+  mood_tags: string[] | null;
+  author_fingerprint: string;
+  author_display_name: string | null;
+  like_count: number;
+  view_count: number;
+  created_at: string;
+  share_code: string;
+  is_public: boolean;
+}
+
+interface ExploreFilters {
+  sort: "newest" | "popular" | "most_liked";
+  search: string;
+  tags: string[];
+  colorCount?: number;
+}
+```
+
+### Store Structure
+
+```typescript
+interface CommunityState {
+  palettes: PublishedPalette[];
+  isLoading: boolean;
+  hasMore: boolean;
+  cursor: string | null;
+  filters: ExploreFilters;
+  likedPaletteIds: string[];  // Persisted
+  publishCount: number;        // Persisted
+
+  fetchPalettes: (reset?: boolean) => Promise<void>;
+  loadMore: () => Promise<void>;
+  toggleLike: (paletteId: string) => Promise<void>;
+  setFilters: (filters: Partial<ExploreFilters>) => void;
+  isLiked: (paletteId: string) => boolean;
+}
+```
+
+### API Routes
+
+```typescript
+// List palettes with pagination
+GET /api/community/palettes
+Query: { sort, search, tags, colorCount, cursor }
+Response: { palettes: PublishedPalette[], hasMore: boolean, cursor: string }
+
+// Publish new palette
+POST /api/community/publish
+Body: { colors, title?, harmony_type?, mood_tags?, author_display_name?, fingerprint }
+Response: { success: boolean, palette?: PublishedPalette, share_code?: string }
+
+// Toggle like
+POST /api/community/palettes/[id]/like
+Body: { fingerprint }
+Response: { success: boolean, liked: boolean, like_count: number }
+```
+
+### Fingerprinting (`src/lib/fingerprint.ts`)
+
+Anonymous user identification without accounts:
+
+```typescript
+getFingerprint(): string        // Generate/retrieve stable ID
+getAuthorDisplayName(): string  // Get stored name
+setAuthorDisplayName(name)      // Persist name for publishing
+```
+
+Components: screen size, color depth, timezone, language, platform, hardware concurrency.
+
+### Related Files
+
+- Store: `src/store/community.ts`
+- Types: `src/lib/community-types.ts`
+- Page: `src/app/explore/page.tsx`
+- Components: `src/components/modes/explore/*`
+- Modal: `src/components/PublishModal.tsx`
 
 ---
 

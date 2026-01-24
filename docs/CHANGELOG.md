@@ -4,6 +4,89 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.9.0] - 2026-01-23
+
+### Phase 2: Community Explorer (Competitive Roadmap)
+
+Adding community features to close the gap with Coolors.co's 10M+ palette library. Implements Supabase database, palette explorer, and publish flow.
+
+#### Added
+
+**Supabase Integration** (`src/lib/supabase.ts`)
+- Supabase client initialization with graceful fallback
+- Environment variable configuration for URL and anon key
+- `isSupabaseConfigured()` helper for feature detection
+
+**Anonymous Fingerprinting** (`src/lib/fingerprint.ts`)
+- Browser-based fingerprint generation for anonymous users
+- Combines screen, timezone, language, platform characteristics
+- Persisted to localStorage for consistent identification
+- Author display name storage for publishing
+
+**Community Types** (`src/lib/community-types.ts`)
+- `PublishedPalette` interface for database records
+- `PublishPaletteRequest/Response` for API contracts
+- `PaletteListResponse` with cursor-based pagination
+- `LikeResponse` for toggle like operations
+- `ExploreFilters` with sort, search, tags
+- `MOOD_TAGS` constant for predefined tag options
+
+**Community Store** (`src/store/community.ts`)
+- Zustand store with persist middleware
+- Palettes array with loading, hasMore, cursor state
+- Filters management (sort, search, tags)
+- Liked palette IDs (persisted locally)
+- Publish count tracking for free tier limits
+- Optimistic like/unlike with server sync
+- Selector hooks: `usePalettes()`, `useIsLoading()`, `useHasMore()`, `useFilters()`, `useLikedPaletteIds()`, `usePublishCount()`
+
+**API Routes**
+- `GET /api/community/palettes` - List with pagination, sorting (newest/popular/most_liked), search, tag filtering
+- `POST /api/community/publish` - Publish palette with rate limiting (10/hour), duplicate detection
+- `POST /api/community/palettes/[id]/like` - Toggle like with fingerprint tracking
+
+**Explore Mode** (`/explore`)
+- New mode accessible from ModeToggle (free tier)
+- `ExploreView` - Main view with header, filters, grid
+- `ExploreFilterBar` - Search input (debounced), sort dropdown, tag filter pills
+- `ExplorePaletteGrid` - Responsive grid with infinite scroll
+- `ExplorePaletteCard` - Color strip preview, metadata, like button, hover overlay with "Use Palette"
+
+**Publish Modal** (`src/components/PublishModal.tsx`)
+- Palette preview with hex codes
+- Optional title input (max 50 chars)
+- Optional author name input (max 30 chars, persisted)
+- Tag selection (up to 5 from predefined list)
+- Free tier limit display (3 publishes)
+- Loading state during publish
+
+**Database Schema** (`supabase/migrations/`)
+- `published_palettes` table with JSONB colors, hex_codes array, metadata
+- `palette_likes` table with unique constraint on palette_id + fingerprint
+- Automatic `like_count` trigger on insert/delete
+- Row Level Security policies for anonymous access
+- Indexes on created_at, like_count, share_code, hex_codes (GIN)
+
+#### Changed
+
+- `Mode` type now includes `"explore"`
+- `FREE_MODES` updated to include `"explore"`
+- Added `FREE_PUBLISH_LIMIT = 3` and `PREMIUM_PUBLISH_LIMIT` constants
+- `ModeToggle` includes Explore mode with compass icon
+- `UtilityButtons` includes Publish button (paper plane icon)
+- `ActionBar` manages PublishModal state
+- Stack now includes Supabase for database
+
+#### Technical
+
+- New dependency: `@supabase/supabase-js`
+- 14 new files created
+- 6 files modified
+- Supabase migration stored in `supabase/migrations/`
+- Build passes with no lint errors in new files
+
+---
+
 ## [0.8.0] - 2026-01-23
 
 ### Phase 1: Foundation Enhancements (Competitive Roadmap)
@@ -451,6 +534,8 @@ STRIPE_PREMIUM_PRICE_ID
 | Sprint 5 complete | ✅ | 2025-12-18 |
 | V1 Launch Prep complete | ✅ | 2026-01-22 |
 | Sprint 6 complete | ✅ | 2026-01-22 |
+| Phase 1 complete | ✅ | 2026-01-23 |
+| Phase 2 complete | ✅ | 2026-01-23 |
 
 ---
 

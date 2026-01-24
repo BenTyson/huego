@@ -35,6 +35,10 @@ const HistoryBrowser = dynamic(
   () => import("../HistoryBrowser").then((mod) => mod.HistoryBrowser),
   { ssr: false }
 );
+const PublishModal = dynamic(
+  () => import("../PublishModal").then((mod) => mod.PublishModal),
+  { ssr: false }
+);
 
 export function ActionBar() {
   const [showToast, setShowToast] = useState<string | null>(null);
@@ -44,6 +48,7 @@ export function ActionBar() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showExtractModal, setShowExtractModal] = useState(false);
   const [showHistoryBrowser, setShowHistoryBrowser] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Cleanup timer on unmount
@@ -86,6 +91,7 @@ export function ActionBar() {
           onShowAccessibility={() => setShowAccessibilityPanel(true)}
           onShowImport={() => setShowImportModal(true)}
           onShowExtract={() => setShowExtractModal(true)}
+          onShowPublish={() => setShowPublishModal(true)}
         />
       </motion.div>
 
@@ -127,6 +133,15 @@ export function ActionBar() {
       <HistoryBrowser
         isOpen={showHistoryBrowser}
         onClose={() => setShowHistoryBrowser(false)}
+      />
+      <PublishModal
+        isOpen={showPublishModal}
+        onClose={() => setShowPublishModal(false)}
+        onUpgradeClick={() => {
+          setShowPublishModal(false);
+          setShowPricingModal(true);
+        }}
+        onShowToast={showToastMessage}
       />
 
       {/* Toast notification */}

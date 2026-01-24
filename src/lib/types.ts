@@ -27,7 +27,7 @@ export interface Color {
   contrastColor: "white" | "black";
 }
 
-export type Mode = "immersive" | "context" | "mood" | "playground" | "gradient";
+export type Mode = "immersive" | "context" | "mood" | "playground" | "gradient" | "explore";
 
 export interface Palette {
   id: string;
@@ -76,8 +76,12 @@ export const FREE_MAX_PALETTE_SIZE = 7;
 export const PREMIUM_MAX_PALETTE_SIZE = 10;
 
 // Free vs Premium modes
-export const FREE_MODES: Mode[] = ["immersive", "playground"];
+export const FREE_MODES: Mode[] = ["immersive", "playground", "explore"];
 export const PREMIUM_MODES: Mode[] = ["context", "mood", "gradient"];
+
+// Community feature limits
+export const FREE_PUBLISH_LIMIT = 3;
+export const PREMIUM_PUBLISH_LIMIT = Infinity;
 
 // Free vs Premium harmonies
 export const FREE_HARMONIES: HarmonyType[] = ["random", "analogous", "complementary"];
