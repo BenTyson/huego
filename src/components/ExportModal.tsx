@@ -15,8 +15,10 @@ import {
   exportSVG,
   type ExportFormat,
 } from "@/lib/export";
-import { FREE_EXPORT_FORMATS, PREMIUM_EXPORT_FORMATS } from "@/lib/types";
+import { FREE_EXPORT_FORMATS } from "@/lib/feature-limits";
 import { AdUnit } from "./ads/AdUnit";
+import { LoadingSpinner } from "./ui/LoadingSpinner";
+import { CloseButton } from "./ui/CloseButton";
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -101,22 +103,7 @@ export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProp
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
               <h2 className="text-lg font-semibold text-white">Export Palette</h2>
-              <button
-                onClick={onClose}
-                className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
+              <CloseButton onClick={onClose} />
             </div>
 
             {/* Content */}
@@ -269,11 +256,7 @@ export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProp
               >
                 {downloading ? (
                   <>
-                    <motion.div
-                      className="w-4 h-4 border-2 border-zinc-400 border-t-zinc-900 rounded-full"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    />
+                    <LoadingSpinner size="sm" variant="dark" />
                     Exporting...
                   </>
                 ) : (

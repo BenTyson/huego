@@ -7,7 +7,9 @@ import { useCommunityStore, usePublishCount } from "@/store/community";
 import { useIsPremium } from "@/store/subscription";
 import { getFingerprint, getAuthorDisplayName, setAuthorDisplayName } from "@/lib/fingerprint";
 import { MOOD_TAGS } from "@/lib/community-types";
-import { FREE_PUBLISH_LIMIT } from "@/lib/types";
+import { FREE_PUBLISH_LIMIT } from "@/lib/feature-limits";
+import { LoadingSpinner } from "./ui/LoadingSpinner";
+import { CloseButton } from "./ui/CloseButton";
 
 interface PublishModalProps {
   isOpen: boolean;
@@ -127,15 +129,7 @@ export function PublishModal({ isOpen, onClose, onUpgradeClick, onShowToast }: P
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <h2 className="text-xl font-bold text-white">Publish to Community</h2>
-              <button
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-                onClick={onClose}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
+              <CloseButton onClick={onClose} />
             </div>
 
             {/* Content */}
@@ -263,11 +257,7 @@ export function PublishModal({ isOpen, onClose, onUpgradeClick, onShowToast }: P
               >
                 {isPublishing ? (
                   <>
-                    <motion.div
-                      className="w-4 h-4 border-2 border-zinc-400 border-t-zinc-700 rounded-full"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    />
+                    <LoadingSpinner size="sm" variant="dark" />
                     Publishing...
                   </>
                 ) : canPublish ? (

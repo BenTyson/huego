@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo, memo } from "react";
 import { motion } from "framer-motion";
 import type { Color } from "@/lib/types";
 
@@ -14,7 +14,7 @@ interface ColorColumnProps {
   isActive: boolean;
 }
 
-export function ColorColumn({
+export const ColorColumn = memo(function ColorColumn({
   color,
   index,
   isLocked,
@@ -269,4 +269,4 @@ export function ColorColumn({
       </motion.div>
     </motion.div>
   );
-}
+});

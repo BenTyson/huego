@@ -4,6 +4,132 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.10.0] - 2026-01-24
+
+### Phase 3: Codebase Audit & Refactoring
+
+Comprehensive audit addressing compartmentalization, modularization, optimization, and code cleanup. No breaking changes - internal refactoring only.
+
+#### Fixed
+
+**Memory Leak** (`src/components/ImageDropZone.tsx`)
+- Added `URL.revokeObjectURL()` cleanup for `createObjectURL` calls
+- Cleanup on unmount, error, apply, and reset actions
+- Proper ref tracking to prevent stale URL references
+
+#### Added
+
+**Shared UI Components** (`src/components/ui/`)
+- `ModalBase.tsx` - Reusable modal with backdrop, header, content, footer
+- `LoadingSpinner.tsx` - Framer Motion spinner with size/variant options
+- `CloseButton.tsx` - Standard close button component
+- `ModalCancelButton` and `ModalPrimaryButton` helper components
+
+**Utility Hooks** (`src/hooks/`)
+- `useClipboardFeedback.ts` - Copy with visual feedback and timeout
+- `useModal.ts` - Modal open/close state management
+- `useToast.ts` - Toast notifications with auto-dismiss
+
+**Shared Utilities** (`src/lib/`)
+- `random.ts` - Consolidated `randomInRange()`, `randomHue()`, `normalizeHue()`, `randomHueInRange()`, `shuffleArray()`, `randomElement()`
+- `color-factory.ts` - `colorFromOklch()`, `adjustLightness()`, `adjustChroma()`, `shiftHue()`, `invertLightness()`, `getComplement()`
+- `file-operations.ts` - `downloadFile()`, `copyToClipboard()`, `readFileAsText()`, `readFileAsDataURL()`, `getMimeType()`
+- `feature-limits.ts` - Centralized FREE_MAX, PREMIUM_MAX constants and helper functions
+
+**Accessibility Sub-components** (`src/components/accessibility/`)
+- `ContrastPanel.tsx` - WCAG contrast checking (extracted from AccessibilityPanel)
+- `ColorBlindnessPanel.tsx` - Color blindness simulation (extracted from AccessibilityPanel)
+
+**Image Extract Sub-components** (`src/components/image-extract/`)
+- `DropZone.tsx` - Drag and drop zone
+- `ImagePreview.tsx` - Image preview with loading state
+- `ExtractedPalette.tsx` - Extracted colors display
+- `HarmonizeToggle.tsx` - Harmonization toggle switch
+
+**Error Handling** (`src/components/ErrorBoundary.tsx`)
+- Global error boundary component
+- Fallback UI with retry/refresh options
+- Development mode error details
+
+**Keyboard Hook Split** (`src/hooks/`)
+- `useKeyboardGeneration.ts` - Spacebar generation, undo/redo
+- `useKeyboardClipboard.ts` - Copy operations, number key shortcuts
+- `useKeyboardBatchOps.ts` - Shuffle, invert, adjust operations
+
+#### Changed
+
+**Store Decoupling**
+- `palette.ts` no longer directly imports `subscription.ts`
+- `addColor()` and `savePalette()` now accept `isPremium` parameter
+- Feature limits imported from centralized `feature-limits.ts`
+
+**Component Optimizations**
+- `ExplorePaletteCard` - Wrapped with `React.memo()`
+- `ColorColumn` - Wrapped with `React.memo()`
+
+**Modal Refactoring**
+- `ImportModal` - Fully refactored to use `ModalBase`
+- `ExportModal` - Uses `LoadingSpinner` and `CloseButton`
+- `PublishModal` - Uses `LoadingSpinner` and `CloseButton`
+- `AccessibilityPanel` - Uses `CloseButton`, composed from sub-panels
+- `ImageDropZone` - Uses `LoadingSpinner`, `CloseButton`, and sub-components
+
+**Lib File Updates**
+- `generate.ts` - Uses shared `randomInRange()`, `randomHue()` from `random.ts`
+- `mood.ts` - Uses shared `randomInRange()`, `normalizeHue()`, `randomHueInRange()` from `random.ts`
+- `suggestions.ts` - Removed unused imports
+
+#### Technical
+
+**New Files (18 total)**
+```
+src/components/ui/ModalBase.tsx
+src/components/ui/LoadingSpinner.tsx
+src/components/ui/CloseButton.tsx
+src/components/accessibility/ContrastPanel.tsx
+src/components/accessibility/ColorBlindnessPanel.tsx
+src/components/image-extract/DropZone.tsx
+src/components/image-extract/ImagePreview.tsx
+src/components/image-extract/ExtractedPalette.tsx
+src/components/image-extract/HarmonizeToggle.tsx
+src/components/ErrorBoundary.tsx
+src/hooks/useClipboardFeedback.ts
+src/hooks/useModal.ts
+src/hooks/useToast.ts
+src/hooks/useKeyboardGeneration.ts
+src/hooks/useKeyboardClipboard.ts
+src/hooks/useKeyboardBatchOps.ts
+src/lib/random.ts
+src/lib/color-factory.ts
+src/lib/file-operations.ts
+src/lib/feature-limits.ts
+```
+
+**Modified Files (15 total)**
+```
+src/components/ImageDropZone.tsx
+src/components/ImportModal.tsx
+src/components/ExportModal.tsx
+src/components/PublishModal.tsx
+src/components/AccessibilityPanel.tsx
+src/components/ActionBar/PaletteSizeSelector.tsx
+src/components/ActionBar/SaveButton.tsx
+src/components/modes/explore/ExplorePaletteCard.tsx
+src/components/modes/immersive/ColorColumn.tsx
+src/hooks/useKeyboard.ts
+src/store/palette.ts
+src/store/subscription.ts
+src/lib/generate.ts
+src/lib/mood.ts
+src/lib/suggestions.ts
+```
+
+- Build passes with no errors
+- Lint shows only pre-existing issues (3 errors, 14 warnings)
+- No breaking changes to public API
+
+---
+
 ## [0.9.0] - 2026-01-23
 
 ### Phase 2: Community Explorer (Competitive Roadmap)
@@ -536,6 +662,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Sprint 6 complete | ✅ | 2026-01-22 |
 | Phase 1 complete | ✅ | 2026-01-23 |
 | Phase 2 complete | ✅ | 2026-01-23 |
+| Phase 3 complete | ✅ | 2026-01-24 |
 
 ---
 

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { usePaletteStore, usePaletteSize } from "@/store/palette";
 import { useSubscriptionStore } from "@/store/subscription";
-import { MIN_PALETTE_SIZE } from "@/lib/types";
+import { MIN_PALETTE_SIZE } from "@/lib/feature-limits";
 
 interface PaletteSizeSelectorProps {
   onUpgradeClick: () => void;
@@ -24,7 +24,7 @@ export function PaletteSizeSelector({ onUpgradeClick }: PaletteSizeSelectorProps
       onUpgradeClick();
       return;
     }
-    addColor();
+    addColor(isPremium);
   };
 
   return (

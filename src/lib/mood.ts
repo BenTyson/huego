@@ -3,6 +3,7 @@
 
 import type { Color, OKLCH } from "./types";
 import { oklchToHex, createColor, forceInGamut, clampOklch } from "./colors";
+import { randomInRange, normalizeHue, randomHueInRange } from "./random";
 
 export interface MoodProfile {
   id: string;
@@ -140,25 +141,6 @@ const defaultRefinements: RefinementValues = {
   vibrancy: 0,
   brightness: 0,
 };
-
-function randomInRange(min: number, max: number): number {
-  return Math.random() * (max - min) + min;
-}
-
-function normalizeHue(hue: number): number {
-  return ((hue % 360) + 360) % 360;
-}
-
-function randomHueInRange(range: [number, number]): number {
-  const [min, max] = range;
-  if (min <= max) {
-    return randomInRange(min, max);
-  }
-  // Wrapping case
-  const rangeSize = (360 - min) + max;
-  const r = Math.random() * rangeSize;
-  return normalizeHue(min + r);
-}
 
 /**
  * Generate a palette based on mood profile and refinements

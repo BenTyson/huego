@@ -22,7 +22,7 @@ export function SaveButton({ onShowToast, onShowPricing }: SaveButtonProps) {
       return;
     }
 
-    const result = savePalette();
+    const result = savePalette(isPremium);
     if (result) {
       onShowToast("Palette saved!");
     } else {

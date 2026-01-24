@@ -4,7 +4,15 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Subscription, ExportFormat } from "@/lib/types";
-import { FREE_MAX_PALETTE_SIZE, PREMIUM_MAX_PALETTE_SIZE, MIN_PALETTE_SIZE } from "@/lib/types";
+import {
+  FREE_MAX_PALETTE_SIZE,
+  PREMIUM_MAX_PALETTE_SIZE,
+  MIN_PALETTE_SIZE,
+  FREE_SAVED_PALETTES_LIMIT as FREE_SAVED_LIMIT,
+  isExportFormatFree,
+  isModeFree,
+  isHarmonyFree,
+} from "@/lib/feature-limits";
 
 interface SubscriptionState extends Subscription {
   // Verification state
@@ -37,12 +45,9 @@ const initialState: Subscription & { lastVerified: number | null; isVerifying: b
   isVerifying: false,
 };
 
-// Free tier limits
-const FREE_EXPORT_FORMATS: ExportFormat[] = ["css", "json"];
-const FREE_MODES = ["immersive", "playground"];
-const FREE_HARMONIES = ["random", "analogous", "complementary"];
+// Free tier limits - using centralized feature-limits
+// Note: FREE_EXPORT_FORMATS, FREE_MODES, FREE_HARMONIES are imported from feature-limits
 const FREE_ACCESSIBILITY_FEATURES = ["contrast-aa", "protanopia", "deuteranopia"];
-const FREE_SAVED_PALETTES_LIMIT = 5;
 
 // Verification cache duration (5 minutes)
 const VERIFICATION_CACHE_MS = 5 * 60 * 1000;
@@ -124,12 +129,12 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
       canUseExportFormat: (format: ExportFormat) => {
         const { isPremium } = get();
-        return isPremium || FREE_EXPORT_FORMATS.includes(format);
+        return isPremium || isExportFormatFree(format);
       },
 
       getSavedPalettesLimit: () => {
         const { isPremium } = get();
-        return isPremium ? Infinity : FREE_SAVED_PALETTES_LIMIT;
+        return isPremium ? Infinity : FREE_SAVED_LIMIT;
       },
 
       getMaxPaletteSize: () => {
@@ -146,12 +151,12 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 
       canUseMode: (mode: string) => {
         const { isPremium } = get();
-        return isPremium || FREE_MODES.includes(mode);
+        return isPremium || isModeFree(mode as import("@/lib/types").Mode);
       },
 
       canUseHarmony: (harmony: string) => {
         const { isPremium } = get();
-        return isPremium || FREE_HARMONIES.includes(harmony);
+        return isPremium || isHarmonyFree(harmony as import("@/lib/types").HarmonyType);
       },
 
       canUseAccessibilityFeature: (feature: string) => {

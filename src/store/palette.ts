@@ -4,10 +4,15 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Color, Mode, Palette, HarmonyType } from "@/lib/types";
-import { DEFAULT_PALETTE_SIZE, MIN_PALETTE_SIZE, MAX_PALETTE_SIZE } from "@/lib/types";
+import {
+  DEFAULT_PALETTE_SIZE,
+  MIN_PALETTE_SIZE,
+  MAX_PALETTE_SIZE,
+  getMaxPaletteSize,
+  getSavedPalettesLimit,
+} from "@/lib/feature-limits";
 import { generatePalette, generatePaletteId } from "@/lib/generate";
-import { createColor, hexToOklch, oklchToHex, forceInGamut } from "@/lib/colors";
-import { useSubscriptionStore } from "./subscription";
+import { createColor, oklchToHex, forceInGamut } from "@/lib/colors";
 
 const MAX_HISTORY = 50;
 
@@ -34,11 +39,11 @@ interface PaletteState {
   setMode: (mode: Mode) => void;
   setHarmonyType: (type: HarmonyType) => void;
   setPaletteSize: (size: number) => void;
-  addColor: () => void;
+  addColor: (isPremium?: boolean) => void;
   removeColor: () => void;
   undo: () => void;
   redo: () => void;
-  savePalette: () => Palette | null;
+  savePalette: (isPremium?: boolean) => Palette | null;
   deleteSavedPalette: (id: string) => void;
   loadPalette: (palette: Palette) => void;
   reorderColors: (fromIndex: number, toIndex: number) => void;
@@ -166,10 +171,10 @@ export const usePaletteStore = create<PaletteState>()(
         });
       },
 
-      // Add a single color
-      addColor: () => {
-        const { colors, locked, paletteSize, harmonyType } = get();
-        const maxSize = useSubscriptionStore.getState().getMaxPaletteSize();
+      // Add a single color (premium status is checked by the calling component)
+      addColor: (isPremium: boolean = false) => {
+        const { colors, locked, harmonyType } = get();
+        const maxSize = getMaxPaletteSize(isPremium);
 
         if (colors.length >= maxSize) return;
 
@@ -223,12 +228,12 @@ export const usePaletteStore = create<PaletteState>()(
         });
       },
 
-      // Save current palette
-      savePalette: () => {
+      // Save current palette (premium status is checked by the calling component)
+      savePalette: (isPremium: boolean = false) => {
         const { colors, locked, mode, savedPalettes } = get();
 
-        // Get limit from subscription store
-        const limit = useSubscriptionStore.getState().getSavedPalettesLimit();
+        // Get limit based on premium status
+        const limit = getSavedPalettesLimit(isPremium);
 
         if (savedPalettes.length >= limit) {
           return null; // Premium feature needed

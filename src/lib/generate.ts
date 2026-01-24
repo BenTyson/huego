@@ -8,21 +8,10 @@ import {
   forceInGamut,
   clampOklch,
 } from "./colors";
+import { randomInRange, randomHue } from "./random";
 
 // Default palette size
 const PALETTE_SIZE = 5;
-
-// ============================================
-// Random number utilities
-// ============================================
-
-function randomInRange(min: number, max: number): number {
-  return Math.random() * (max - min) + min;
-}
-
-function randomHue(): number {
-  return Math.random() * 360;
-}
 
 // ============================================
 // Core generation function

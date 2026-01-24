@@ -1,7 +1,7 @@
 // Smart color suggestions for HueGo
 // Generates intelligent color variations for discovery
 
-import { hexToOklch, oklchToHex, forceInGamut, createColor } from "./colors";
+import { oklchToHex, forceInGamut } from "./colors";
 import type { Color, OKLCH } from "./types";
 
 export interface ColorSuggestion {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCommunityStore } from "@/store/community";
@@ -13,7 +13,7 @@ interface ExplorePaletteCardProps {
   index: number;
 }
 
-export function ExplorePaletteCard({ palette, index }: ExplorePaletteCardProps) {
+export const ExplorePaletteCard = memo(function ExplorePaletteCard({ palette, index }: ExplorePaletteCardProps) {
   const router = useRouter();
   const { toggleLike, isLiked } = useCommunityStore();
   const { setColors } = usePaletteStore();
@@ -167,4 +167,4 @@ export function ExplorePaletteCard({ palette, index }: ExplorePaletteCardProps) 
       )}
     </motion.div>
   );
-}
+});

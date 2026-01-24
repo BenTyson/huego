@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePaletteStore } from "@/store/palette";
 import { useIsPremium } from "@/store/subscription";
@@ -11,6 +11,11 @@ import {
   getRemainingExtractions,
   incrementExtractionCount,
 } from "@/lib/extract";
+import { createColor } from "@/lib/colors";
+import { CloseButton } from "./ui/CloseButton";
+import { LoadingSpinner } from "./ui/LoadingSpinner";
+import { ExtractedPalette } from "./image-extract/ExtractedPalette";
+import { HarmonizeToggle } from "./image-extract/HarmonizeToggle";
 
 interface ImageDropZoneProps {
   isOpen: boolean;
@@ -28,6 +33,7 @@ export function ImageDropZone({
   const { setColors } = usePaletteStore();
   const isPremium = useIsPremium();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -37,6 +43,15 @@ export function ImageDropZone({
     { hex: string; name: string; contrastColor: string }[] | null
   >(null);
   const [harmonize, setHarmonize] = useState(true);
+
+  // Cleanup object URL on unmount or when URL changes to prevent memory leak
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+    };
+  }, []);
 
   const remaining = getRemainingExtractions(isPremium);
   const canExtractNow = canExtract(isPremium);
@@ -67,8 +82,14 @@ export function ImageDropZone({
       setIsProcessing(true);
       setExtractedColors(null);
 
+      // Revoke previous URL if exists to prevent memory leak
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+      }
+
       // Show preview
       const url = URL.createObjectURL(file);
+      previewUrlRef.current = url;
       setPreviewUrl(url);
 
       try {
@@ -89,6 +110,11 @@ export function ImageDropZone({
         incrementExtractionCount();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to extract colors");
+        // Cleanup URL on error
+        if (previewUrlRef.current) {
+          URL.revokeObjectURL(previewUrlRef.current);
+          previewUrlRef.current = null;
+        }
         setPreviewUrl(null);
       } finally {
         setIsProcessing(false);
@@ -124,22 +150,27 @@ export function ImageDropZone({
     if (!extractedColors) return;
 
     // Reconstruct Color objects
-    const colors = extractedColors.map((c) => {
-      // Import createColor to get full Color object
-      const { createColor } = require("@/lib/colors");
-      return createColor(c.hex);
-    });
+    const colors = extractedColors.map((c) => createColor(c.hex));
 
     setColors(colors);
     onShowToast?.("Colors extracted!");
     onClose();
 
-    // Cleanup
+    // Cleanup URL to prevent memory leak
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
     setPreviewUrl(null);
     setExtractedColors(null);
   }, [extractedColors, setColors, onShowToast, onClose]);
 
   const handleReset = useCallback(() => {
+    // Cleanup URL to prevent memory leak
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
     setPreviewUrl(null);
     setExtractedColors(null);
     setError(null);
@@ -178,22 +209,7 @@ export function ImageDropZone({
                   </p>
                 )}
               </div>
-              <button
-                onClick={onClose}
-                className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
+              <CloseButton onClick={onClose} />
             </div>
 
             {/* Content */}
@@ -257,78 +273,16 @@ export function ImageDropZone({
                     />
                     {isProcessing && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <motion.div
-                          className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full"
-                          animate={{ rotate: 360 }}
-                          transition={{
-                            duration: 1,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                        />
+                        <LoadingSpinner size="md" variant="light" />
                       </div>
                     )}
                   </div>
 
                   {/* Harmonize Toggle */}
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setHarmonize(!harmonize)}
-                      className={`relative w-10 h-6 rounded-full transition-colors ${
-                        harmonize ? "bg-amber-500" : "bg-zinc-700"
-                      }`}
-                    >
-                      <motion.div
-                        className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full"
-                        animate={{ x: harmonize ? 16 : 0 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      />
-                    </button>
-                    <span className="text-sm text-zinc-400">
-                      Harmonize colors for better palette cohesion
-                    </span>
-                  </div>
+                  <HarmonizeToggle enabled={harmonize} onChange={setHarmonize} />
 
                   {/* Extracted Colors */}
-                  {extractedColors && (
-                    <div>
-                      <h3 className="text-sm font-medium text-zinc-400 mb-2">
-                        Extracted Palette
-                      </h3>
-                      <div className="flex rounded-lg overflow-hidden h-20">
-                        {extractedColors.map((color, index) => (
-                          <div
-                            key={index}
-                            className="flex-1 flex flex-col items-center justify-center gap-1"
-                            style={{ backgroundColor: color.hex }}
-                          >
-                            <span
-                              className="text-xs font-mono"
-                              style={{
-                                color:
-                                  color.contrastColor === "white"
-                                    ? "#fff"
-                                    : "#000",
-                              }}
-                            >
-                              {color.hex}
-                            </span>
-                            <span
-                              className="text-[10px] opacity-70"
-                              style={{
-                                color:
-                                  color.contrastColor === "white"
-                                    ? "#fff"
-                                    : "#000",
-                              }}
-                            >
-                              {color.name}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  {extractedColors && <ExtractedPalette colors={extractedColors} />}
                 </div>
               )}
 
