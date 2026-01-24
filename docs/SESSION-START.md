@@ -1,7 +1,7 @@
 # HueGo - Session Start Guide
 
 > **Read this before doing anything.**
-> Last Updated: 2026-01-23
+> Last Updated: 2026-01-24
 > Production: https://huego-production.up.railway.app
 > Dev: `npm run dev` (port 3377)
 
@@ -11,7 +11,7 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 2 complete. Community features live.
+Phase 3 complete. AI Color Assistant live.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
@@ -21,6 +21,7 @@ Phase 2 complete. Community features live.
 - Import/extraction/gradients/suggestions all working
 - Server-side subscription validation active
 - Supabase community database active
+- AI-powered palette generation via Claude API
 - Stripe in test mode
 
 **Phase 1 Complete:**
@@ -35,10 +36,16 @@ Phase 2 complete. Community features live.
 - Like/unlike with optimistic updates
 - Anonymous fingerprinting for rate limits
 
-**Next (Phase 3 - AI Assistant):**
-- Claude API integration
-- Natural language color requests
-- Smart palette suggestions
+**Phase 3 Complete:**
+- Claude API integration via `/api/ai/generate`
+- Natural language palette generation
+- AI Assistant modal with preview and apply
+- Rate limiting (3/min, 10/day free; 30/min, unlimited premium)
+
+**Next (Phase 4 - Platform Integrations):**
+- Figma plugin
+- Chrome extension
+- VS Code extension
 
 ---
 
@@ -71,6 +78,8 @@ src/
 │   ├── explore/          # Community explorer (free)
 │   ├── p/[id]/           # Shared palettes
 │   ├── api/
+│   │   ├── ai/           # AI routes
+│   │   │   └── generate/ # POST Claude palette generation
 │   │   ├── checkout/     # Stripe checkout
 │   │   ├── community/    # Community API routes
 │   │   │   ├── palettes/ # GET list, POST publish
@@ -111,7 +120,8 @@ src/
 │   ├── ImportModal.tsx   # Palette import
 │   ├── ImageDropZone.tsx # Image extraction
 │   ├── HistoryBrowser.tsx
-│   └── PublishModal.tsx  # Publish to community
+│   ├── PublishModal.tsx  # Publish to community
+│   └── AIAssistantModal.tsx # AI palette generation
 ├── lib/
 │   ├── colors.ts         # Color conversions
 │   ├── color-psychology.ts # Color meanings & culture
@@ -156,6 +166,9 @@ STRIPE_PREMIUM_ANNUAL_PRICE_ID=price_...
 # Supabase (required for community features)
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+
+# Anthropic (required for AI assistant)
+ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 ---
@@ -234,6 +247,7 @@ PREMIUM_MAX_PALETTE_SIZE: 10
 | Publish to Community | 3 total | Unlimited |
 | Browse Community | Unlimited | Unlimited |
 | Like Palettes | Unlimited | Unlimited |
+| AI Generation | 3/min, 10/day | 30/min, Unlimited |
 
 ---
 

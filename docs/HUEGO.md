@@ -21,8 +21,8 @@ Competitors are functional but boring. We differentiate on:
 
 | Tier | Price | Features |
 |------|-------|----------|
-| **Free** | $0 | 3 modes (Immersive, Play, Explore), 3 harmonies, 2 exports, 5 saved palettes, 3 extractions/session, 3 publishes, unlimited browsing/liking |
-| **Pro** | $5/mo or $36/yr | All 6 modes, all 6 harmonies, all exports, unlimited saves, unlimited extractions, unlimited publishes, gradients, full accessibility |
+| **Free** | $0 | 3 modes (Immersive, Play, Explore), 3 harmonies, 2 exports, 5 saved palettes, 3 extractions/session, 3 publishes, AI (3/min, 10/day), unlimited browsing/liking |
+| **Pro** | $5/mo or $36/yr | All 6 modes, all 6 harmonies, all exports, unlimited saves, unlimited extractions, unlimited publishes, unlimited AI, gradients, full accessibility |
 
 ---
 
@@ -82,12 +82,19 @@ Competitors are functional but boring. We differentiate on:
 - Color blindness simulation (5 types)
 - Confusable pairs detection
 
-### Community (New)
+### Community
 - **Explore**: Browse community-published palettes
 - **Publish**: Share your palettes with optional name, author, tags
 - **Like**: Heart palettes you love (persisted locally)
 - **Search & Filter**: Find palettes by name, author, tags, sort by newest/popular/most liked
 - **Use Palette**: One-click load any community palette into editor
+
+### AI Color Assistant (New)
+- **Natural Language**: Describe palettes in plain English ("warm sunset", "modern tech startup")
+- **Claude-Powered**: Uses Claude claude-sonnet-4-20250514 for fast, intelligent suggestions
+- **Preview & Apply**: See generated colors before applying to your palette
+- **Regenerate**: Not happy? Generate new variations with one click
+- **Rate Limits**: Free users get 3/min and 10/day; Premium users get 30/min unlimited
 
 ---
 
@@ -111,7 +118,7 @@ All sprints complete. Now implementing competitive roadmap.
 |-------|-------|--------|
 | 1 | Variable palette size, dark mode, color psychology | ✅ |
 | 2 | Community explorer (Supabase + palette browsing) | ✅ |
-| 3 | AI color assistant (Claude API) | Pending |
+| 3 | AI color assistant (Claude API) | ✅ |
 | 4 | Platform integrations (Figma, Chrome, VS Code) | Pending |
 | 5 | SVG recolor, expanded templates | Pending |
 | 6 | Projects/collections, zen mode | Pending |
@@ -184,7 +191,7 @@ localStorage for user preferences, Supabase for community palettes.
 | Mesh gradients | No | Yes | ✅ Advantage |
 | Accessibility sim | Basic | 5 types | ✅ Advantage |
 | Community palettes | 10M+ | Yes (growing) | ✅ Parity |
-| AI assistant | Yes | Pending | Phase 3 |
+| AI assistant | Yes | Yes | ✅ Parity |
 | Figma plugin | Yes | Pending | Phase 4 |
 
 ---

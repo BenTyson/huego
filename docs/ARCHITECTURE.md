@@ -809,6 +809,89 @@ Components: screen size, color depth, timezone, language, platform, hardware con
 
 ---
 
+## AI Color Assistant (`src/app/api/ai/generate/route.ts`)
+
+### Overview
+
+Claude-powered palette generation from natural language descriptions.
+
+### Architecture
+
+```
+User Input → AIAssistantModal → /api/ai/generate → Claude API
+                                       ↓
+                              Parse JSON response
+                                       ↓
+                              createColor() for each hex
+                                       ↓
+                              Display preview → Apply to palette
+```
+
+### API Route
+
+```typescript
+POST /api/ai/generate
+Body: {
+  prompt: string;        // User's description (max 500 chars)
+  colorCount: number;    // 2-10, defaults to current palette size
+  fingerprint: string;   // For rate limiting
+  isPremium: boolean;    // Tier for rate limits
+}
+Response: {
+  success: boolean;
+  colors: { hex: string; name: string }[];
+  remaining: number;     // Requests remaining in window
+}
+```
+
+### Rate Limits
+
+| Tier | Per Minute | Per Day |
+|------|------------|---------|
+| Free | 3 | 10 |
+| Premium | 30 | Unlimited |
+
+### System Prompt
+
+```
+You are a professional color palette designer. Generate color palettes based on user descriptions.
+
+RULES:
+1. Return EXACTLY the number of colors requested (default: 5)
+2. Return as JSON array: [{"hex": "#RRGGBB", "name": "Color Name"}, ...]
+3. Hex codes must be valid 6-digit uppercase format
+4. Color names should be descriptive (e.g., "Sunset Orange", "Deep Ocean")
+5. Consider color harmony, contrast, and visual balance
+6. Respond ONLY with valid JSON, no additional text
+```
+
+### Store Integration
+
+```typescript
+// State
+aiSuggestions: Color[] | null;
+aiLoading: boolean;
+aiError: string | null;
+
+// Actions
+generateAISuggestions(prompt: string, isPremium: boolean): Promise<void>
+applySuggestion(): void      // Applies to palette with undo support
+clearSuggestions(): void     // Clears preview state
+
+// Selectors
+useAISuggestions(): Color[] | null
+useAILoading(): boolean
+useAIError(): string | null
+```
+
+### Related Files
+
+- Modal: `src/components/AIAssistantModal.tsx`
+- Store: `src/store/palette.ts` (AI state)
+- Button: `src/components/ActionBar/UtilityButtons.tsx`
+
+---
+
 ## Related Docs
 
 - [Product Overview](/docs/HUEGO.md) - Vision and features

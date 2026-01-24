@@ -31,6 +31,11 @@ interface PaletteState {
   // Saved palettes
   savedPalettes: Palette[];
 
+  // AI suggestions
+  aiSuggestions: Color[] | null;
+  aiLoading: boolean;
+  aiError: string | null;
+
   // Actions
   generate: () => void;
   toggleLock: (index: number) => void;
@@ -54,6 +59,11 @@ interface PaletteState {
   invert: () => void;
   adjustChroma: (delta: number) => void; // +/- percentage
   adjustLightness: (delta: number) => void; // +/- percentage
+
+  // AI actions
+  generateAISuggestions: (prompt: string, isPremium: boolean) => Promise<void>;
+  applySuggestion: () => void;
+  clearSuggestions: () => void;
 }
 
 // Generate initial palette
@@ -72,6 +82,11 @@ export const usePaletteStore = create<PaletteState>()(
       history: [],
       historyIndex: -1,
       savedPalettes: [],
+
+      // AI state
+      aiSuggestions: null,
+      aiLoading: false,
+      aiError: null,
 
       // Generate new palette (respecting locks)
       generate: () => {
@@ -364,6 +379,87 @@ export const usePaletteStore = create<PaletteState>()(
 
         set({ colors: newColors });
       },
+
+      // Generate AI suggestions
+      generateAISuggestions: async (prompt: string, isPremium: boolean) => {
+        const { paletteSize } = get();
+
+        set({ aiLoading: true, aiError: null });
+
+        try {
+          // Import fingerprint dynamically to avoid SSR issues
+          const { getFingerprint } = await import("@/lib/fingerprint");
+          const fingerprint = getFingerprint();
+
+          const response = await fetch("/api/ai/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt,
+              colorCount: paletteSize,
+              fingerprint,
+              isPremium,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to generate palette");
+          }
+
+          // Convert API response to Color objects
+          const suggestions = data.colors.map(
+            (c: { hex: string; name: string }) => createColor(c.hex, c.name)
+          );
+
+          set({ aiSuggestions: suggestions, aiLoading: false });
+        } catch (error) {
+          set({
+            aiError: error instanceof Error ? error.message : "Failed to generate palette",
+            aiLoading: false,
+          });
+        }
+      },
+
+      // Apply AI suggestions to the palette
+      applySuggestion: () => {
+        const { aiSuggestions, history, historyIndex, colors, locked, mode } = get();
+
+        if (!aiSuggestions) return;
+
+        // Save current state to history before applying
+        const currentPalette: Palette = {
+          id: generatePaletteId(),
+          colors: [...colors],
+          locked: [...locked],
+          createdAt: Date.now(),
+          mode,
+        };
+
+        // Trim history if we're not at the end
+        const newHistory = history.slice(0, historyIndex + 1);
+        newHistory.push(currentPalette);
+
+        // Keep history under limit
+        while (newHistory.length > MAX_HISTORY) {
+          newHistory.shift();
+        }
+
+        set({
+          colors: aiSuggestions,
+          locked: Array(aiSuggestions.length).fill(false),
+          paletteSize: aiSuggestions.length,
+          history: newHistory,
+          historyIndex: newHistory.length - 1,
+          aiSuggestions: null,
+        });
+      },
+
+      // Clear AI suggestions
+      clearSuggestions: () => {
+        set({ aiSuggestions: null, aiError: null });
+      },
     }),
     {
       name: "huego-palette",
@@ -392,3 +488,8 @@ export const useHistoryIndex = () => usePaletteStore((state) => state.historyInd
 export const useCanUndo = () => usePaletteStore((state) => state.historyIndex >= 0);
 export const useCanRedo = () =>
   usePaletteStore((state) => state.historyIndex < state.history.length - 1);
+
+// AI selector hooks
+export const useAISuggestions = () => usePaletteStore((state) => state.aiSuggestions);
+export const useAILoading = () => usePaletteStore((state) => state.aiLoading);
+export const useAIError = () => usePaletteStore((state) => state.aiError);

@@ -4,6 +4,62 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.11.0] - 2026-01-24
+
+### Phase 3: AI Color Assistant
+
+AI-powered color palette generation using Claude API. Users can describe palettes in natural language and receive professional color suggestions.
+
+#### Added
+
+**API Route** (`src/app/api/ai/generate/route.ts`)
+- POST endpoint for Claude API integration
+- Uses `claude-sonnet-4-20250514` model (fast, cost-effective)
+- Rate limiting: 3/min and 10/day free, 30/min unlimited premium
+- System prompt returns JSON array with hex codes and descriptive names
+- Hex validation and error handling
+
+**AI Modal Component** (`src/components/AIAssistantModal.tsx`)
+- Textarea for prompt input (max 500 characters)
+- Example prompt chips for inspiration (warm sunset, ocean waves, etc.)
+- Loading spinner during generation
+- Color preview swatches with hex codes and names
+- "Apply Palette" and "Regenerate" buttons
+- Purple/pink gradient accent for visual differentiation
+
+**Store Extensions** (`src/store/palette.ts`)
+- New state: `aiSuggestions`, `aiLoading`, `aiError`
+- New actions: `generateAISuggestions()`, `applySuggestion()`, `clearSuggestions()`
+- New selectors: `useAISuggestions()`, `useAILoading()`, `useAIError()`
+- Apply preserves undo history
+
+**UI Integration**
+- AI button in ActionBar (sparkles icon with purple gradient)
+- Lazy-loaded AIAssistantModal via dynamic import
+- Modal accessible from UtilityButtons
+
+#### Technical
+
+**New Files (2 total)**
+```
+src/app/api/ai/generate/route.ts
+src/components/AIAssistantModal.tsx
+```
+
+**Modified Files (4 total)**
+```
+src/store/palette.ts
+src/components/ActionBar/index.tsx
+src/components/ActionBar/UtilityButtons.tsx
+.env.example
+```
+
+- New dependency: `@anthropic-ai/sdk`
+- Build passes with no errors
+- Environment variable: `ANTHROPIC_API_KEY`
+
+---
+
 ## [0.10.0] - 2026-01-24
 
 ### Phase 3: Codebase Audit & Refactoring
@@ -662,7 +718,8 @@ STRIPE_PREMIUM_PRICE_ID
 | Sprint 6 complete | ✅ | 2026-01-22 |
 | Phase 1 complete | ✅ | 2026-01-23 |
 | Phase 2 complete | ✅ | 2026-01-23 |
-| Phase 3 complete | ✅ | 2026-01-24 |
+| Phase 3 (Refactoring) complete | ✅ | 2026-01-24 |
+| Phase 3 (AI Assistant) complete | ✅ | 2026-01-24 |
 
 ---
 

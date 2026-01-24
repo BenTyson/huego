@@ -39,6 +39,10 @@ const PublishModal = dynamic(
   () => import("../PublishModal").then((mod) => mod.PublishModal),
   { ssr: false }
 );
+const AIAssistantModal = dynamic(
+  () => import("../AIAssistantModal").then((mod) => mod.AIAssistantModal),
+  { ssr: false }
+);
 
 export function ActionBar() {
   const [showToast, setShowToast] = useState<string | null>(null);
@@ -49,6 +53,7 @@ export function ActionBar() {
   const [showExtractModal, setShowExtractModal] = useState(false);
   const [showHistoryBrowser, setShowHistoryBrowser] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Cleanup timer on unmount
@@ -92,6 +97,7 @@ export function ActionBar() {
           onShowImport={() => setShowImportModal(true)}
           onShowExtract={() => setShowExtractModal(true)}
           onShowPublish={() => setShowPublishModal(true)}
+          onShowAI={() => setShowAIModal(true)}
         />
       </motion.div>
 
@@ -139,6 +145,15 @@ export function ActionBar() {
         onClose={() => setShowPublishModal(false)}
         onUpgradeClick={() => {
           setShowPublishModal(false);
+          setShowPricingModal(true);
+        }}
+        onShowToast={showToastMessage}
+      />
+      <AIAssistantModal
+        isOpen={showAIModal}
+        onClose={() => setShowAIModal(false)}
+        onUpgradeClick={() => {
+          setShowAIModal(false);
           setShowPricingModal(true);
         }}
         onShowToast={showToastMessage}

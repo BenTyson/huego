@@ -11,6 +11,7 @@ interface UtilityButtonsProps {
   onShowImport: () => void;
   onShowExtract: () => void;
   onShowPublish: () => void;
+  onShowAI: () => void;
 }
 
 export function UtilityButtons({
@@ -20,6 +21,7 @@ export function UtilityButtons({
   onShowImport,
   onShowExtract,
   onShowPublish,
+  onShowAI,
 }: UtilityButtonsProps) {
   const colors = useColors();
 
@@ -138,6 +140,27 @@ export function UtilityButtons({
         >
           <path d="M22 2L11 13" />
           <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+        </svg>
+      </motion.button>
+
+      {/* AI Assistant */}
+      <motion.button
+        className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/30 to-pink-500/30 backdrop-blur-md border border-purple-400/30 flex items-center justify-center text-purple-200 hover:text-white hover:from-purple-500/50 hover:to-pink-500/50 transition-colors"
+        onClick={onShowAI}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        title="AI Color Assistant"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" />
+          <path d="M19 15l.88 2.62L22.5 18.5l-2.62.88L19 22l-.88-2.62L15.5 18.5l2.62-.88L19 15z" />
         </svg>
       </motion.button>
 
