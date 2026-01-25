@@ -1,0 +1,9 @@
+export { Navbar } from "./Navbar";
+export { Hero } from "./Hero";
+export { SocialProof } from "./SocialProof";
+export { ModeShowcase } from "./ModeShowcase";
+export { AIFeature } from "./AIFeature";
+export { FeatureGrid } from "./FeatureGrid";
+export { Pricing } from "./Pricing";
+export { FinalCTA } from "./FinalCTA";
+export { Footer } from "./Footer";

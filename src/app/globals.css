@@ -83,7 +83,17 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+}
+
+/* App pages need overflow hidden for full-screen modes */
+body.app-mode {
   overflow: hidden;
+}
+
+/* Marketing pages can scroll */
+body.marketing-mode {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 body {

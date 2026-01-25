@@ -33,6 +33,13 @@ export function ModePageLayout({
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setMounted(true);
+    // Set app mode for overflow hidden behavior
+    document.body.classList.add("app-mode");
+    document.body.classList.remove("marketing-mode");
+
+    return () => {
+      document.body.classList.remove("app-mode");
+    };
   }, []);
 
   if (!mounted) {
