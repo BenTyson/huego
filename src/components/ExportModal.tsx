@@ -9,11 +9,13 @@ import {
   exportPalette,
   exportCSS,
   exportSCSS,
-  exportTailwind,
+  exportTailwindWithOptions,
   exportJSON,
   exportArray,
   exportSVG,
   type ExportFormat,
+  type TailwindVersion,
+  type ColorSpace,
 } from "@/lib/export";
 import { FREE_EXPORT_FORMATS } from "@/lib/feature-limits";
 import { AdUnit } from "./ads/AdUnit";
@@ -32,6 +34,9 @@ export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProp
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>("css");
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [includeShadeScales, setIncludeShadeScales] = useState(true);
+  const [tailwindVersion, setTailwindVersion] = useState<TailwindVersion>("v3");
+  const [colorSpace, setColorSpace] = useState<ColorSpace>("hex");
 
   const isFormatLocked = (format: ExportFormat) => {
     if (isPremium) return false;
@@ -45,7 +50,11 @@ export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProp
       case "scss":
         return exportSCSS(colors);
       case "tailwind":
-        return exportTailwind(colors);
+        return exportTailwindWithOptions(colors, {
+          version: tailwindVersion,
+          colorSpace: colorSpace,
+          includeShades: includeShadeScales,
+        });
       case "json":
         return exportJSON(colors);
       case "array":
@@ -61,21 +70,56 @@ export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProp
       default:
         return "";
     }
-  }, [selectedFormat, colors]);
+  }, [selectedFormat, colors, includeShadeScales, tailwindVersion, colorSpace]);
 
   const handleCopy = useCallback(async () => {
-    const success = await exportPalette(selectedFormat, colors, "copy");
-    if (success) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+    // For text formats, copy the preview content directly (includes Tailwind options)
+    const textFormats: ExportFormat[] = ["css", "scss", "tailwind", "json", "array", "svg"];
+    if (textFormats.includes(selectedFormat)) {
+      try {
+        await navigator.clipboard.writeText(getPreview());
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // Fallback to exportPalette
+        const success = await exportPalette(selectedFormat, colors, "copy");
+        if (success) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }
+      }
+    } else {
+      const success = await exportPalette(selectedFormat, colors, "copy");
+      if (success) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
     }
-  }, [selectedFormat, colors]);
+  }, [selectedFormat, colors, getPreview]);
 
   const handleDownload = useCallback(async () => {
     setDownloading(true);
-    await exportPalette(selectedFormat, colors, "download");
+
+    // For Tailwind, handle the custom options
+    if (selectedFormat === "tailwind") {
+      const content = getPreview();
+      const extension = tailwindVersion === "v4" ? ".css" : ".js";
+      const mimeType = tailwindVersion === "v4" ? "text/css" : "text/javascript";
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `huego-palette${extension}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else {
+      await exportPalette(selectedFormat, colors, "download");
+    }
+
     setDownloading(false);
-  }, [selectedFormat, colors]);
+  }, [selectedFormat, colors, getPreview, tailwindVersion]);
 
   const selectedOption = exportOptions.find((o) => o.id === selectedFormat);
 
@@ -108,56 +152,140 @@ export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProp
 
             {/* Content */}
             <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
-              {/* Format Selector */}
-              <div className="w-full md:w-48 flex-shrink-0 p-4 border-b md:border-b-0 md:border-r border-zinc-800 overflow-y-auto">
-                <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">
-                  Format
+              {/* Format Selector & Options */}
+              <div className="w-full md:w-56 flex-shrink-0 border-b md:border-b-0 md:border-r border-zinc-800 overflow-y-auto">
+                {/* Format List */}
+                <div className="p-4">
+                  <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">
+                    Format
+                  </div>
+                  <div className="space-y-1">
+                    {exportOptions.map((option) => {
+                      const locked = isFormatLocked(option.id);
+                      return (
+                        <button
+                          key={option.id}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors relative ${
+                            selectedFormat === option.id && !locked
+                              ? "bg-white/10 text-white"
+                              : locked
+                              ? "text-zinc-500 cursor-not-allowed"
+                              : "text-zinc-400 hover:text-white hover:bg-white/5"
+                          }`}
+                          onClick={() => {
+                            if (locked && onUpgradeClick) {
+                              onUpgradeClick();
+                            } else if (!locked) {
+                              setSelectedFormat(option.id);
+                            }
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="font-medium text-sm">{option.label}</div>
+                            {locked && (
+                              <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                className="text-amber-500"
+                              >
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                              </svg>
+                            )}
+                          </div>
+                          <div className="text-xs opacity-60">
+                            {locked ? "Premium" : option.description}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  {exportOptions.map((option) => {
-                    const locked = isFormatLocked(option.id);
-                    return (
-                      <button
-                        key={option.id}
-                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors relative ${
-                          selectedFormat === option.id && !locked
-                            ? "bg-white/10 text-white"
-                            : locked
-                            ? "text-zinc-500 cursor-not-allowed"
-                            : "text-zinc-400 hover:text-white hover:bg-white/5"
-                        }`}
-                        onClick={() => {
-                          if (locked && onUpgradeClick) {
-                            onUpgradeClick();
-                          } else if (!locked) {
-                            setSelectedFormat(option.id);
-                          }
-                        }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="font-medium text-sm">{option.label}</div>
-                          {locked && (
-                            <svg
-                              width="12"
-                              height="12"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              className="text-amber-500"
+
+                {/* Tailwind Options - shown when Tailwind is selected */}
+                {selectedFormat === "tailwind" && (
+                  <div className="p-4 pt-0">
+                    <div className="border-t border-zinc-800 pt-4">
+                      <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">
+                        Tailwind Options
+                      </div>
+
+                      {/* Version Selection */}
+                      <div className="mb-4">
+                        <div className="text-xs text-zinc-400 mb-2">Version</div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {(["v3", "v4"] as TailwindVersion[]).map((version) => (
+                            <button
+                              key={version}
+                              onClick={() => setTailwindVersion(version)}
+                              className={`px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                                tailwindVersion === version
+                                  ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/25"
+                                  : "bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                              }`}
                             >
-                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                            </svg>
-                          )}
+                              {version === "v3" ? "v3" : "v4"}
+                              <span className="block text-[10px] opacity-70 mt-0.5">
+                                {version === "v3" ? "JS Config" : "CSS Theme"}
+                              </span>
+                            </button>
+                          ))}
                         </div>
-                        <div className="text-xs opacity-60">
-                          {locked ? "Premium" : option.description}
+                      </div>
+
+                      {/* Color Space Selection */}
+                      <div className="mb-4">
+                        <div className="text-xs text-zinc-400 mb-2">Color Space</div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {(["hex", "oklch", "rgb", "hsl"] as ColorSpace[]).map((space) => (
+                            <button
+                              key={space}
+                              onClick={() => setColorSpace(space)}
+                              className={`px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                                colorSpace === space
+                                  ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/25"
+                                  : "bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                              }`}
+                            >
+                              {space === "hex" ? "Hex" : space === "oklch" ? "OKLCH" : space === "rgb" ? "RGB" : "HSL"}
+                            </button>
+                          ))}
                         </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                      </div>
+
+                      {/* Include Shades Toggle */}
+                      <div>
+                        <div className="text-xs text-zinc-400 mb-2">Shade Scale</div>
+                        <button
+                          onClick={() => setIncludeShadeScales(!includeShadeScales)}
+                          className={`w-full px-3 py-2.5 rounded-lg transition-all flex items-center justify-between ${
+                            includeShadeScales
+                              ? "bg-indigo-500/20 border border-indigo-500/50 text-white"
+                              : "bg-zinc-800 border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-700"
+                          }`}
+                        >
+                          <span className="text-sm font-medium">
+                            {includeShadeScales ? "Full scale (50-950)" : "Single color only"}
+                          </span>
+                          <div
+                            className={`w-8 h-5 rounded-full transition-colors relative ${
+                              includeShadeScales ? "bg-indigo-500" : "bg-zinc-600"
+                            }`}
+                          >
+                            <span
+                              className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+                              style={{ left: includeShadeScales ? "14px" : "2px" }}
+                            />
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Preview */}
@@ -168,7 +296,7 @@ export function ExportModal({ isOpen, onClose, onUpgradeClick }: ExportModalProp
                     {selectedOption?.label} Preview
                   </span>
                   <span className="text-xs text-zinc-500 font-mono">
-                    {selectedOption?.extension}
+                    {selectedFormat === "tailwind" && tailwindVersion === "v4" ? ".css" : selectedOption?.extension}
                   </span>
                 </div>
 

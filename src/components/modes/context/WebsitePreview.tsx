@@ -2,27 +2,26 @@
 
 import { motion } from "framer-motion";
 import type { Color } from "@/lib/types";
+import type { PreviewTheme } from "./PreviewTypeSelector";
+import { getPreviewColors } from "./previewUtils";
 
 interface WebsitePreviewProps {
   colors: Color[];
+  theme: PreviewTheme;
 }
 
-export function WebsitePreview({ colors }: WebsitePreviewProps) {
-  // Assign colors to roles
-  const primary = colors[0]?.hex || "#6366f1";
-  const secondary = colors[1]?.hex || "#8b5cf6";
-  const accent = colors[2]?.hex || "#ec4899";
-  const background = colors[3]?.hex || "#f8fafc";
-  const surface = colors[4]?.hex || "#ffffff";
-
-  // Determine text colors based on background lightness
-  const bgLight = colors[3]?.oklch.l > 0.6;
-  const textPrimary = bgLight ? "#1f2937" : "#f9fafb";
-  const textSecondary = bgLight ? "#6b7280" : "#9ca3af";
-
-  const surfaceLight = colors[4]?.oklch.l > 0.6;
-  const surfaceText = surfaceLight ? "#1f2937" : "#f9fafb";
-  const surfaceTextMuted = surfaceLight ? "#6b7280" : "#9ca3af";
+export function WebsitePreview({ colors, theme }: WebsitePreviewProps) {
+  const {
+    primary,
+    secondary,
+    accent,
+    background,
+    surface,
+    textPrimary,
+    textSecondary,
+    surfaceText,
+    surfaceTextMuted,
+  } = getPreviewColors(colors, theme);
 
   return (
     <motion.div

@@ -4,6 +4,212 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.15.0] - 2026-01-25
+
+### Phase 8: Enhanced Tailwind Export
+
+Professional-grade Tailwind export matching Coolors' functionality. Adds version selection (v3/v4), color space options (Hex/OKLCH/RGB/HSL), and improved Export button visibility across the app.
+
+#### Added
+
+**Tailwind Export Types** (`src/lib/export.ts`)
+- `TailwindVersion` type: `"v3" | "v4"`
+- `ColorSpace` type: `"hex" | "oklch" | "rgb" | "hsl"`
+- `TailwindExportOptions` interface for configuring exports
+
+**New Export Functions** (`src/lib/export.ts`)
+- `exportTailwindWithOptions()` - Main export function with version/color space support
+- `exportTailwindV3()` - JS `module.exports` format for Tailwind v3
+- `exportTailwindV4()` - CSS `@theme` format for Tailwind v4
+- `formatColorValue()` - Converts hex to any color space (OKLCH, RGB, HSL)
+- `slugifyColorName()` - Converts color names to URL-safe slugs (e.g., "Deep Blue" → "deep-blue")
+
+**Export Modal Options Panel** (`src/components/ExportModal.tsx`)
+- Dedicated "Tailwind Options" section in sidebar when Tailwind format selected
+- Version toggle: v3 (JS Config) / v4 (CSS Theme)
+- Color space selector: Hex / OKLCH / RGB / HSL (2x2 grid)
+- Shade scale toggle with descriptive labels ("Full scale 50-950" vs "Single color only")
+- Wider sidebar (56 units) to accommodate options
+
+**Prominent Export Button**
+- `CommandBar.tsx` - Added labeled Export button with indigo→purple gradient
+- `UtilityButtons.tsx` - Promoted Export to labeled button, secondary actions to overflow menu
+- Export now visible without clicking "..." menu in both ActionBar and CommandCenter
+
+#### Changed
+
+**ExportModal UI** (`src/components/ExportModal.tsx`)
+- Tailwind options moved from inline row to dedicated sidebar section
+- File extension display updates dynamically (.css for v4, .js for v3)
+- `handleCopy()` now copies preview content directly (respects all options)
+- `handleDownload()` generates correct file type based on version
+
+**CommandBar** (`src/components/CommandCenter/CommandBar.tsx`)
+- Added `onExport` prop for direct export access
+- Export button styled with gradient to stand out from other actions
+
+**UtilityButtons** (`src/components/ActionBar/UtilityButtons.tsx`)
+- Export promoted to labeled gradient button
+- Import, Extract, Accessibility, Publish moved to overflow menu
+- AI Assistant and Share remain visible as primary actions
+
+#### Output Formats
+
+**v3 + Hex (with shades):**
+```javascript
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        'deep-blue': {
+          50: '#e6f0ff',
+          100: '#cce0ff',
+          // ...
+          DEFAULT: '#1e3a8a',
+        },
+      }
+    }
+  }
+}
+```
+
+**v4 + OKLCH (with shades):**
+```css
+@theme {
+  --color-deep-blue-50: oklch(0.970 0.050 265.0);
+  --color-deep-blue-100: oklch(0.930 0.080 265.0);
+  /* ... */
+  --color-deep-blue: oklch(0.372 0.125 265.8);
+}
+```
+
+#### Technical
+
+**Modified Files (4 total)**
+```
+src/lib/export.ts
+src/components/ExportModal.tsx
+src/components/CommandCenter/CommandBar.tsx
+src/components/CommandCenter/index.tsx
+src/components/ActionBar/UtilityButtons.tsx
+```
+
+- Uses existing `hexToRgb`, `hexToHsl`, `hexToOklch` from `colors.ts`
+- Color names slugified for valid CSS/JS identifiers
+- All 8 combinations (2 versions × 4 color spaces) supported
+- Build passes with no errors
+
+---
+
+## [0.14.0] - 2026-01-25
+
+### Phase 7: Context Mode Enhancement
+
+Comprehensive upgrade to Context mode matching/exceeding Coolors' Tailwind page. Adds Tailwind-compatible shade scale generation, light/dark preview toggle, 4 new UI component previews, and color adjustment sliders.
+
+#### Added
+
+**Shade Scale Generation** (`src/lib/shade-scale.ts`)
+- Tailwind-compatible 50-950 shade scale generation using OKLCH color space
+- `generateShadeScale(hex)` - Creates 11 shades from any base color
+- `detectShadeLevel(hex)` - Identifies which shade level (50-950) a color matches
+- `generateShadeScaleWithBase(hex)` - Returns scale with base shade info
+- `getShade(hex, level)` - Get specific shade from base color
+- `getContrastingShades()` - Suggests text colors for backgrounds
+- `shadeScaleToCSS()` - Export shades as CSS custom properties
+- Chroma adjustment factors per shade level for perceptually uniform results
+
+**Types** (`src/lib/types.ts`)
+- `ShadeScale` interface for 50-950 shade mapping
+- `ShadeLevel` type for shade level keys
+
+**Preview Utilities** (`src/components/modes/context/previewUtils.ts`)
+- `getPreviewColors()` - Theme-aware color extraction from palette
+- Light mode: Uses palette colors directly
+- Dark mode: Uses shade scales to generate darker variants
+- Returns: primary, secondary, accent, background, surface, text colors
+
+**New Preview Components** (`src/components/modes/context/previews/`)
+- `ButtonStatesPreview.tsx` - Button grid with solid/outline variants, hover/active/disabled states
+- `FormControlsPreview.tsx` - Text inputs, checkboxes, toggles, select dropdowns with focus states
+- `PricingCardsPreview.tsx` - 3-tier pricing cards (Basic, Pro highlighted, Enterprise)
+- `StatsCardsPreview.tsx` - Metric cards with trends, progress bars, quick stats list
+
+**Color Slider Component** (`src/components/ui/ColorSlider.tsx`)
+- Reusable slider with gradient background support
+- Pointer event handling for smooth drag
+- Value display with customizable units
+
+#### Changed
+
+**PreviewTypeSelector** (`src/components/modes/context/PreviewTypeSelector.tsx`)
+- Added 4 new preview types: Buttons, Forms, Pricing, Stats (7 total)
+- Added `PreviewTheme` type (`'light' | 'dark'`)
+- Added theme toggle button with sun/moon icons
+- Redesigned as horizontal nav bar with clear visual separation from main menu
+- Container with `bg-zinc-800/80`, rounded corners, border styling
+- Vertical divider between preview types and theme toggle
+
+**ContextView** (`src/components/modes/context/ContextView.tsx`)
+- Added `previewTheme` state for light/dark toggle
+- Imports and renders all 7 preview components
+- Passes `theme` prop to all preview components
+
+**PaletteSidebar** (`src/components/modes/context/PaletteSidebar.tsx`)
+- Added `ShadeScaleDisplay` component showing 11-shade grid per color
+- Added `ColorSliders` component with Hue/Saturation/Lightness controls
+- Expandable sections for shade scales and sliders
+- Real-time preview updates when adjusting sliders
+
+**Existing Preview Components** (WebsitePreview, MobileAppPreview, DashboardPreview)
+- Added `theme: PreviewTheme` prop
+- Updated to use `getPreviewColors()` for theme-aware styling
+- Both light and dark modes now render correctly
+
+**Export System** (`src/lib/export.ts`)
+- Added `exportTailwindWithShades()` function
+- Generates full Tailwind config with 11 shades per color plus DEFAULT
+- Format: `primary: { 50: '#...', 100: '#...', ..., 950: '#...', DEFAULT: '#...' }`
+
+**ExportModal** (`src/components/ExportModal.tsx`)
+- Added "Include shade scales" toggle for Tailwind export
+- Conditionally uses `exportTailwindWithShades()` when enabled
+
+#### Technical
+
+**New Files (7 total)**
+```
+src/lib/shade-scale.ts
+src/components/modes/context/previewUtils.ts
+src/components/modes/context/previews/ButtonStatesPreview.tsx
+src/components/modes/context/previews/FormControlsPreview.tsx
+src/components/modes/context/previews/PricingCardsPreview.tsx
+src/components/modes/context/previews/StatsCardsPreview.tsx
+src/components/ui/ColorSlider.tsx
+```
+
+**Modified Files (9 total)**
+```
+src/lib/types.ts
+src/lib/export.ts
+src/components/ExportModal.tsx
+src/components/modes/context/ContextView.tsx
+src/components/modes/context/PreviewTypeSelector.tsx
+src/components/modes/context/PaletteSidebar.tsx
+src/components/modes/context/WebsitePreview.tsx
+src/components/modes/context/MobileAppPreview.tsx
+src/components/modes/context/DashboardPreview.tsx
+```
+
+- Algorithm: OKLCH for perceptually uniform shade generation
+- Shade lightness targets derived from Tailwind's default palette analysis
+- Chroma factors: 0.25 (50) → 1.0 (500) → 0.45 (950)
+- `forceInGamut()` ensures all shades are valid sRGB
+- Build passes with no errors
+- All 7 preview types support light/dark modes
+
+---
+
 ## [0.13.0] - 2026-01-25
 
 ### Phase 6: Named Colors Database
@@ -886,6 +1092,8 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 3 (AI Assistant) complete | ✅ | 2026-01-24 |
 | Phase 5 (V2 UI/UX) complete | ✅ | 2026-01-24 |
 | Phase 6 (Named Colors) complete | ✅ | 2026-01-25 |
+| Phase 7 (Context Mode) complete | ✅ | 2026-01-25 |
+| Phase 8 (Enhanced Tailwind Export) complete | ✅ | 2026-01-25 |
 
 ---
 

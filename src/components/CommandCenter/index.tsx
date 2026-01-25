@@ -114,6 +114,7 @@ export function CommandCenter() {
           onTogglePanel={() => setShowPanel(!showPanel)}
           isPanelOpen={showPanel}
           onShowToast={showToastMessage}
+          onExport={() => setShowExportModal(true)}
         />
       </motion.div>
 

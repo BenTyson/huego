@@ -1,8 +1,23 @@
 // Export utilities for HueGo
 // Generates various output formats for palettes
 
-import type { Color, ExportFormat } from "./types";
+import type { Color, ExportFormat, ShadeScale } from "./types";
+import { generateShadeScale } from "./shade-scale";
 import jsPDF from "jspdf";
+import { hexToRgb, hexToHsl, hexToOklch } from "./colors";
+
+// ============================================
+// Tailwind Export Types
+// ============================================
+
+export type TailwindVersion = "v3" | "v4";
+export type ColorSpace = "hex" | "oklch" | "rgb" | "hsl";
+
+export interface TailwindExportOptions {
+  version: TailwindVersion;
+  colorSpace: ColorSpace;
+  includeShades: boolean;
+}
 
 // ============================================
 // CSS Variables Export
@@ -105,6 +120,247 @@ module.exports = {
 // Usage: bg-palette-primary, text-palette-accent, etc.`;
 
   return config;
+}
+
+// ============================================
+// Tailwind Config Export with Shade Scales
+// ============================================
+
+export function exportTailwindWithShades(colors: Color[]): string {
+  const roleNames = ["primary", "secondary", "accent", "background", "surface"];
+
+  // Build the color configuration object
+  const colorConfig: Record<string, Record<string, string> | string> = {};
+
+  colors.forEach((color, index) => {
+    const roleName = roleNames[index] || `color-${index + 1}`;
+    const scale: ShadeScale = generateShadeScale(color.hex);
+
+    // Create the shade scale object with DEFAULT pointing to original color
+    colorConfig[roleName] = {
+      "50": scale[50],
+      "100": scale[100],
+      "200": scale[200],
+      "300": scale[300],
+      "400": scale[400],
+      "500": scale[500],
+      "600": scale[600],
+      "700": scale[700],
+      "800": scale[800],
+      "900": scale[900],
+      "950": scale[950],
+      DEFAULT: color.hex,
+    };
+  });
+
+  // Format the configuration nicely
+  const formatColorObj = (obj: Record<string, string>, indent: number): string => {
+    const spaces = " ".repeat(indent);
+    const lines = Object.entries(obj).map(([key, value]) => {
+      const keyStr = key === "DEFAULT" || /^\d+$/.test(key) ? key : `'${key}'`;
+      return `${spaces}${keyStr}: '${value}',`;
+    });
+    return lines.join("\n");
+  };
+
+  const colorLines = Object.entries(colorConfig).map(([name, shades]) => {
+    if (typeof shades === "string") {
+      return `        ${name}: '${shades}',`;
+    }
+    return `        ${name}: {\n${formatColorObj(shades as Record<string, string>, 10)}\n        },`;
+  });
+
+  const config = `// HueGo Palette - Tailwind Config with Shade Scales
+// https://huego.app
+// Add to your tailwind.config.js
+
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+${colorLines.join("\n")}
+      }
+    }
+  }
+}
+
+// Usage examples:
+// bg-primary-500      - Primary color at 500 shade
+// text-accent-200     - Accent color at 200 shade
+// bg-primary          - Primary at DEFAULT (your original color)
+// border-secondary-700`;
+
+  return config;
+}
+
+// ============================================
+// Tailwind Config Export with Version/ColorSpace Options
+// ============================================
+
+/**
+ * Convert color name to a URL-safe slug
+ */
+function slugifyColorName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Remove duplicate hyphens
+    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+}
+
+/**
+ * Format a color value in the specified color space
+ */
+function formatColorValue(hex: string, space: ColorSpace): string {
+  switch (space) {
+    case "hex":
+      return hex.toLowerCase();
+    case "oklch": {
+      const oklch = hexToOklch(hex);
+      return `oklch(${oklch.l.toFixed(3)} ${oklch.c.toFixed(3)} ${oklch.h.toFixed(1)})`;
+    }
+    case "rgb": {
+      const rgb = hexToRgb(hex);
+      return `rgb(${rgb.r} ${rgb.g} ${rgb.b})`;
+    }
+    case "hsl": {
+      const hsl = hexToHsl(hex);
+      return `hsl(${Math.round(hsl.h)} ${Math.round(hsl.s)}% ${Math.round(hsl.l)}%)`;
+    }
+  }
+}
+
+/**
+ * Export Tailwind configuration with version and color space options
+ */
+export function exportTailwindWithOptions(
+  colors: Color[],
+  options: TailwindExportOptions
+): string {
+  const { version, colorSpace, includeShades } = options;
+
+  if (version === "v4") {
+    return exportTailwindV4(colors, colorSpace, includeShades);
+  } else {
+    return exportTailwindV3(colors, colorSpace, includeShades);
+  }
+}
+
+/**
+ * Export Tailwind v3 configuration (JS module.exports format)
+ */
+function exportTailwindV3(
+  colors: Color[],
+  colorSpace: ColorSpace,
+  includeShades: boolean
+): string {
+  const colorConfig: Record<string, Record<string, string> | string> = {};
+
+  colors.forEach((color) => {
+    const colorName = slugifyColorName(color.name) || "color";
+
+    if (includeShades) {
+      const scale = generateShadeScale(color.hex);
+      const shadeObj: Record<string, string> = {};
+
+      // Add all shade levels
+      const shadeLevels: (keyof ShadeScale)[] = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+      shadeLevels.forEach((level) => {
+        shadeObj[level.toString()] = formatColorValue(scale[level], colorSpace);
+      });
+
+      // Add DEFAULT pointing to original color
+      shadeObj["DEFAULT"] = formatColorValue(color.hex, colorSpace);
+
+      colorConfig[colorName] = shadeObj;
+    } else {
+      colorConfig[colorName] = formatColorValue(color.hex, colorSpace);
+    }
+  });
+
+  // Format the configuration
+  const formatValue = (value: Record<string, string> | string, indent: number): string => {
+    if (typeof value === "string") {
+      return `'${value}'`;
+    }
+
+    const spaces = " ".repeat(indent);
+    const innerSpaces = " ".repeat(indent + 2);
+    const entries = Object.entries(value).map(([key, val]) => {
+      const keyStr = key === "DEFAULT" ? "DEFAULT" : /^\d+$/.test(key) ? key : `'${key}'`;
+      return `${innerSpaces}${keyStr}: '${val}',`;
+    });
+    return `{\n${entries.join("\n")}\n${spaces}}`;
+  };
+
+  const colorEntries = Object.entries(colorConfig).map(([name, value]) => {
+    return `        '${name}': ${formatValue(value, 8)},`;
+  });
+
+  const config = `// HueGo Palette - Tailwind v3 Config
+// https://huego.app
+// Add to your tailwind.config.js
+
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+${colorEntries.join("\n")}
+      }
+    }
+  }
+}`;
+
+  return config;
+}
+
+/**
+ * Export Tailwind v4 configuration (CSS @theme format)
+ */
+function exportTailwindV4(
+  colors: Color[],
+  colorSpace: ColorSpace,
+  includeShades: boolean
+): string {
+  const lines: string[] = [
+    "/* HueGo Palette - Tailwind v4 Config */",
+    "/* https://huego.app */",
+    "/* Add to your main CSS file */",
+    "",
+    "@theme {",
+  ];
+
+  colors.forEach((color) => {
+    const colorName = slugifyColorName(color.name) || "color";
+
+    if (includeShades) {
+      const scale = generateShadeScale(color.hex);
+      const shadeLevels: (keyof ShadeScale)[] = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+
+      shadeLevels.forEach((level) => {
+        const value = formatColorValue(scale[level], colorSpace);
+        lines.push(`  --color-${colorName}-${level}: ${value};`);
+      });
+
+      // Add default (no suffix) pointing to original
+      const defaultValue = formatColorValue(color.hex, colorSpace);
+      lines.push(`  --color-${colorName}: ${defaultValue};`);
+      lines.push("");
+    } else {
+      const value = formatColorValue(color.hex, colorSpace);
+      lines.push(`  --color-${colorName}: ${value};`);
+    }
+  });
+
+  // Remove trailing empty line if present
+  if (lines[lines.length - 1] === "") {
+    lines.pop();
+  }
+
+  lines.push("}");
+
+  return lines.join("\n");
 }
 
 // ============================================
