@@ -19,6 +19,12 @@ export const FREE_SAVED_PALETTES_LIMIT = 5;
 export const PREMIUM_SAVED_PALETTES_LIMIT = Infinity;
 
 // ============================================
+// Saved Colors Limits
+// ============================================
+export const FREE_SAVED_COLORS_LIMIT = 10;
+export const PREMIUM_SAVED_COLORS_LIMIT = Infinity;
+
+// ============================================
 // Community Publish Limits
 // ============================================
 export const FREE_PUBLISH_LIMIT = 3;
@@ -131,6 +137,13 @@ export function getSavedPalettesLimit(isPremium: boolean): number {
  */
 export function getPublishLimit(isPremium: boolean): number {
   return isPremium ? PREMIUM_PUBLISH_LIMIT : FREE_PUBLISH_LIMIT;
+}
+
+/**
+ * Get the saved colors limit for a user tier
+ */
+export function getSavedColorsLimit(isPremium: boolean): number {
+  return isPremium ? PREMIUM_SAVED_COLORS_LIMIT : FREE_SAVED_COLORS_LIMIT;
 }
 
 /**

@@ -10,6 +10,7 @@ import {
   MAX_PALETTE_SIZE,
   getMaxPaletteSize,
   getSavedPalettesLimit,
+  getSavedColorsLimit,
 } from "@/lib/feature-limits";
 import { generatePalette, generatePaletteId } from "@/lib/generate";
 import { createColor, oklchToHex, forceInGamut } from "@/lib/colors";
@@ -31,6 +32,9 @@ interface PaletteState {
   // Saved palettes
   savedPalettes: Palette[];
 
+  // Saved colors (favorites)
+  savedColors: Color[];
+
   // AI suggestions
   aiSuggestions: Color[] | null;
   aiLoading: boolean;
@@ -46,12 +50,18 @@ interface PaletteState {
   setPaletteSize: (size: number) => void;
   addColor: (isPremium?: boolean) => void;
   removeColor: () => void;
+  removeColorAt: (index: number) => void;
   undo: () => void;
   redo: () => void;
   savePalette: (isPremium?: boolean) => Palette | null;
   deleteSavedPalette: (id: string) => void;
   loadPalette: (palette: Palette) => void;
   reorderColors: (fromIndex: number, toIndex: number) => void;
+
+  // Saved colors (favorites)
+  toggleSaveColor: (color: Color, isPremium?: boolean) => boolean;
+  isSavedColor: (hex: string) => boolean;
+  deleteSavedColor: (hex: string) => void;
   reset: () => void;
 
   // Batch operations
@@ -82,6 +92,7 @@ export const usePaletteStore = create<PaletteState>()(
       history: [],
       historyIndex: -1,
       savedPalettes: [],
+      savedColors: [],
 
       // AI state
       aiSuggestions: null,
@@ -217,6 +228,26 @@ export const usePaletteStore = create<PaletteState>()(
         });
       },
 
+      // Remove a specific color at given index
+      removeColorAt: (index: number) => {
+        const { colors, locked } = get();
+
+        if (colors.length <= MIN_PALETTE_SIZE) return;
+        if (index < 0 || index >= colors.length) return;
+
+        const newColors = [...colors];
+        const newLocked = [...locked];
+
+        newColors.splice(index, 1);
+        newLocked.splice(index, 1);
+
+        set({
+          colors: newColors,
+          locked: newLocked,
+          paletteSize: newColors.length,
+        });
+      },
+
       // Undo to previous palette
       undo: () => {
         const { history, historyIndex } = get();
@@ -299,6 +330,48 @@ export const usePaletteStore = create<PaletteState>()(
         newLocked.splice(toIndex, 0, movedLock);
 
         set({ colors: newColors, locked: newLocked });
+      },
+
+      // Toggle a color as saved/favorite
+      toggleSaveColor: (color: Color, isPremium: boolean = false) => {
+        const { savedColors } = get();
+        const normalizedHex = color.hex.toUpperCase();
+        const existingIndex = savedColors.findIndex(
+          (c) => c.hex.toUpperCase() === normalizedHex
+        );
+
+        if (existingIndex >= 0) {
+          // Already saved - remove it
+          const newSavedColors = savedColors.filter((_, i) => i !== existingIndex);
+          set({ savedColors: newSavedColors });
+          return false; // Was removed
+        } else {
+          // Not saved - add it if under limit
+          const limit = getSavedColorsLimit(isPremium);
+          if (savedColors.length >= limit) {
+            return false; // At limit
+          }
+          set({ savedColors: [...savedColors, color] });
+          return true; // Was added
+        }
+      },
+
+      // Check if a color is saved
+      isSavedColor: (hex: string) => {
+        const { savedColors } = get();
+        const normalizedHex = hex.toUpperCase();
+        return savedColors.some((c) => c.hex.toUpperCase() === normalizedHex);
+      },
+
+      // Delete a saved color by hex
+      deleteSavedColor: (hex: string) => {
+        const { savedColors } = get();
+        const normalizedHex = hex.toUpperCase();
+        set({
+          savedColors: savedColors.filter(
+            (c) => c.hex.toUpperCase() !== normalizedHex
+          ),
+        });
       },
 
       // Reset to initial state
@@ -470,6 +543,7 @@ export const usePaletteStore = create<PaletteState>()(
         harmonyType: state.harmonyType,
         paletteSize: state.paletteSize,
         savedPalettes: state.savedPalettes,
+        savedColors: state.savedColors,
         // Don't persist history to keep localStorage small
       }),
     }
@@ -493,3 +567,6 @@ export const useCanRedo = () =>
 export const useAISuggestions = () => usePaletteStore((state) => state.aiSuggestions);
 export const useAILoading = () => usePaletteStore((state) => state.aiLoading);
 export const useAIError = () => usePaletteStore((state) => state.aiError);
+
+// Saved colors selector hooks
+export const useSavedColors = () => usePaletteStore((state) => state.savedColors);

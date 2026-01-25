@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { usePaletteStore, useColors, useLocked } from "@/store/palette";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { usePaletteStore, useColors, useLocked, useSavedColors } from "@/store/palette";
 import { createColor } from "@/lib/colors";
 import { ColorColumn } from "./ColorColumn";
 import { ColorInfoPanel } from "@/components/ColorInfoPanel";
@@ -12,8 +12,18 @@ export function ImmersiveView() {
   // Use individual selectors for optimized re-renders
   const colors = useColors();
   const locked = useLocked();
-  const { generate, toggleLock, setColor } = usePaletteStore();
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  // savedColors is accessed via isSavedColor - this hook ensures re-renders on savedColors changes
+  useSavedColors();
+  const {
+    generate,
+    toggleLock,
+    setColor,
+    removeColorAt,
+    reorderColors,
+    toggleSaveColor,
+    isSavedColor,
+  } = usePaletteStore();
+  const [activeIndex] = useState<number | null>(null);
   const [showHint, setShowHint] = useState(true);
   const [infoColor, setInfoColor] = useState<Color | null>(null);
   const [showInfoPanel, setShowInfoPanel] = useState(false);
@@ -31,39 +41,71 @@ export function ImmersiveView() {
     setShowHint(false);
   }, [generate]);
 
-  const handleColorChange = useCallback((index: number, hex: string) => {
-    const newColor = createColor(hex);
-    setColor(index, newColor);
-  }, [setColor]);
+  const handleColorChange = useCallback(
+    (index: number, hex: string) => {
+      const newColor = createColor(hex);
+      setColor(index, newColor);
+    },
+    [setColor]
+  );
 
   const handleShowInfo = useCallback((color: Color) => {
     setInfoColor(color);
     setShowInfoPanel(true);
   }, []);
 
+  const handleRemove = useCallback(
+    (index: number) => {
+      removeColorAt(index);
+    },
+    [removeColorAt]
+  );
+
+  const handleReorder = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      reorderColors(fromIndex, toIndex);
+    },
+    [reorderColors]
+  );
+
+  const handleToggleSave = useCallback(
+    (color: Color) => {
+      // For now, assume non-premium - this can be connected to auth later
+      toggleSaveColor(color, false);
+    },
+    [toggleSaveColor]
+  );
+
   return (
     <div className="relative h-screen w-screen overflow-hidden">
       {/* Color columns */}
-      <motion.div
-        className="flex h-full w-full flex-col md:flex-row"
-        initial={false}
-        animate={{ opacity: 1 }}
-      >
-        <AnimatePresence mode="sync">
-          {colors.map((color, index) => (
-            <ColorColumn
-              key={index}
-              color={color}
-              index={index}
-              isLocked={locked[index]}
-              onToggleLock={() => toggleLock(index)}
-              onColorChange={(hex) => handleColorChange(index, hex)}
-              onShowInfo={() => handleShowInfo(color)}
-              isActive={activeIndex === index}
-            />
-          ))}
-        </AnimatePresence>
-      </motion.div>
+      <LayoutGroup>
+        <motion.div
+          className="flex h-full w-full flex-col md:flex-row"
+          initial={false}
+          animate={{ opacity: 1 }}
+        >
+          <AnimatePresence mode="sync">
+            {colors.map((color, index) => (
+              <ColorColumn
+                key={`${color.hex}-${index}`}
+                color={color}
+                index={index}
+                isLocked={locked[index]}
+                isSaved={isSavedColor(color.hex)}
+                totalColors={colors.length}
+                onToggleLock={() => toggleLock(index)}
+                onToggleSave={() => handleToggleSave(color)}
+                onRemove={() => handleRemove(index)}
+                onColorChange={(hex) => handleColorChange(index, hex)}
+                onShowInfo={() => handleShowInfo(color)}
+                onReorder={(toIndex) => handleReorder(index, toIndex)}
+                isActive={activeIndex === index}
+              />
+            ))}
+          </AnimatePresence>
+        </motion.div>
+      </LayoutGroup>
 
       {/* Spacebar hint */}
       <AnimatePresence>

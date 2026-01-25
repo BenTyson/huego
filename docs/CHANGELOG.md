@@ -4,6 +4,99 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.16.0] - 2026-01-25
+
+### Phase 9: Coolors-style Color Column Actions
+
+Added Coolors-style functionality to the ColorColumn component in Immersive mode, including remove color, shade popover, saved/favorite colors, drag-to-reorder, and an Apple/Notion-inspired contextual action pill UI.
+
+#### Added
+
+**Saved Colors System** (`src/store/palette.ts`)
+- `savedColors: Color[]` state persisted to localStorage
+- `toggleSaveColor(color, isPremium)` - Toggle save/unsave with limit check
+- `isSavedColor(hex)` - Check if a color is saved
+- `deleteSavedColor(hex)` - Remove from saved colors
+- `useSavedColors()` selector hook for reactive updates
+
+**Feature Limits** (`src/lib/feature-limits.ts`)
+- `FREE_SAVED_COLORS_LIMIT = 10` constant
+- `PREMIUM_SAVED_COLORS_LIMIT = Infinity` constant
+- `getSavedColorsLimit(isPremium)` helper function
+
+**Remove Color at Index** (`src/store/palette.ts`)
+- `removeColorAt(index)` - Remove specific color (respects min 2 colors)
+- Properly updates both `colors` and `locked` arrays
+
+**Shade Popover Component** (`src/components/ui/ShadePopover.tsx`)
+- Frosted glass floating popover with 11-shade scale (50-950)
+- Uses existing `generateShadeScaleWithBase()` from `shade-scale.ts`
+- Click any shade to copy hex with checkmark feedback
+- Base shade indicated with ring highlight
+- Hover tooltips showing hex codes
+- Closes on click outside or Escape key
+- Spring animations for entrance/exit
+
+**Contextual Action Pill** (`src/components/modes/immersive/ColorColumn.tsx`)
+- Floating horizontal pill below hex code, appears on column hover
+- Frosted glass effect with backdrop blur and subtle border
+- 6 action icons in a row:
+  1. **X** - Remove color (disabled at min 2 colors)
+  2. **Half-circle** - Toggle shade popover
+  3. **Heart** - Toggle saved/favorite (fills when saved)
+  4. **6-dot grip** - Drag handle for reordering
+  5. **Copy** - Copy hex code
+  6. **Info (i)** - Color psychology panel
+- Icons scale on hover (1.1x), spring animations
+- Lock icon moved to top-right corner (always visible when locked)
+
+**Drag-to-Reorder** (`src/components/modes/immersive/ColorColumn.tsx`)
+- Framer Motion drag controls with drag handle
+- Only drag handle initiates drag (not entire column)
+- Column scales (1.02x) and gets shadow during drag
+- Calculates target position based on drag distance
+- Calls existing `reorderColors(from, to)` store action
+
+#### Changed
+
+**ColorColumn Props** (`src/components/modes/immersive/ColorColumn.tsx`)
+- Added `isSaved: boolean` - Whether color is in saved list
+- Added `totalColors: number` - For min size check on remove
+- Added `onToggleSave: () => void` - Save/unsave callback
+- Added `onRemove: () => void` - Remove color callback
+- Added `onReorder: (toIndex: number) => void` - Reorder callback
+
+**ImmersiveView** (`src/components/modes/immersive/ImmersiveView.tsx`)
+- Changed key from `index` to `${color.hex}-${index}` for stable animations
+- Added `LayoutGroup` wrapper for smooth reorder animations
+- Wired up all new ColorColumn props
+- Uses `isSavedColor()` for reactive saved state
+
+**Store Persistence** (`src/store/palette.ts`)
+- Added `savedColors` to `partialize` for localStorage persistence
+
+#### Technical
+
+**New Files (1 total)**
+```
+src/components/ui/ShadePopover.tsx
+```
+
+**Modified Files (4 total)**
+```
+src/lib/feature-limits.ts
+src/store/palette.ts
+src/components/modes/immersive/ColorColumn.tsx
+src/components/modes/immersive/ImmersiveView.tsx
+```
+
+- Build passes with no errors
+- All new code lints clean
+- Action pill uses framer-motion spring animations
+- Shade popover reuses existing shade-scale library
+
+---
+
 ## [0.15.0] - 2026-01-25
 
 ### Phase 8: Enhanced Tailwind Export
@@ -1094,6 +1187,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 6 (Named Colors) complete | ✅ | 2026-01-25 |
 | Phase 7 (Context Mode) complete | ✅ | 2026-01-25 |
 | Phase 8 (Enhanced Tailwind Export) complete | ✅ | 2026-01-25 |
+| Phase 9 (Coolors-style Actions) complete | ✅ | 2026-01-25 |
 
 ---
 

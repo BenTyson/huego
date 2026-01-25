@@ -388,6 +388,9 @@ interface PaletteState {
   // Saved palettes
   savedPalettes: Palette[];
 
+  // Saved colors (favorites)
+  savedColors: Color[];
+
   // Actions
   generate: () => void;
   toggleLock: (index: number) => void;
@@ -398,6 +401,7 @@ interface PaletteState {
   setPaletteSize: (size: number) => void;
   addColor: () => void;
   removeColor: () => void;
+  removeColorAt: (index: number) => void;  // Remove specific color
   undo: () => void;
   redo: () => void;
   savePalette: () => Palette | null;
@@ -405,6 +409,11 @@ interface PaletteState {
   loadPalette: (palette: Palette) => void;
   reorderColors: (from: number, to: number) => void;
   reset: () => void;
+
+  // Saved colors (favorites)
+  toggleSaveColor: (color: Color, isPremium?: boolean) => boolean;
+  isSavedColor: (hex: string) => boolean;
+  deleteSavedColor: (hex: string) => void;
 
   // Batch operations
   shuffle: () => void;
@@ -424,6 +433,7 @@ useMode(): Mode
 useHarmonyType(): HarmonyType
 usePaletteSize(): number
 useSavedPalettes(): Palette[]
+useSavedColors(): Color[]
 useHistory(): Palette[]
 useHistoryIndex(): number
 useCanUndo(): boolean
@@ -542,6 +552,7 @@ ModePageLayout
 | `ColorEditButton` | Color picker with suggestions | `src/components/ui/` |
 | `HydrationLoader` | SSR hydration loading state | `src/components/ui/` |
 | `ModePageLayout` | Common mode wrapper | `src/components/layout/` |
+| `ShadePopover` | 11-shade scale popover (50-950) | `src/components/ui/` |
 
 ---
 

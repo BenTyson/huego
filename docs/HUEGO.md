@@ -47,6 +47,10 @@ Competitors are functional but boring. We differentiate on:
 - OKLCH color space for perceptual uniformity
 - Lock colors to preserve during regeneration
 - Undo/redo with visual history browser
+- **Saved colors**: Heart colors to save favorites (10 free, unlimited premium)
+- **Shade popover**: View 11-shade Tailwind scale (50-950) for any color
+- **Drag reorder**: Drag handle to rearrange colors
+- **Remove at index**: X button to remove specific colors (min 2)
 
 ### Color Psychology (Unique)
 - Meaning and emotions for each color
@@ -192,6 +196,11 @@ localStorage for user preferences, Supabase for community palettes.
 | Accessibility sim | Basic | 5 types | ✅ Advantage |
 | Community palettes | 10M+ | Yes (growing) | ✅ Parity |
 | AI assistant | Yes | Yes | ✅ Parity |
+| Remove color (X) | Yes | Yes | ✅ Parity |
+| View shades | Yes | Yes | ✅ Parity |
+| Save/favorite color | Yes | Yes | ✅ Parity |
+| Drag to reorder | Yes | Yes | ✅ Parity |
+| Copy button | Yes | Yes | ✅ Parity |
 | Figma plugin | Yes | Pending | Phase 4 |
 
 ---
