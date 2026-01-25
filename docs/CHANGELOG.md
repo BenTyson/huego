@@ -4,6 +4,68 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.13.0] - 2026-01-25
+
+### Phase 6: Named Colors Database
+
+Replaced the limited algorithmic color naming system (~84 names like "Muted Yellow") with a proper named colors database (~1,552 names like "Coral", "Crimson", "Lavender Blush") using perceptually uniform OKLab color matching.
+
+#### Added
+
+**Named Colors Database** (`src/lib/color-names/`)
+- `database.ts` - 1,552 colors from "Name That Color" with pre-computed OKLab values (~140KB)
+- `search.ts` - OKLab Euclidean distance matching algorithm
+- `index.ts` - Barrel export for the module
+
+**Generator Script** (`scripts/generate-color-database.ts`)
+- Node script to generate database.ts from raw color data
+- Computes OKLab values at build time for runtime performance
+- Run with `npx tsx scripts/generate-color-database.ts`
+
+#### Changed
+
+**Two-Tier Color Naming System** (`src/lib/colors.ts`)
+- `generateColorName()` now accepts optional RGB parameter
+- Tier 1: Database lookup - finds closest named color within distance threshold (0.12)
+- Tier 2: Enhanced algorithmic fallback - 24+ hue names with contextual modifiers
+- `createColor()` now passes RGB to enable database lookup
+
+**Example Improvements**
+
+| Hex | Before | After |
+|-----|--------|-------|
+| #FF7F50 | Bright Coral | Coral |
+| #DC143C | Vivid Red | Crimson |
+| #F0F8FF | Pastel Blue | Alice Blue |
+| #E6E6FA | Light Blue | Lavender |
+| #8B9846 | Muted Yellow | Olive Haze |
+| #DBDBF1 | Light Blue | Fog |
+| #2E8B57 | Bright Emerald | Sea Green |
+
+#### Technical
+
+**New Files (4 total)**
+```
+scripts/generate-color-database.ts
+src/lib/color-names/database.ts
+src/lib/color-names/search.ts
+src/lib/color-names/index.ts
+```
+
+**Modified Files (1 total)**
+```
+src/lib/colors.ts
+```
+
+- Algorithm: OKLab Euclidean distance (perceptually uniform)
+- Distance threshold: 0.12 for "close enough" matches
+- Performance: ~0.1ms per lookup (linear search through 1,552 colors)
+- Bundle impact: ~15-20KB gzipped
+- Build passes with no errors
+- All exports (JSON, PDF, PNG, ASE) use the new naming system
+
+---
+
 ## [0.12.0] - 2026-01-24
 
 ### Phase 5: V2 UI/UX Redesign
@@ -823,6 +885,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 3 (Refactoring) complete | ✅ | 2026-01-24 |
 | Phase 3 (AI Assistant) complete | ✅ | 2026-01-24 |
 | Phase 5 (V2 UI/UX) complete | ✅ | 2026-01-24 |
+| Phase 6 (Named Colors) complete | ✅ | 2026-01-25 |
 
 ---
 

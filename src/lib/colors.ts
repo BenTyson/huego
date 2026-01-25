@@ -2,6 +2,7 @@
 // Using OKLCH for perceptually uniform color generation
 
 import type { RGB, HSL, OKLCH, Color } from "./types";
+import { getColorName } from "./color-names";
 
 // ============================================
 // HEX conversions
@@ -122,7 +123,7 @@ function linearToSrgb(c: number): number {
 }
 
 // RGB to OKLab
-function rgbToOklab(rgb: RGB): { L: number; a: number; b: number } {
+export function rgbToOklab(rgb: RGB): { L: number; a: number; b: number } {
   const r = srgbToLinear(rgb.r);
   const g = srgbToLinear(rgb.g);
   const b = srgbToLinear(rgb.b);
@@ -300,55 +301,206 @@ export function createColor(hex: string, name?: string): Color {
     rgb,
     hsl,
     oklch,
-    name: name || generateColorName(hsl),
+    name: name || generateColorName(hsl, rgb),
     contrastColor,
   };
 }
 
-/**
- * Generate a descriptive color name based on HSL
- */
-export function generateColorName(hsl: HSL): string {
-  const { h, s, l } = hsl;
+// ============================================
+// Enhanced Algorithmic Color Naming
+// ============================================
 
-  // Handle achromatic colors
-  if (s < 10) {
-    if (l < 15) return "Black";
-    if (l < 30) return "Charcoal";
-    if (l < 45) return "Dark Gray";
-    if (l < 60) return "Gray";
-    if (l < 75) return "Silver";
-    if (l < 90) return "Light Gray";
-    return "White";
+/**
+ * Get enhanced grayscale name based on lightness
+ */
+function getGrayscaleName(l: number): string {
+  if (l < 8) return "Jet";
+  if (l < 18) return "Charcoal";
+  if (l < 30) return "Slate";
+  if (l < 45) return "Pewter";
+  if (l < 60) return "Gray";
+  if (l < 75) return "Silver";
+  if (l < 88) return "Pearl";
+  return "Snow";
+}
+
+/**
+ * Get enhanced hue name with 24+ options based on narrower degree ranges
+ */
+function getEnhancedHueName(h: number, s: number, l: number): string {
+  // Reds (345-15)
+  if (h >= 345 || h < 8) return l < 35 ? "Crimson" : s > 70 ? "Scarlet" : "Red";
+  if (h < 15) return l < 40 ? "Ruby" : "Cherry";
+
+  // Oranges (15-45)
+  if (h < 22) return l > 65 ? "Peach" : "Coral";
+  if (h < 32) return l > 60 ? "Apricot" : "Tangerine";
+  if (h < 45) return "Orange";
+
+  // Yellows (45-75)
+  if (h < 52) return s > 60 ? "Amber" : "Gold";
+  if (h < 62) return l > 70 ? "Lemon" : "Honey";
+  if (h < 75) return "Yellow";
+
+  // Yellow-Greens (75-105)
+  if (h < 85) return "Chartreuse";
+  if (h < 95) return "Lime";
+  if (h < 105) return "Apple";
+
+  // Greens (105-150)
+  if (h < 120) return l < 40 ? "Forest" : "Emerald";
+  if (h < 135) return s < 50 ? "Sage" : "Green";
+  if (h < 150) return l > 60 ? "Mint" : "Green";
+
+  // Teals (150-180)
+  if (h < 160) return "Jade";
+  if (h < 170) return "Teal";
+  if (h < 180) return "Seafoam";
+
+  // Cyans (180-200)
+  if (h < 188) return "Aqua";
+  if (h < 195) return "Cyan";
+  if (h < 200) return "Turquoise";
+
+  // Blues (200-255)
+  if (h < 210) return "Azure";
+  if (h < 220) return l > 60 ? "Sky" : "Cerulean";
+  if (h < 235) return l < 35 ? "Navy" : "Cobalt";
+  if (h < 248) return s > 70 ? "Sapphire" : "Blue";
+  if (h < 255) return "Blue";
+
+  // Purples (255-290)
+  if (h < 268) return l < 40 ? "Indigo" : "Violet";
+  if (h < 280) return s < 50 ? "Plum" : "Purple";
+  if (h < 290) return "Purple";
+
+  // Magentas (290-320)
+  if (h < 300) return s > 70 ? "Fuchsia" : "Magenta";
+  if (h < 310) return "Berry";
+  if (h < 320) return "Magenta";
+
+  // Pinks (320-345)
+  if (h < 328) return l > 70 ? "Blush" : "Rose";
+  if (h < 338) return l > 60 ? "Salmon" : "Pink";
+  return "Pink";
+}
+
+/**
+ * Get lightness modifier based on lightness and saturation
+ */
+function getLightnessModifier(l: number, s: number): string {
+  if (l < 20) return "Deep";
+  if (l < 35) return s > 60 ? "Rich" : "Dark";
+  if (l > 80) return s < 40 ? "Pastel" : "Pale";
+  if (l > 65) return "Soft";
+  return "";
+}
+
+/**
+ * Get saturation modifier based on saturation and lightness
+ */
+function getSaturationModifier(s: number, l: number): string {
+  // Don't add saturation modifiers for very dark or very light colors
+  if (l < 20 || l > 85) return "";
+
+  if (s < 25) return "Dusty";
+  if (s < 40) return "Faded";
+  if (s < 55) return "Muted";
+  if (s > 90) return "Electric";
+  if (s > 75) return "Vivid";
+  if (s > 60) return "Bright";
+  return "";
+}
+
+/**
+ * Combine modifiers with hue name to create natural-sounding names
+ */
+function combineModifiers(
+  lightMod: string,
+  satMod: string,
+  hueName: string
+): string {
+  // Avoid awkward double modifiers - pick the more descriptive one
+  if (lightMod && satMod) {
+    // Certain combinations work well together
+    const goodCombos = [
+      ["Deep", "Rich"],
+      ["Soft", "Muted"],
+      ["Pale", "Dusty"],
+      ["Pastel", "Faded"],
+    ];
+
+    const isGoodCombo = goodCombos.some(
+      ([a, b]) =>
+        (lightMod === a && satMod === b) || (lightMod === b && satMod === a)
+    );
+
+    if (!isGoodCombo) {
+      // Prefer the more specific modifier
+      if (["Deep", "Rich", "Pastel"].includes(lightMod)) {
+        return `${lightMod} ${hueName}`;
+      }
+      if (["Electric", "Vivid", "Dusty"].includes(satMod)) {
+        return `${satMod} ${hueName}`;
+      }
+      // Default to lightness modifier
+      return `${lightMod} ${hueName}`;
+    }
   }
 
-  // Determine hue name
-  let hueName: string;
-  if (h < 15) hueName = "Red";
-  else if (h < 45) hueName = "Orange";
-  else if (h < 75) hueName = "Yellow";
-  else if (h < 105) hueName = "Lime";
-  else if (h < 135) hueName = "Green";
-  else if (h < 165) hueName = "Teal";
-  else if (h < 195) hueName = "Cyan";
-  else if (h < 225) hueName = "Sky";
-  else if (h < 255) hueName = "Blue";
-  else if (h < 285) hueName = "Purple";
-  else if (h < 315) hueName = "Magenta";
-  else if (h < 345) hueName = "Pink";
-  else hueName = "Red";
+  // Single modifier or good combo
+  if (lightMod && satMod) {
+    return `${satMod} ${hueName}`;
+  }
+  if (lightMod) {
+    return `${lightMod} ${hueName}`;
+  }
+  if (satMod) {
+    return `${satMod} ${hueName}`;
+  }
 
-  // Add lightness modifier
-  let lightMod = "";
-  if (l < 25) lightMod = "Dark ";
-  else if (l > 75) lightMod = "Light ";
+  return hueName;
+}
 
-  // Add saturation modifier
-  let satMod = "";
-  if (s < 40) satMod = "Muted ";
-  else if (s > 80) satMod = "Vivid ";
+/**
+ * Generate enhanced algorithmic color name
+ */
+function generateAlgorithmicName(hsl: HSL): string {
+  const { h, s, l } = hsl;
 
-  return `${lightMod}${satMod}${hueName}`.trim();
+  // Handle achromatic colors (low saturation)
+  if (s < 8) {
+    return getGrayscaleName(l);
+  }
+
+  // Get fine-grained hue name
+  const hueName = getEnhancedHueName(h, s, l);
+
+  // Get contextual modifiers
+  const lightMod = getLightnessModifier(l, s);
+  const satMod = getSaturationModifier(s, l);
+
+  // Combine intelligently
+  return combineModifiers(lightMod, satMod, hueName);
+}
+
+/**
+ * Generate a descriptive color name based on HSL and RGB
+ * Uses two-tier system:
+ * 1. Try Name That Color database for close matches
+ * 2. Fall back to enhanced algorithmic naming
+ */
+export function generateColorName(hsl: HSL, rgb?: RGB): string {
+  // Get the algorithmic name first (used as fallback)
+  const algorithmicName = generateAlgorithmicName(hsl);
+
+  // If RGB is provided, try database lookup
+  if (rgb) {
+    return getColorName(rgb, algorithmicName);
+  }
+
+  // Otherwise just use algorithmic naming
+  return algorithmicName;
 }
 
 /**
