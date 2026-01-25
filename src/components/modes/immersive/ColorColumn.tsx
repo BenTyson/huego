@@ -94,22 +94,21 @@ export const ColorColumn = memo(function ColorColumn({
         aria-label={`Edit color ${index + 1}`}
       />
 
-      {/* Edit and Info buttons */}
+      {/* Edit and Info buttons - subtle, positioned below nav */}
       <motion.div
-        className="absolute top-4 left-4 md:top-6 md:left-6 flex gap-1"
-        initial={false}
-        animate={{
-          opacity: isHovered ? 1 : 0,
-          scale: isHovered ? 1 : 0.8,
-        }}
+        className="absolute top-16 left-4 md:top-20 md:left-6 flex gap-1"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isHovered ? 0.9 : 0.35 }}
         transition={{ duration: 0.2 }}
       >
         <motion.button
-          className="p-2 rounded-lg transition-colors"
+          className="p-1.5 rounded-md transition-all"
           style={{
-            backgroundColor: color.contrastColor === "white"
-              ? "rgba(255,255,255,0.15)"
-              : "rgba(0,0,0,0.1)",
+            backgroundColor: isHovered
+              ? color.contrastColor === "white"
+                ? "rgba(255,255,255,0.15)"
+                : "rgba(0,0,0,0.1)"
+              : "transparent",
           }}
           onClick={handleEditClick}
           whileHover={{ scale: 1.1 }}
@@ -117,8 +116,8 @@ export const ColorColumn = memo(function ColorColumn({
           title="Edit color"
         >
           <svg
-            width="20"
-            height="20"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             stroke={textColor}
@@ -132,11 +131,13 @@ export const ColorColumn = memo(function ColorColumn({
         </motion.button>
         {onShowInfo && (
           <motion.button
-            className="p-2 rounded-lg transition-colors"
+            className="p-1.5 rounded-md transition-all"
             style={{
-              backgroundColor: color.contrastColor === "white"
-                ? "rgba(255,255,255,0.15)"
-                : "rgba(0,0,0,0.1)",
+              backgroundColor: isHovered
+                ? color.contrastColor === "white"
+                  ? "rgba(255,255,255,0.15)"
+                  : "rgba(0,0,0,0.1)"
+                : "transparent",
             }}
             onClick={(e) => {
               e.stopPropagation();
@@ -147,8 +148,8 @@ export const ColorColumn = memo(function ColorColumn({
             title="Color psychology info"
           >
             <svg
-              width="20"
-              height="20"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke={textColor}
@@ -164,19 +165,19 @@ export const ColorColumn = memo(function ColorColumn({
         )}
       </motion.div>
 
-      {/* Lock indicator */}
+      {/* Lock indicator - subtle, positioned below nav */}
       <motion.div
-        className="absolute top-4 right-4 md:top-6 md:right-6"
-        initial={false}
+        className="absolute top-16 right-4 md:top-20 md:right-6"
+        initial={{ opacity: 0 }}
         animate={{
-          opacity: isLocked ? 1 : isHovered ? 0.6 : 0,
-          scale: isLocked ? 1 : 0.8,
+          opacity: isLocked ? 0.8 : isHovered ? 0.4 : 0.2,
         }}
         transition={{ duration: 0.2 }}
+        whileHover={{ scale: 1.1, opacity: 1 }}
       >
         <svg
-          width="24"
-          height="24"
+          width="18"
+          height="18"
           viewBox="0 0 24 24"
           fill="none"
           stroke={textColor}

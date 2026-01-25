@@ -23,6 +23,12 @@
   --overlay: rgba(0, 0, 0, 0.6);
   --glass: rgba(0, 0, 0, 0.3);
   --glass-border: rgba(255, 255, 255, 0.1);
+  /* Command Center tokens */
+  --command-bg: rgba(24, 24, 27, 0.95);
+  --command-border: rgba(63, 63, 70, 0.5);
+  --command-hover: rgba(255, 255, 255, 0.05);
+  --primary-cta: #ffffff;
+  --primary-cta-text: #09090b;
 }
 
 /* Light theme */
@@ -47,6 +53,12 @@
   --overlay: rgba(0, 0, 0, 0.4);
   --glass: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(0, 0, 0, 0.1);
+  /* Command Center tokens */
+  --command-bg: rgba(255, 255, 255, 0.95);
+  --command-border: rgba(228, 228, 231, 0.8);
+  --command-hover: rgba(0, 0, 0, 0.03);
+  --primary-cta: #18181b;
+  --primary-cta-text: #fafafa;
 }
 
 @theme inline {
@@ -70,6 +82,11 @@
   --color-overlay: var(--overlay);
   --color-glass: var(--glass);
   --color-glass-border: var(--glass-border);
+  --color-command-bg: var(--command-bg);
+  --color-command-border: var(--command-border);
+  --color-command-hover: var(--command-hover);
+  --color-primary-cta: var(--primary-cta);
+  --color-primary-cta-text: var(--primary-cta-text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

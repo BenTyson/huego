@@ -71,12 +71,32 @@ export function MoodView() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-2xl font-bold text-white mb-2">
-            How should it feel?
-          </h1>
-          <p className="text-zinc-400 mb-8">
-            Select a mood to generate a matching palette
-          </p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="text-purple-300"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                <path d="M9 9h.01M15 9h.01" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-white">
+                How should it feel?
+              </h1>
+              <p className="text-sm text-zinc-500">
+                Select a mood to generate colors
+              </p>
+            </div>
+          </div>
+          <div className="h-px bg-gradient-to-r from-white/10 via-white/5 to-transparent mb-6" />
 
           {/* Mood Grid */}
           <MoodSelectionPanel

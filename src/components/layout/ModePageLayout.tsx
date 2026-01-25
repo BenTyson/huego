@@ -2,8 +2,8 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
-import { ModeToggle } from "@/components/ModeToggle";
-import { ActionBar } from "@/components/ActionBar";
+import { NavigationBar } from "@/components/Navigation";
+import { CommandCenter } from "@/components/CommandCenter";
 import { HydrationLoader } from "@/components/ui/HydrationLoader";
 import { useKeyboard } from "@/hooks/useKeyboard";
 
@@ -49,9 +49,9 @@ export function ModePageLayout({
   return (
     <>
       {showBannerAd && <BannerAd position="top" />}
-      <ModeToggle />
+      <NavigationBar />
       {children}
-      <ActionBar />
+      <CommandCenter />
     </>
   );
 }

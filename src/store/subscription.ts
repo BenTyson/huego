@@ -179,7 +179,8 @@ export const useSubscriptionStore = create<SubscriptionState>()(
 );
 
 // Selector hooks
-export const useIsPremium = () => useSubscriptionStore((state) => state.isPremium);
+// TEMP: Override for V2 development - disable pro gating
+export const useIsPremium = () => true; // useSubscriptionStore((state) => state.isPremium);
 export const useSubscriptionStatus = () => useSubscriptionStore((state) => state.status);
 export const useIsVerifying = () => useSubscriptionStore((state) => state.isVerifying);
 export const useCanUseExportFormat = (format: ExportFormat) =>
