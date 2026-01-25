@@ -322,6 +322,11 @@ Theme applies class `light` or `dark` to `<html>` element. CSS variables defined
 | `--foreground` | #fafafa | #09090b |
 | `--glass` | rgba(0,0,0,0.3) | rgba(255,255,255,0.8) |
 | `--glass-border` | rgba(255,255,255,0.1) | rgba(0,0,0,0.1) |
+| `--command-bg` | rgba(24,24,27,0.95) | rgba(255,255,255,0.95) |
+| `--command-border` | rgba(63,63,70,0.5) | rgba(228,228,231,0.8) |
+| `--command-hover` | rgba(255,255,255,0.05) | rgba(0,0,0,0.03) |
+| `--primary-cta` | #ffffff | #18181b |
+| `--primary-cta-text` | #09090b | #fafafa |
 
 ### Related Files
 
@@ -497,25 +502,37 @@ export default function ModePage() {
 ```
 ModePageLayout
 ├── HydrationLoader (loading state)
-├── ModeToggle (header)
+├── NavigationBar (top navigation)
+│   ├── ModeSelector (dropdown with mode cards)
+│   ├── Logo (HueGo link)
+│   ├── ExploreLink (separate explore navigation)
+│   ├── Help Button (? shortcut hint)
+│   └── ThemeToggle
 ├── [ModeView] (dynamic)
 │   ├── ImmersiveView → ColorColumn[]
 │   ├── ContextView → PaletteSidebar, PreviewTypeSelector, [Preview]
 │   ├── MoodView → MoodSelectionPanel, RefinementSliders
 │   ├── PlaygroundView → SwipeCards
 │   └── GradientView → GradientPreview, GradientControls
-├── ActionBar
-│   ├── HarmonySelector
-│   ├── UndoRedoButtons
-│   ├── SaveButton
-│   └── UtilityButtons
+├── CommandCenter (bottom action bar)
+│   ├── CommandBar
+│   │   ├── GenerateButton (primary CTA)
+│   │   ├── PaletteControls (size +/-, harmony dropdown)
+│   │   ├── More Button (opens CommandPanel)
+│   │   └── Share Button
+│   └── CommandPanel (slide-up grouped actions)
+│       ├── CommandGroup "Edit" → Undo, Redo, History, Shuffle, Invert
+│       ├── CommandGroup "Tools" → AI, Accessibility, Extract, Import
+│       └── CommandGroup "Output" → Export, Publish, Save
 └── [Modals] (lazy loaded)
     ├── ExportModal
     ├── AccessibilityPanel
-    ├── PricingModal
     ├── ImportModal
     ├── ImageDropZone
-    └── HistoryBrowser
+    ├── HistoryBrowser
+    ├── PublishModal
+    ├── AIAssistantModal
+    └── KeyboardShortcuts
 ```
 
 ### Shared UI Components
@@ -565,6 +582,8 @@ useKeyboard(options: KeyboardOptions): {
 | `V` | Vibrant | `enableBatchOps` |
 | `H` | History | `enableBatchOps` |
 | `T` | Toggle theme | `enableBatchOps` |
+| `?` | Show shortcuts overlay | Always |
+| `Esc` | Close panel/modal | When open |
 | `Ctrl+Z` | Undo | `enableUndo` |
 | `Ctrl+Y` | Redo | `enableUndo` |
 

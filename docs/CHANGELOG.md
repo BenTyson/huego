@@ -4,6 +4,108 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.12.0] - 2026-01-24
+
+### Phase 5: V2 UI/UX Redesign
+
+Complete redesign of navigation and action bar with Apple/Airbnb/Notion-level polish. New component architecture replacing the old ModeToggle and ActionBar.
+
+#### Added
+
+**Navigation System** (`src/components/Navigation/`)
+- `NavigationBar.tsx` - Top bar with pill-shaped container, backdrop blur, shadow
+- `ModeSelector.tsx` - Dropdown with mode cards, icons, and descriptions
+- `ExploreLink.tsx` - Separate navigation for Explore (browsing, not creating)
+- `KeyboardShortcuts.tsx` - Press `?` to view all shortcuts overlay
+- Keyboard listener for `?` key to trigger help overlay
+
+**Command Center** (`src/components/CommandCenter/`)
+- `index.tsx` - Main orchestrator with modal state management
+- `CommandBar.tsx` - Bottom bar with 5 primary actions always visible
+- `CommandPanel.tsx` - Slide-up panel with grouped actions (Edit, Tools, Output)
+- `CommandGroup.tsx` - Section component with title and staggered animations
+- `CommandItem.tsx` - Action button with icon, label, and keyboard shortcut hint
+- `GenerateButton.tsx` - Prominent white CTA with Space key hint
+- `PaletteControls.tsx` - Unified size (+/-) and harmony dropdown
+
+**Design Tokens** (`src/app/globals.css`)
+- `--command-bg` - Command panel background (dark: rgba(24,24,27,0.95))
+- `--command-border` - Panel border color
+- `--command-hover` - Hover state background
+- `--primary-cta` - Primary CTA button color (white/dark mode aware)
+- `--primary-cta-text` - CTA text color
+
+**Mood Page Improvements** (`src/components/modes/mood/`)
+- Rich list view replacing cramped 4-column grid
+- Mood icons for each of 12 moods
+- Color preview dots (3 representative colors per mood)
+- Descriptions visible (e.g., "Peaceful, serene, tranquil")
+- Staggered entrance animations
+- Selected state with indicator line
+
+**Gradient Page Improvements** (`src/components/modes/gradient/`)
+- Editable color dots - click to open native color picker
+- Compact inline Copy button in CSS preview
+- Fixed CSS property conflicts (background vs backgroundSize)
+- Added bottom padding for CommandCenter clearance
+
+#### Changed
+
+**ModePageLayout** (`src/components/layout/ModePageLayout.tsx`)
+- Now uses `NavigationBar` instead of `ModeToggle`
+- Now uses `CommandCenter` instead of `ActionBar`
+
+**ColorColumn** (`src/components/modes/immersive/ColorColumn.tsx`)
+- Edit/info buttons repositioned below nav (`top-16`/`top-20`)
+- Lock indicator repositioned below nav
+- Icons more subtle (smaller, lower opacity by default)
+- Hover to reveal full opacity
+- Locked state more visible (80% opacity)
+
+**Pro Gating** (`src/store/subscription.ts`)
+- Temporarily disabled for V2 development
+- `useIsPremium()` now always returns `true`
+
+#### Deprecated
+
+The following components are kept but no longer imported:
+- `src/components/ModeToggle.tsx` - Replaced by `Navigation/`
+- `src/components/ActionBar/*` - Replaced by `CommandCenter/`
+
+#### Technical
+
+**New Files (12 total)**
+```
+src/components/CommandCenter/index.tsx
+src/components/CommandCenter/CommandBar.tsx
+src/components/CommandCenter/CommandPanel.tsx
+src/components/CommandCenter/CommandGroup.tsx
+src/components/CommandCenter/CommandItem.tsx
+src/components/CommandCenter/GenerateButton.tsx
+src/components/CommandCenter/PaletteControls.tsx
+src/components/Navigation/index.tsx
+src/components/Navigation/NavigationBar.tsx
+src/components/Navigation/ModeSelector.tsx
+src/components/Navigation/ExploreLink.tsx
+src/components/Navigation/KeyboardShortcuts.tsx
+```
+
+**Modified Files (7 total)**
+```
+src/app/globals.css
+src/components/layout/ModePageLayout.tsx
+src/components/modes/gradient/GradientView.tsx
+src/components/modes/immersive/ColorColumn.tsx
+src/components/modes/mood/MoodSelectionPanel.tsx
+src/components/modes/mood/MoodView.tsx
+src/store/subscription.ts
+```
+
+- Build passes with no errors
+- 1,644 lines added across 19 files
+
+---
+
 ## [0.11.0] - 2026-01-24
 
 ### Phase 3: AI Color Assistant
@@ -720,6 +822,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 2 complete | ✅ | 2026-01-23 |
 | Phase 3 (Refactoring) complete | ✅ | 2026-01-24 |
 | Phase 3 (AI Assistant) complete | ✅ | 2026-01-24 |
+| Phase 5 (V2 UI/UX) complete | ✅ | 2026-01-24 |
 
 ---
 
