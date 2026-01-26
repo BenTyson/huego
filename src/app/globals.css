@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Safe area insets for mobile notch/home indicator */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Dynamic viewport height (mobile browser address bar fix) */
+.h-dvh { height: 100dvh; }
+
+/* Touch target utilities - Apple HIG minimum 44px */
+.touch-target { min-width: 44px; min-height: 44px; }
+
 /* Dark theme (default) */
 :root,
 :root.dark {

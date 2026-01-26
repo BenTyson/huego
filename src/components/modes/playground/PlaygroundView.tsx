@@ -65,7 +65,7 @@ export function PlaygroundView() {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex flex-col items-center justify-center bg-zinc-900 p-6 overflow-hidden">
+    <div className="h-dvh w-screen flex flex-col items-center justify-center bg-zinc-900 p-6 overflow-hidden">
       {/* Header */}
       <motion.div
         className="text-center mb-8"

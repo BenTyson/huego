@@ -123,9 +123,9 @@ export function ModeSelector() {
               onClick={() => setIsOpen(false)}
             />
 
-            {/* Dropdown */}
+            {/* Dropdown - responsive width for mobile */}
             <motion.div
-              className="absolute top-full mt-2 left-0 p-2 rounded-xl bg-command-bg backdrop-blur-xl border border-command-border min-w-[220px] z-50 shadow-xl"
+              className="absolute top-full mt-2 left-0 p-2 rounded-xl bg-command-bg backdrop-blur-xl border border-command-border w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[220px] max-w-[280px] z-50 shadow-xl"
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}

@@ -36,13 +36,42 @@ export const ColorColumn = memo(function ColorColumn({
   isActive,
 }: ColorColumnProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showShades, setShowShades] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const colorInputRef = useRef<HTMLInputElement>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const columnRef = useRef<HTMLDivElement>(null);
+  const actionPillRef = useRef<HTMLDivElement>(null);
   const dragControls = useDragControls();
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Close mobile expanded state on outside tap
+  useEffect(() => {
+    if (!mobileExpanded || !isMobile) return;
+
+    const handleOutsideTouch = (e: TouchEvent | MouseEvent) => {
+      if (actionPillRef.current && !actionPillRef.current.contains(e.target as Node)) {
+        setMobileExpanded(false);
+      }
+    };
+
+    document.addEventListener('touchstart', handleOutsideTouch);
+    document.addEventListener('mousedown', handleOutsideTouch);
+    return () => {
+      document.removeEventListener('touchstart', handleOutsideTouch);
+      document.removeEventListener('mousedown', handleOutsideTouch);
+    };
+  }, [mobileExpanded, isMobile]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -165,12 +194,22 @@ export const ColorColumn = memo(function ColorColumn({
       onDragEnd={handleDragEnd}
       whileHover={{ scale: isDragging ? 1.02 : 1.01 }}
       whileTap={{ scale: 0.99 }}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => {
-        setIsHovered(false);
-        setShowShades(false);
+        if (!isMobile) {
+          setIsHovered(false);
+          setShowShades(false);
+        }
       }}
-      onClick={handleEditClick}
+      onClick={(e) => {
+        if (isMobile) {
+          // On mobile, tap toggles the action pill
+          e.stopPropagation();
+          setMobileExpanded(!mobileExpanded);
+        } else {
+          handleEditClick(e);
+        }
+      }}
     >
       {/* Hidden color input */}
       <input
@@ -283,10 +322,32 @@ export const ColorColumn = memo(function ColorColumn({
         </motion.div>
       </motion.div>
 
-      {/* Contextual Action Pill - appears on hover */}
+      {/* Mobile tap hint - shows when collapsed on mobile */}
       <AnimatePresence>
-        {isHovered && (
+        {isMobile && !mobileExpanded && (
           <motion.div
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full text-xs font-medium"
+            style={{
+              backgroundColor:
+                color.contrastColor === "white"
+                  ? "rgba(255,255,255,0.1)"
+                  : "rgba(0,0,0,0.05)",
+              color: textColorMuted,
+            }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 0.7, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+          >
+            Tap for options
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Contextual Action Pill - appears on hover (desktop) or tap (mobile) */}
+      <AnimatePresence>
+        {(isHovered || mobileExpanded) && (
+          <motion.div
+            ref={actionPillRef}
             className="absolute bottom-16 md:bottom-20 left-1/2 flex items-center gap-1 px-2 py-1.5 rounded-full backdrop-blur-xl border"
             style={{
               backgroundColor:
@@ -312,8 +373,8 @@ export const ColorColumn = memo(function ColorColumn({
               bgHover={bgHover}
             >
               <svg
-                width="14"
-                height="14"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -337,8 +398,8 @@ export const ColorColumn = memo(function ColorColumn({
               bgActive={bgActive}
             >
               <svg
-                width="14"
-                height="14"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -361,8 +422,8 @@ export const ColorColumn = memo(function ColorColumn({
               bgActive={bgActive}
             >
               <svg
-                width="14"
-                height="14"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill={isSaved ? "currentColor" : "none"}
                 stroke="currentColor"
@@ -376,7 +437,7 @@ export const ColorColumn = memo(function ColorColumn({
 
             {/* Drag handle */}
             <motion.button
-              className="p-1.5 rounded-md transition-all"
+              className="p-2.5 md:p-1.5 rounded-md transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center"
               style={{
                 color: textColor,
                 backgroundColor: "transparent",
@@ -391,8 +452,8 @@ export const ColorColumn = memo(function ColorColumn({
               title="Drag to reorder"
             >
               <svg
-                width="14"
-                height="14"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="currentColor"
                 stroke="none"
@@ -417,8 +478,8 @@ export const ColorColumn = memo(function ColorColumn({
               bgHover={bgHover}
             >
               <svg
-                width="14"
-                height="14"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -510,7 +571,7 @@ function ActionButton({
 }: ActionButtonProps) {
   return (
     <motion.button
-      className="p-1.5 rounded-md transition-all"
+      className="p-2.5 md:p-1.5 rounded-md transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center"
       style={{
         color: textColor,
         backgroundColor: active ? bgActive || bgHover : "transparent",

@@ -4,6 +4,81 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.17.0] - 2026-01-25
+
+### Phase 10: Mobile UI/UX Implementation
+
+Comprehensive mobile fixes addressing critical usability issues: viewport configuration, touch targets, hover-only interactions, safe area handling, and dynamic viewport height.
+
+#### Added
+
+**Viewport Configuration** (`src/app/layout.tsx`)
+- Next.js 16 `Viewport` export with proper mobile settings
+- `width: "device-width"` for responsive scaling
+- `initialScale: 1`, `maximumScale: 5` for zoom accessibility
+- `viewportFit: "cover"` for notch/home indicator support
+
+**Mobile CSS Utilities** (`src/app/globals.css`)
+- `--safe-area-top` and `--safe-area-bottom` CSS variables using `env()`
+- `.h-dvh` utility class for dynamic viewport height (100dvh)
+- `.touch-target` utility class (min 44px for Apple HIG compliance)
+
+**Mobile Action Pill Tap-Toggle** (`src/components/modes/immersive/ColorColumn.tsx`)
+- `isMobile` state with resize listener (breakpoint: 768px)
+- `mobileExpanded` state for tap-based pill display
+- Outside tap detection to close expanded pill
+- "Tap for options" hint text on mobile when collapsed
+- Desktop: hover-based behavior unchanged
+- Mobile: tap column to toggle action pill visibility
+
+#### Changed
+
+**Touch Target Sizes** (Apple HIG 44px minimum)
+- `ColorSlider.tsx`: Track `h-8 md:h-5`, thumb `w-6 h-6 md:w-4 md:h-4`
+- `NavigationBar.tsx`: Help button `w-11 h-11 md:w-9 md:h-9`
+- `ShadePopover.tsx`: Swatches `w-11 h-14 md:w-8 md:h-12`
+- `ColorColumn.tsx`: ActionButtons `min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0`
+- All action icons increased from 14px to 16px
+
+**Safe Area Handling**
+- `CommandCenter/index.tsx`: Bottom uses `max(1.5rem, env(safe-area-inset-bottom))`
+- `NavigationBar.tsx`: Top uses `max(1rem, env(safe-area-inset-top))`
+- `ImmersiveView.tsx`: Generate and undo buttons respect safe area insets
+
+**Dynamic Viewport Height** (Mobile browser address bar fix)
+- `ImmersiveView.tsx`: `h-screen` → `h-dvh`
+- `ContextView.tsx`: `h-screen` → `h-dvh`
+- `MoodView.tsx`: `h-screen` → `h-dvh`
+- `PlaygroundView.tsx`: `h-screen` → `h-dvh`
+
+**Dropdown Overflow Fix**
+- `ModeSelector.tsx`: `w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[220px] max-w-[280px]`
+
+#### Technical
+
+**Modified Files (12 total)**
+```
+src/app/layout.tsx
+src/app/globals.css
+src/components/modes/immersive/ColorColumn.tsx
+src/components/ui/ColorSlider.tsx
+src/components/ui/ShadePopover.tsx
+src/components/Navigation/NavigationBar.tsx
+src/components/Navigation/ModeSelector.tsx
+src/components/CommandCenter/index.tsx
+src/components/modes/immersive/ImmersiveView.tsx
+src/components/modes/context/ContextView.tsx
+src/components/modes/mood/MoodView.tsx
+src/components/modes/playground/PlaygroundView.tsx
+```
+
+- Build passes with no new errors
+- All touch targets ≥44px on mobile
+- No content behind notch/home indicator
+- No layout shift with mobile browser address bar
+
+---
+
 ## [0.16.0] - 2026-01-25
 
 ### Phase 9: Coolors-style Color Column Actions
@@ -1188,6 +1263,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 7 (Context Mode) complete | ✅ | 2026-01-25 |
 | Phase 8 (Enhanced Tailwind Export) complete | ✅ | 2026-01-25 |
 | Phase 9 (Coolors-style Actions) complete | ✅ | 2026-01-25 |
+| Phase 10 (Mobile UI/UX) complete | ✅ | 2026-01-25 |
 
 ---
 

@@ -77,7 +77,7 @@ export function ImmersiveView() {
   );
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
+    <div className="relative h-dvh w-screen overflow-hidden">
       {/* Color columns */}
       <LayoutGroup>
         <motion.div
@@ -127,9 +127,10 @@ export function ImmersiveView() {
         )}
       </AnimatePresence>
 
-      {/* Mobile generate button */}
+      {/* Mobile generate button - respects safe area */}
       <motion.button
-        className="md:hidden absolute bottom-6 right-6 w-14 h-14 rounded-full bg-white/90 shadow-lg flex items-center justify-center"
+        className="md:hidden absolute right-6 w-14 h-14 rounded-full bg-white/90 shadow-lg flex items-center justify-center"
+        style={{ bottom: 'max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem))' }}
         onClick={handleGenerate}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -155,9 +156,10 @@ export function ImmersiveView() {
         </svg>
       </motion.button>
 
-      {/* Undo button */}
+      {/* Undo button - respects safe area */}
       <motion.button
-        className="absolute bottom-6 left-6 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/50 transition-colors"
+        className="absolute left-6 w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/80 hover:text-white hover:bg-black/50 transition-colors"
+        style={{ bottom: 'max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem))' }}
         onClick={() => usePaletteStore.getState().undo()}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}

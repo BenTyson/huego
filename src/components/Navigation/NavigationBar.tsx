@@ -36,7 +36,8 @@ export function NavigationBar() {
   return (
     <>
       <motion.nav
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-50"
+        className="fixed left-1/2 -translate-x-1/2 z-50"
+        style={{ top: 'max(1rem, env(safe-area-inset-top))' }}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -59,9 +60,9 @@ export function NavigationBar() {
           {/* Explore link */}
           <ExploreLink />
 
-          {/* Help button */}
+          {/* Help button - 44px touch target on mobile */}
           <motion.button
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-command-hover transition-colors"
+            className="w-11 h-11 md:w-9 md:h-9 rounded-lg flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-command-hover transition-colors"
             onClick={() => setShowShortcuts(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

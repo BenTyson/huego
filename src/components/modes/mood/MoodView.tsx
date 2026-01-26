@@ -64,7 +64,7 @@ export function MoodView() {
   }, [selectedMood, refinements, setColors]);
 
   return (
-    <div className="h-screen w-screen flex flex-col md:flex-row overflow-hidden bg-zinc-900">
+    <div className="h-dvh w-screen flex flex-col md:flex-row overflow-hidden bg-zinc-900">
       {/* Mood Selection Panel */}
       <div className="w-full md:w-96 flex-shrink-0 p-6 md:p-8 overflow-y-auto">
         <motion.div

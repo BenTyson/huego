@@ -1,14 +1,21 @@
-# Skill: Update Phase
-
-> Update `/docs` after completing a development phase. Optimized for agent comprehension.
-
+---
+name: update-phase
+description: Update /docs after completing a development phase. Triggers on "update phase", "update this phase", or "/update-phase". Updates CHANGELOG.md, ARCHITECTURE.md, SESSION-START.md, and HUEGO.md with consistent formatting.
+allowed-tools: Bash, Read, Edit, Glob, Grep
 ---
 
-## Trigger
+# Update Phase Documentation
 
-Invoke with: `/update-phase` or after completing sprints/features
+Update `/docs` after completing a development phase. Optimized for agent comprehension.
 
----
+## Trigger Phrases
+
+This skill should be invoked when user says:
+- `/update-phase`
+- "update phase"
+- "update this phase"
+- "update the docs"
+- After completing sprints/features
 
 ## Execution Steps
 
@@ -40,11 +47,9 @@ git diff --stat HEAD~5
 **Order matters** - later files reference earlier ones:
 
 1. **CHANGELOG.md** - Raw change capture
-2. **ARCHITECTURE.md** - Technical systems
+2. **ARCHITECTURE.md** - Technical systems (if new systems added)
 3. **SESSION-START.md** - Developer reference
 4. **HUEGO.md** - Product summary
-
----
 
 ## File-Specific Templates
 
@@ -77,7 +82,7 @@ Brief description of what this release accomplishes.
 
 ### ARCHITECTURE.md Update
 
-Add new system sections following this template:
+Add new system sections following this template (only if new systems/APIs added):
 
 ```markdown
 ## System Name (`src/lib/system.ts`)
@@ -86,17 +91,17 @@ Add new system sections following this template:
 One-line description of purpose.
 
 ### Key Types
-\`\`\`typescript
+```typescript
 interface MainType {
   property: Type;
 }
-\`\`\`
+```
 
 ### Key Functions
-\`\`\`typescript
+```typescript
 functionName(param: Type): ReturnType
 anotherFunction(param: Type): ReturnType
-\`\`\`
+```
 
 ### Integration
 How it connects to other systems.
@@ -110,24 +115,22 @@ How it connects to other systems.
 
 Update these sections:
 
-1. **Status** - Current phase, next actions
-2. **Key Files** - Add new directories/files to tree
-3. **Data Models** - New types from `types.ts`
-4. **Feature Gating** - If tier limits changed
-5. **Keyboard Shortcuts** - If new shortcuts added
-6. **Commands** - If new scripts added
+1. **Last Updated** - Change date at top
+2. **Status** - Current phase, next actions
+3. **Key Files** - Add new directories/files to tree (if significant)
+4. **Data Models** - New types from `types.ts` (if added)
+5. **Feature Gating** - If tier limits changed
+6. **Keyboard Shortcuts** - If new shortcuts added
 
 ### HUEGO.md Update
 
 Update these sections:
 
-1. **Implementation Status** - Sprint/phase completion
+1. **Competitive Roadmap** - Sprint/phase completion status
 2. **Key Features** - New user-facing features
-3. **The 5 Modes** - If modes changed
-4. **Revenue** - If pricing/tiers changed
-5. **Competitors** - Our new advantages
-
----
+3. **Gap Analysis** - Our new advantages vs competitors
+4. **The 6 Modes** - If modes changed
+5. **Revenue** - If pricing/tiers changed
 
 ## Interlinking Rules
 
@@ -141,8 +144,6 @@ Anchor format for changelog versions:
 - Version `0.8.0` → anchor `#080---2026-01-23`
 - Spaces become `-`, dots removed from version
 
----
-
 ## Post-Update Validation
 
 After all updates:
@@ -153,19 +154,16 @@ After all updates:
 - [ ] Data models match `src/lib/types.ts`
 - [ ] No placeholder text remaining
 - [ ] Dates are accurate (today's date for new changes)
-
----
+- [ ] Project Milestones table updated in CHANGELOG.md
 
 ## Quick Reference
 
 | Doc | Primary Purpose | Update When |
 |-----|-----------------|-------------|
-| CHANGELOG | Version history, all changes | Every change |
-| ARCHITECTURE | Technical deep-dive, APIs | New systems/APIs |
-| SESSION-START | Quick dev reference | Every sprint |
+| CHANGELOG | Version history, all changes | Every phase |
+| ARCHITECTURE | Technical deep-dive, APIs | New systems/APIs only |
+| SESSION-START | Quick dev reference | Every phase |
 | HUEGO | Product overview | Major features |
-
----
 
 ## Example Output
 
@@ -176,20 +174,19 @@ After updating, provide summary:
 
 ### CHANGELOG.md
 - Added version 0.8.0 section with Phase 1 features
+- Updated Project Milestones table
 
 ### ARCHITECTURE.md
 - Added Color Psychology system section
 - Added Theme System section
-- Updated PaletteState interface
 
 ### SESSION-START.md
+- Updated Last Updated date
 - Updated Status to reflect Phase 1 complete
 - Added new files to Key Files tree
-- Added new keyboard shortcuts
-- Updated Data Models with paletteSize
 
 ### HUEGO.md
-- Updated Implementation Status with Phase 1
+- Updated Competitive Roadmap with Phase 1
 - Added new features to Key Features
-- Updated Feature Gating table
+- Updated Gap Analysis table
 ```

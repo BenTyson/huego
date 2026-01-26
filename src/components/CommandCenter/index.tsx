@@ -103,9 +103,10 @@ export function CommandCenter() {
 
   return (
     <>
-      {/* Main command bar */}
+      {/* Main command bar - respects safe area for devices with home indicator */}
       <motion.div
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40"
+        className="fixed left-1/2 -translate-x-1/2 z-40"
+        style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}

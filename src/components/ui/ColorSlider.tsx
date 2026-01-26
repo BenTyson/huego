@@ -84,7 +84,7 @@ export function ColorSlider({
       )}
       <div
         ref={trackRef}
-        className="relative h-5 flex items-center cursor-pointer touch-none"
+        className="relative h-8 md:h-5 flex items-center cursor-pointer touch-none"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -92,14 +92,14 @@ export function ColorSlider({
       >
         {/* Track background */}
         <div
-          className="absolute inset-y-1.5 left-0 right-0 rounded-full"
+          className="absolute inset-y-2.5 md:inset-y-1.5 left-0 right-0 rounded-full"
           style={{
             background: gradient || "linear-gradient(to right, #374151, #6b7280, #9ca3af)",
           }}
         />
-        {/* Thumb */}
+        {/* Thumb - 44px touch target on mobile */}
         <div
-          className="absolute w-4 h-4 rounded-full bg-white shadow-md border-2 border-zinc-300 -ml-2 transition-transform"
+          className="absolute w-6 h-6 md:w-4 md:h-4 rounded-full bg-white shadow-md border-2 border-zinc-300 -ml-3 md:-ml-2 transition-transform"
           style={{
             left: `${percentage}%`,
             transform: isDragging ? "scale(1.2)" : "scale(1)",

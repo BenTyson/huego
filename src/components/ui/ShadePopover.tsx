@@ -128,9 +128,9 @@ export function ShadePopover({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {/* Color swatch */}
+                  {/* Color swatch - larger on mobile for touch */}
                   <div
-                    className="w-8 h-12 rounded-lg transition-all relative"
+                    className="w-11 h-14 md:w-8 md:h-12 rounded-lg transition-all relative"
                     style={{
                       backgroundColor: hex,
                       boxShadow: isBase

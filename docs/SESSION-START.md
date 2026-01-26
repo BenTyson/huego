@@ -1,7 +1,7 @@
 # HueGo - Session Start Guide
 
 > **Read this before doing anything.**
-> Last Updated: 2026-01-24
+> Last Updated: 2026-01-25
 > Production: https://huego-production.up.railway.app
 > Dev: `npm run dev` (port 3377)
 
@@ -11,7 +11,7 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 3 complete. AI Color Assistant live.
+Phase 10 complete. Mobile UI/UX optimized.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
@@ -22,25 +22,22 @@ Phase 3 complete. AI Color Assistant live.
 - Server-side subscription validation active
 - Supabase community database active
 - AI-powered palette generation via Claude API
+- Mobile-optimized with touch targets and safe areas
 - Stripe in test mode
 
-**Phase 1 Complete:**
-- Variable palette size (2-10 colors, free: 2-7)
-- Dark mode with system preference detection
-- Color psychology panel with cultural context
+**Phase 10 Complete (Mobile UI/UX):**
+- Viewport configuration with `viewportFit: "cover"`
+- Touch targets ≥44px on mobile (Apple HIG)
+- Mobile action pill tap-toggle (vs hover)
+- Safe area insets for notch/home indicator
+- Dynamic viewport height (`h-dvh`) for mobile browsers
+- Dropdown overflow fixes for small screens
 
-**Phase 2 Complete:**
-- Supabase database with published_palettes and palette_likes tables
-- Explore mode with infinite scroll palette grid
-- Publish modal with optional title/author/tags
-- Like/unlike with optimistic updates
-- Anonymous fingerprinting for rate limits
-
-**Phase 3 Complete:**
-- Claude API integration via `/api/ai/generate`
-- Natural language palette generation
-- AI Assistant modal with preview and apply
-- Rate limiting (3/min, 10/day free; 30/min, unlimited premium)
+**Recent Phases:**
+- Phase 9: Coolors-style ColorColumn actions
+- Phase 8: Enhanced Tailwind export (v3/v4, color spaces)
+- Phase 7: Context mode enhancement (shade scales, previews)
+- Phase 6: Named colors database (1,552 colors)
 
 **Next (Phase 4 - Platform Integrations):**
 - Figma plugin

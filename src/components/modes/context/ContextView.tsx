@@ -82,7 +82,7 @@ export function ContextView() {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col md:flex-row overflow-hidden bg-zinc-900">
+    <div className="h-dvh w-screen flex flex-col md:flex-row overflow-hidden bg-zinc-900">
       {/* Palette Sidebar */}
       <PaletteSidebar
         colors={adjustedColors}

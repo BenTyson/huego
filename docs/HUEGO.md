@@ -62,6 +62,13 @@ Competitors are functional but boring. We differentiate on:
 - Dark/light mode with system preference detection
 - Keyboard shortcut `T` to toggle
 
+### Mobile Experience
+- Touch targets ≥44px (Apple Human Interface Guidelines)
+- Safe area handling for notch/home indicator devices
+- Dynamic viewport height for mobile browser address bar
+- Tap-toggle action pill (replaces hover on mobile)
+- Responsive dropdowns that don't overflow small screens
+
 ### Import & Extraction
 - **Import**: Paste hex codes, CSS variables, Tailwind config, or JSON
 - **Extract**: Drop an image, get harmonized 5-color palette (k-means clustering)
@@ -123,9 +130,13 @@ All sprints complete. Now implementing competitive roadmap.
 | 1 | Variable palette size, dark mode, color psychology | ✅ |
 | 2 | Community explorer (Supabase + palette browsing) | ✅ |
 | 3 | AI color assistant (Claude API) | ✅ |
+| 6 | Named colors database (1,552 colors) | ✅ |
+| 7 | Context mode enhancement (shade scales, previews) | ✅ |
+| 8 | Enhanced Tailwind export (v3/v4, color spaces) | ✅ |
+| 9 | Coolors-style actions (remove, shades, drag, save) | ✅ |
+| 10 | Mobile UI/UX (touch targets, safe areas, tap-toggle) | ✅ |
 | 4 | Platform integrations (Figma, Chrome, VS Code) | Pending |
 | 5 | SVG recolor, expanded templates | Pending |
-| 6 | Projects/collections, zen mode | Pending |
 
 ---
 
@@ -201,6 +212,8 @@ localStorage for user preferences, Supabase for community palettes.
 | Save/favorite color | Yes | Yes | ✅ Parity |
 | Drag to reorder | Yes | Yes | ✅ Parity |
 | Copy button | Yes | Yes | ✅ Parity |
+| Mobile touch targets | Basic | 44px+ HIG | ✅ Advantage |
+| Safe area support | Partial | Full | ✅ Advantage |
 | Figma plugin | Yes | Pending | Phase 4 |
 
 ---
