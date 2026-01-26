@@ -4,6 +4,80 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.18.0] - 2026-01-26
+
+### Phase 11: Expanded Mood Presets with Categories
+
+Massive expansion of mood-based palette generation from 12 to 64 moods, organized in 7 tabbed categories. Makes HueGo the definitive mood-based palette tool.
+
+#### Added
+
+**Mood Category System** (`src/lib/mood.ts`)
+- `MoodCategory` type: emotions, seasons, nature, aesthetics, industry, cultural, abstract
+- `MOOD_CATEGORIES` array with category metadata (id, name, icon)
+- `category` field added to `MoodProfile` interface
+- `getMoodsByCategory(category)` helper function
+- `getMoodsGroupedByCategory()` helper for category mapping
+
+**64 Mood Profiles** (`src/lib/mood.ts`)
+- **Emotions & Feelings (10)**: Calm, Bold, Playful, Energetic, Serene, Mysterious, Romantic, Melancholy, Joyful, Hopeful
+- **Seasons & Time (10)**: Spring, Summer, Autumn, Winter, Sunrise, Sunset, Golden Hour, Midnight, Twilight, Overcast
+- **Nature & Elements (10)**: Natural, Ocean, Forest, Desert, Tropical, Arctic, Mountain, Meadow, Volcanic, Coastal
+- **Aesthetics & Eras (12)**: Retro, Futuristic, Minimal, Art Deco, Cyberpunk, Cottagecore, Y2K, Scandinavian, Mid-Century, Bohemian, Industrial, Vaporwave
+- **Industry & Brand (10)**: Professional, Healthcare, Tech Startup, Fashion, Food & Beverage, Finance, Creative Agency, Wellness, Education, Luxury Brand
+- **Cultural & Regional (8)**: Japanese, Mediterranean, Nordic, Moroccan, Parisian, Tropical Paradise, Southwestern, Coastal New England
+- **Abstract & Conceptual (4)**: Urban, Luxurious, Warm, Cool
+
+**Mood Icons Library** (`src/lib/mood-icons.tsx`)
+- 64 unique SVG icons (20x20, stroke-based, currentColor)
+- `moodIcons` record with icons for each mood ID
+- `moodColors` record with 3 representative preview colors per mood
+
+**Category Tabs UI** (`src/components/modes/mood/MoodSelectionPanel.tsx`)
+- Horizontal scrolling category tabs with icons
+- Fade indicators for scroll overflow on mobile
+- Tab icons for each category (heart, sun, leaf, palette, briefcase, globe, shapes)
+- Animated mood list filtered by selected category
+- Category mood count indicator
+- Smooth AnimatePresence transitions between categories
+
+**Category State Management** (`src/components/modes/mood/MoodView.tsx`)
+- `selectedCategory` state (defaults to "emotions")
+- `handleCategoryChange()` clears mood selection when switching categories
+- Updated subtitle: "64 moods across 7 categories"
+
+#### Changed
+
+**MoodSelectionPanel Props**
+- Added `selectedCategory: MoodCategory` prop
+- Added `onCategoryChange: (category: MoodCategory) => void` prop
+- Now filters moods by category instead of showing all 64
+
+**MoodProfile Interface**
+- Added required `category: MoodCategory` field
+- All 64 mood profiles include category assignment
+
+#### Technical
+
+**New Files (1 total)**
+```
+src/lib/mood-icons.tsx
+```
+
+**Modified Files (3 total)**
+```
+src/lib/mood.ts
+src/components/modes/mood/MoodSelectionPanel.tsx
+src/components/modes/mood/MoodView.tsx
+```
+
+- Build passes with no errors
+- Icons follow existing style: 20x20 viewBox, stroke="currentColor", strokeWidth="1.5"
+- Category tabs scroll horizontally on mobile
+- Each category has curated color parameters for authentic mood representation
+
+---
+
 ## [0.17.0] - 2026-01-25
 
 ### Phase 10: Mobile UI/UX Implementation
@@ -1264,6 +1338,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 8 (Enhanced Tailwind Export) complete | ✅ | 2026-01-25 |
 | Phase 9 (Coolors-style Actions) complete | ✅ | 2026-01-25 |
 | Phase 10 (Mobile UI/UX) complete | ✅ | 2026-01-25 |
+| Phase 11 (Expanded Mood Presets) complete | ✅ | 2026-01-26 |
 
 ---
 

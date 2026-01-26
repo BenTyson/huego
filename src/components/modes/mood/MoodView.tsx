@@ -4,7 +4,12 @@ import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePaletteStore, useColors } from "@/store/palette";
 import { createColor } from "@/lib/colors";
-import { generateMoodPalette, type RefinementValues } from "@/lib/mood";
+import {
+  generateMoodPalette,
+  type RefinementValues,
+  type MoodCategory,
+  moodProfiles,
+} from "@/lib/mood";
 import { MoodSelectionPanel } from "./MoodSelectionPanel";
 import { RefinementSliders } from "./RefinementSliders";
 
@@ -13,6 +18,7 @@ export function MoodView() {
   const colors = useColors();
   const { setColors, setColor } = usePaletteStore();
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<MoodCategory>("emotions");
   const [refinements, setRefinements] = useState<RefinementValues>({
     temperature: 0,
     vibrancy: 0,
@@ -41,6 +47,20 @@ export function MoodView() {
       setColors(newColors);
     },
     [refinements, setColors]
+  );
+
+  const handleCategoryChange = useCallback(
+    (category: MoodCategory) => {
+      setSelectedCategory(category);
+      // If the currently selected mood isn't in the new category, clear it
+      if (selectedMood) {
+        const mood = moodProfiles.find((m) => m.id === selectedMood);
+        if (mood && mood.category !== category) {
+          setSelectedMood(null);
+        }
+      }
+    },
+    [selectedMood]
   );
 
   const handleRefinementChange = useCallback(
@@ -92,7 +112,7 @@ export function MoodView() {
                 How should it feel?
               </h1>
               <p className="text-sm text-zinc-500">
-                Select a mood to generate colors
+                64 moods across 7 categories
               </p>
             </div>
           </div>
@@ -102,6 +122,8 @@ export function MoodView() {
           <MoodSelectionPanel
             selectedMood={selectedMood}
             onMoodSelect={handleMoodSelect}
+            selectedCategory={selectedCategory}
+            onCategoryChange={handleCategoryChange}
           />
 
           {/* Refinement Sliders */}
