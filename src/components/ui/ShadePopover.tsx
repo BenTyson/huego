@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { generateShadeScaleWithBase, SHADE_LEVELS } from "@/lib/shade-scale";
 import type { ShadeLevel } from "@/lib/types";
@@ -87,16 +88,17 @@ export function ShadePopover({
     return shade <= 400 ? "#000000" : "#ffffff";
   };
 
-  return (
+  // Use portal to escape transformed ancestor context
+  const portalContent = (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           ref={popoverRef}
-          className="fixed z-50 p-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl shadow-2xl border border-zinc-200/50 dark:border-zinc-700/50"
+          className="fixed z-50 p-3 rounded-xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl shadow-2xl border border-zinc-200/50 dark:border-zinc-700/50 max-w-[90vw]"
           style={{
-            top: anchorPosition?.y ?? "50%",
-            left: anchorPosition?.x ?? "50%",
-            transform: anchorPosition ? "translate(-50%, 8px)" : "translate(-50%, -50%)",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
           }}
           initial={{ opacity: 0, y: -8, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -114,7 +116,7 @@ export function ShadePopover({
           </div>
 
           {/* Shade strip */}
-          <div className="flex gap-1">
+          <div className="flex gap-1 overflow-x-auto pb-1">
             {SHADE_LEVELS.map((shade) => {
               const hex = scale[shade];
               const isBase = shade === baseShade;
@@ -196,4 +198,8 @@ export function ShadePopover({
       )}
     </AnimatePresence>
   );
+
+  // Portal to document.body to escape transformed ancestor context
+  if (typeof document === "undefined") return null;
+  return createPortal(portalContent, document.body);
 }

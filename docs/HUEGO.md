@@ -34,7 +34,7 @@ Competitors are functional but boring. We differentiate on:
 | **Playground** | `/play` | Swipe to discover | Free |
 | **Explore** | `/explore` | Browse community palettes | Free |
 | **Context** | `/context` | See palette on real designs | Premium |
-| **Mood** | `/mood` | Grid of 64 mood cards, expand to edit | Premium |
+| **Mood** | `/mood` | Grid of 64 mood cards, full ColorColumn actions | Premium |
 | **Gradient** | `/gradient` | Transform palettes to gradients | Premium |
 
 ---
@@ -49,6 +49,7 @@ Competitors are functional but boring. We differentiate on:
 - Undo/redo with visual history browser
 - **Saved colors**: Heart colors to save favorites (10 free, unlimited premium)
 - **Shade popover**: View 11-shade Tailwind scale (50-950) for any color
+- **Global shade control**: Shift entire palette to any shade level (50-950)
 - **Drag reorder**: Drag handle to rearrange colors
 - **Remove at index**: X button to remove specific colors (min 2)
 

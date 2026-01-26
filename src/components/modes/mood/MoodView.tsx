@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { usePaletteStore } from "@/store/palette";
-import { useUIStore } from "@/store/ui";
 import {
   generateMoodPalette,
+  applyRefinementsToColors,
   moodProfiles,
   type RefinementValues,
   type MoodCategory,
@@ -20,7 +20,7 @@ type ViewMode = "browse" | "edit";
 
 export function MoodView() {
   const { setColors } = usePaletteStore();
-  const setHideCommandCenter = useUIStore((state) => state.setHideCommandCenter);
+  const storeColors = usePaletteStore((state) => state.colors);
   const [viewMode, setViewMode] = useState<ViewMode>("browse");
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] =
@@ -30,18 +30,29 @@ export function MoodView() {
     vibrancy: 0,
     brightness: 0,
   });
-  const [editorColors, setEditorColors] = useState<Color[]>([]);
+
+  // Store the base palette (without refinements) for smooth slider adjustments
+  const baseColorsRef = useRef<Color[]>([]);
+  // Track if we're currently applying refinements (to distinguish from external changes)
+  const isApplyingRefinementRef = useRef(false);
 
   const { cache, getPalette, regenerate } = useMoodPaletteCache(
     selectedCategory,
     refinements
   );
 
-  // Hide command center when in edit mode
+  // Sync baseColorsRef when colors change externally (e.g., global shade shift)
   useEffect(() => {
-    setHideCommandCenter(viewMode === "edit");
-    return () => setHideCommandCenter(false);
-  }, [viewMode, setHideCommandCenter]);
+    if (viewMode === "edit" && !isApplyingRefinementRef.current && storeColors.length > 0) {
+      // Colors changed externally - update base and reset refinements
+      baseColorsRef.current = storeColors;
+      setRefinements({
+        temperature: 0,
+        vibrancy: 0,
+        brightness: 0,
+      });
+    }
+  }, [storeColors, viewMode]);
 
   // Get the selected mood profile
   const selectedMoodProfile = selectedMood
@@ -67,12 +78,15 @@ export function MoodView() {
   const handleMoodSelect = useCallback(
     (moodId: string) => {
       setSelectedMood(moodId);
-      // Generate fresh palette for editor
-      const newColors = generateMoodPalette(moodId, refinements);
-      setEditorColors(newColors);
+      // Generate base palette (no refinements) and store it
+      const basePalette = generateMoodPalette(moodId);
+      baseColorsRef.current = basePalette;
+      // Apply current refinements and write to global store
+      const adjustedColors = applyRefinementsToColors(basePalette, refinements);
+      setColors(adjustedColors);
       setViewMode("edit");
     },
-    [refinements]
+    [refinements, setColors]
   );
 
   // Handle back from editor to grid
@@ -86,38 +100,33 @@ export function MoodView() {
       const newRefinements = { ...refinements, [key]: value };
       setRefinements(newRefinements);
 
-      if (selectedMood) {
-        const newColors = generateMoodPalette(selectedMood, newRefinements);
-        setEditorColors(newColors);
+      // Apply refinements to the base palette (smooth adjustment, no regeneration)
+      if (baseColorsRef.current.length > 0) {
+        isApplyingRefinementRef.current = true;
+        const adjustedColors = applyRefinementsToColors(baseColorsRef.current, newRefinements);
+        setColors(adjustedColors);
+        // Reset flag after a tick to allow the effect to run
+        setTimeout(() => {
+          isApplyingRefinementRef.current = false;
+        }, 0);
       }
     },
-    [selectedMood, refinements]
+    [refinements, setColors]
   );
 
   // Handle regenerate in editor
   const handleRegenerate = useCallback(() => {
     if (selectedMood) {
-      const newColors = generateMoodPalette(selectedMood, refinements);
-      setEditorColors(newColors);
+      // Generate new base palette and store it
+      const basePalette = generateMoodPalette(selectedMood);
+      baseColorsRef.current = basePalette;
+      // Apply current refinements
+      const adjustedColors = applyRefinementsToColors(basePalette, refinements);
+      setColors(adjustedColors);
       // Also update the cache
       regenerate(selectedMood, refinements);
     }
-  }, [selectedMood, refinements, regenerate]);
-
-  // Handle individual color change in editor
-  const handleColorChange = useCallback((index: number, color: Color) => {
-    setEditorColors((prev) => {
-      const newColors = [...prev];
-      newColors[index] = color;
-      return newColors;
-    });
-  }, []);
-
-  // Handle apply palette - sets colors in global store
-  const handleApply = useCallback(() => {
-    setColors(editorColors);
-    // Stay in edit mode or navigate elsewhere as desired
-  }, [editorColors, setColors]);
+  }, [selectedMood, refinements, regenerate, setColors]);
 
   // Reset refinements when going back to browse
   useEffect(() => {
@@ -160,13 +169,10 @@ export function MoodView() {
             <MoodEditor
               key="edit"
               mood={selectedMoodProfile}
-              colors={editorColors}
               refinements={refinements}
               onRefinementChange={handleRefinementChange}
               onRegenerate={handleRegenerate}
-              onColorChange={handleColorChange}
               onBack={handleBack}
-              onApply={handleApply}
             />
           )
         )}

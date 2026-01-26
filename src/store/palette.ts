@@ -14,6 +14,8 @@ import {
 } from "@/lib/feature-limits";
 import { generatePalette, generatePaletteId } from "@/lib/generate";
 import { createColor, oklchToHex, forceInGamut } from "@/lib/colors";
+import { getShade } from "@/lib/shade-scale";
+import type { ShadeLevel } from "@/lib/types";
 
 const MAX_HISTORY = 50;
 
@@ -69,6 +71,7 @@ interface PaletteState {
   invert: () => void;
   adjustChroma: (delta: number) => void; // +/- percentage
   adjustLightness: (delta: number) => void; // +/- percentage
+  shiftToShade: (shade: ShadeLevel) => void; // Shift all colors to a shade level
 
   // AI actions
   generateAISuggestions: (prompt: string, isPremium: boolean) => Promise<void>;
@@ -448,6 +451,17 @@ export const usePaletteStore = create<PaletteState>()(
             l: newLightness,
           });
           return createColor(oklchToHex(adjustedOklch));
+        });
+
+        set({ colors: newColors });
+      },
+
+      // Shift all colors to a specific shade level
+      shiftToShade: (shade: ShadeLevel) => {
+        const { colors } = get();
+        const newColors = colors.map((color) => {
+          const shadeHex = getShade(color.hex, shade);
+          return createColor(shadeHex);
         });
 
         set({ colors: newColors });

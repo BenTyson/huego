@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { CommandGroup } from "./CommandGroup";
 import { CommandItem } from "./CommandItem";
+import { ShadeSlider } from "./ShadeSlider";
 
 interface CommandPanelProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface CommandPanelProps {
   onExport: () => void;
   onPublish: () => void;
   onSave: () => void;
+  onShowToast?: (message: string) => void;
 }
 
 export function CommandPanel({
@@ -36,6 +38,7 @@ export function CommandPanel({
   onExport,
   onPublish,
   onSave,
+  onShowToast,
 }: CommandPanelProps) {
   return (
     <AnimatePresence>
@@ -228,6 +231,11 @@ export function CommandPanel({
                     }
                   />
                 </CommandGroup>
+              </div>
+
+              {/* Shade Slider */}
+              <div className="px-4 py-3 border-t border-command-border">
+                <ShadeSlider onShowToast={onShowToast} />
               </div>
 
               {/* Footer hint */}

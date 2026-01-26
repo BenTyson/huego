@@ -19,6 +19,8 @@ interface ColorColumnProps {
   onShowInfo?: () => void;
   onReorder: (toIndex: number) => void;
   isActive: boolean;
+  /** Disable layout animations for smooth color transitions (e.g., in mood mode) */
+  disableLayoutAnimation?: boolean;
 }
 
 export const ColorColumn = memo(function ColorColumn({
@@ -34,6 +36,7 @@ export const ColorColumn = memo(function ColorColumn({
   onShowInfo,
   onReorder,
   isActive,
+  disableLayoutAnimation = false,
 }: ColorColumnProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState(false);
@@ -171,11 +174,11 @@ export const ColorColumn = memo(function ColorColumn({
   return (
     <motion.div
       ref={columnRef}
-      className="relative flex-1 flex flex-col items-center justify-center cursor-pointer no-select"
+      className="relative flex-1 flex flex-col items-center justify-center cursor-pointer no-select transition-colors duration-200"
       style={{ backgroundColor: color.hex }}
-      layout
-      layoutId={`color-column-${color.hex}`}
-      initial={{ opacity: 0, scale: 0.95 }}
+      layout={!disableLayoutAnimation}
+      layoutId={disableLayoutAnimation ? undefined : `color-column-${color.hex}`}
+      initial={disableLayoutAnimation ? false : { opacity: 0, scale: 0.95 }}
       animate={{
         opacity: 1,
         scale: isDragging ? 1.02 : 1,
@@ -183,7 +186,7 @@ export const ColorColumn = memo(function ColorColumn({
         boxShadow: isDragging
           ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
           : "0 0 0 0 rgba(0, 0, 0, 0)",
-        transition: { delay: index * 0.05, duration: 0.3 },
+        transition: disableLayoutAnimation ? { duration: 0.15 } : { delay: index * 0.05, duration: 0.3 },
       }}
       drag="x"
       dragListener={false}
@@ -198,7 +201,7 @@ export const ColorColumn = memo(function ColorColumn({
       onMouseLeave={() => {
         if (!isMobile) {
           setIsHovered(false);
-          setShowShades(false);
+          // Don't close shades here - let the popover handle its own close via click-outside
         }
       }}
       onClick={(e) => {

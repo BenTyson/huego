@@ -29,10 +29,10 @@ export function RefinementSliders({
           exit={{ opacity: 0, y: isOverlay ? 20 : 0, height: isOverlay ? "auto" : 0 }}
           className={
             isOverlay
-              ? "fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-xl border-t border-white/10 z-20"
+              ? "fixed left-0 right-0 bg-zinc-900/95 backdrop-blur-xl border-t border-white/10 z-20"
               : "space-y-6"
           }
-          style={isOverlay ? { paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' } : undefined}
+          style={isOverlay ? { bottom: 'max(5rem, calc(env(safe-area-inset-bottom) + 4.5rem))' } : undefined}
         >
           {isOverlay ? (
             // Overlay variant - horizontal layout

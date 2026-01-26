@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { GenerateButton } from "./GenerateButton";
 import { PaletteControls } from "./PaletteControls";
+import { ShadeBar } from "./ShadeBar";
 import { useColors } from "@/store/palette";
 import { copyShareUrl } from "@/lib/share";
 
@@ -33,6 +34,9 @@ export function CommandBar({ onTogglePanel, isPanelOpen, onShowToast, onExport }
 
       {/* Palette controls: Size + Harmony */}
       <PaletteControls />
+
+      {/* Shade control */}
+      <ShadeBar onShowToast={onShowToast} />
 
       {/* Divider */}
       <div className="w-px h-6 bg-border/50" />

@@ -831,3 +831,38 @@ export function getMoodGrid(): MoodProfile[][] {
     moodProfiles.slice(8, 12),
   ];
 }
+
+/**
+ * Apply refinement adjustments to existing colors (for slider changes)
+ * This transforms colors in place rather than regenerating randomly
+ */
+export function applyRefinementsToColors(
+  colors: Color[],
+  refinements: RefinementValues
+): Color[] {
+  const { temperature, vibrancy, brightness } = refinements;
+
+  return colors.map((color) => {
+    // Shift hue based on temperature (warmer = toward orange, cooler = toward blue)
+    const hueShift = temperature * 30;
+    const newHue = normalizeHue(color.oklch.h + hueShift);
+
+    // Adjust chroma based on vibrancy
+    const chromaMultiplier = 1 + vibrancy * 0.5;
+    const newChroma = Math.max(0.01, Math.min(0.35, color.oklch.c * chromaMultiplier));
+
+    // Adjust lightness based on brightness
+    const lightnessShift = brightness * 0.15;
+    const newLightness = Math.max(0.15, Math.min(0.95, color.oklch.l + lightnessShift));
+
+    const oklch: OKLCH = forceInGamut(
+      clampOklch({
+        l: newLightness,
+        c: newChroma,
+        h: newHue,
+      })
+    );
+
+    return createColor(oklchToHex(oklch));
+  });
+}

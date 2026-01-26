@@ -11,7 +11,7 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 12 complete. Mood Mode Redesign with Grid of Palette Cards.
+Phase 13 complete. Mood Mode Consolidation + Global Shade Control.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
@@ -24,22 +24,22 @@ Phase 12 complete. Mood Mode Redesign with Grid of Palette Cards.
 - AI-powered palette generation via Claude API
 - Mobile-optimized with touch targets and safe areas
 - **64 mood presets across 7 categories** with grid UI
+- **Global shade control** in main CommandBar
 - Stripe in test mode
 
-**Phase 12 Complete (Mood Mode Redesign):**
-- Browse mode: Full-screen grid of mood cards
-- Edit mode: Card expands to full view with vertical columns
-- 5-color horizontal stripes per card with hex hover overlay
-- Responsive grid (1-4 columns based on viewport)
-- Overlay refinement sliders at bottom in edit mode
-- Palette caching for fast category switching
-- 150ms soft fade on color changes
+**Phase 13 Complete (Mood Mode Consolidation):**
+- MoodEditor now uses ColorColumn from Immersive mode (DRY)
+- Full action pill in Mood: lock, drag, remove, shades, save, info
+- Global shade control - shift entire palette to any shade (50-950)
+- Refinement sliders transform colors smoothly (no regeneration)
+- ShadePopover uses portal (escapes transform context)
+- Simplified MoodCard hover state
 
 **Recent Phases:**
+- Phase 12: Mood Mode Redesign (grid of palette cards)
 - Phase 11: Expanded Mood Presets (64 moods, 7 categories)
 - Phase 10: Mobile UI/UX (touch targets, safe areas)
 - Phase 9: Coolors-style ColorColumn actions
-- Phase 8: Enhanced Tailwind export (v3/v4, color spaces)
 
 **Next (Phase 4 - Platform Integrations):**
 - Figma plugin

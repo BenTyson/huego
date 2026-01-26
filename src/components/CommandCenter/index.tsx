@@ -163,6 +163,7 @@ export function CommandCenter() {
           setShowPublishModal(true);
         }}
         onSave={handleSave}
+        onShowToast={showToastMessage}
       />
 
       {/* Modals */}

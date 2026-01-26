@@ -4,6 +4,90 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.20.0] - 2026-01-26
+
+### Phase 13: Mood Mode Consolidation + Global Shade Control
+
+Consolidated Mood Editor to reuse ColorColumn from Immersive mode, providing full functionality (lock, drag, remove, shades, save, info). Added global shade controller to shift entire palette to any Tailwind shade level.
+
+#### Added
+
+**Global Shade Control** (`src/components/CommandCenter/ShadeBar.tsx`)
+- Visible in main CommandBar (not hidden in ... menu)
+- Compact preview strip showing 5 shade levels
+- Dropdown with all 11 shades (50-950)
+- One-click shifts entire palette to target shade
+- Toast feedback on shade change
+
+**ShadeSlider Component** (`src/components/CommandCenter/ShadeSlider.tsx`)
+- Also available in CommandPanel (... menu)
+- Visual shade strip with selection indicator
+- Detects average shade of current palette
+
+**Palette Store Action** (`src/store/palette.ts`)
+- `shiftToShade(shade: ShadeLevel)` - shifts all colors to specified shade
+- Uses `getShade()` from shade-scale library
+
+**Refinement-to-Colors Function** (`src/lib/mood.ts`)
+- `applyRefinementsToColors(colors, refinements)` - applies temp/vibrancy/brightness to existing colors
+- Enables smooth slider transitions without palette regeneration
+
+#### Changed
+
+**MoodEditor** (`src/components/modes/mood/MoodEditor.tsx`)
+- Now uses `ColorColumn` from Immersive mode
+- Full action pill: lock, drag, remove, copy, shades, save, info
+- Removed custom `ColorEditorColumn` (133 lines deleted)
+- Added `ColorInfoPanel` for color psychology
+- Removed "Apply Palette" button (writes directly to store)
+- Added `disableLayoutAnimation` for smooth color transitions
+
+**MoodView** (`src/components/modes/mood/MoodView.tsx`)
+- Removed local `editorColors` state
+- Writes directly to global store via `setColors()`
+- Stores base palette in ref for smooth refinement sliders
+- Syncs base when external changes detected (e.g., shade shift)
+- Refinement sliders now transform colors smoothly (no regeneration)
+
+**ColorColumn** (`src/components/modes/immersive/ColorColumn.tsx`)
+- Added `disableLayoutAnimation` prop
+- Disables Framer Motion layout animations when true
+- Added `transition-colors duration-200` for smooth color changes
+- ShadePopover no longer closes on mouse leave
+
+**RefinementSliders** (`src/components/modes/mood/RefinementSliders.tsx`)
+- Repositioned above CommandCenter (bottom: 5rem + safe area)
+- Prevents overlap with CommandCenter controls
+
+**ShadePopover** (`src/components/ui/ShadePopover.tsx`)
+- Now uses React portal to document.body
+- Escapes transformed ancestor context (fixed positioning works correctly)
+- Added `max-w-[90vw]` and horizontal scroll for narrow screens
+
+**MoodCard** (`src/components/modes/mood/MoodCard.tsx`)
+- Simplified hover state (removed hex code overlay)
+- Added `cursor-pointer` for hand cursor
+- Subtle lift + scale on hover
+
+**CommandCenter** (`src/components/CommandCenter/index.tsx`)
+- No longer hidden in Mood edit mode
+- ShadeBar visible in main CommandBar
+
+#### Technical
+
+**New Files (2)**
+```
+src/components/CommandCenter/ShadeBar.tsx
+src/components/CommandCenter/ShadeSlider.tsx
+```
+
+**Architecture**
+- Mood Editor now shares ColorColumn with Immersive mode (DRY)
+- Global palette actions (shade, lock, save) work across all modes
+- Refinement sliders work as transforms, not regenerators
+
+---
+
 ## [0.19.0] - 2026-01-26
 
 ### Phase 12: Mood Mode Redesign - Grid of Palette Cards
