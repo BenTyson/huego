@@ -4,6 +4,105 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.19.0] - 2026-01-26
+
+### Phase 12: Mood Mode Redesign - Grid of Palette Cards
+
+Complete redesign of Mood mode from sidebar list to Coolors-style grid of rectangular palette cards. Clicking a card expands it into a full edit view with refinement sliders.
+
+#### Added
+
+**Palette Cache Hook** (`src/hooks/useMoodPaletteCache.ts`)
+- Pre-generates palettes for all moods in selected category
+- Caches results to avoid regeneration on category switch
+- `getPalette(moodId)` returns cached or generates on-demand
+- `regenerate(moodId)` forces new palette generation
+- Uses `useRef` for on-demand cache to avoid render-time setState
+
+**MoodCard Component** (`src/components/modes/mood/MoodCard.tsx`)
+- 5 horizontal color stripes display (flex-col layout)
+- Mood name + icon below card
+- Hover: scale(1.02) + shadow + hex codes overlay
+- Responsive card heights (h-24 sm:h-28)
+
+**MoodGrid Component** (`src/components/modes/mood/MoodGrid.tsx`)
+- Responsive grid: 1 col mobile, 2 sm, 3 lg, 4 xl
+- Filters moods by selected category
+- AnimatePresence for smooth card transitions
+
+**MoodHeader Component** (`src/components/modes/mood/MoodHeader.tsx`)
+- Title "How should it feel?" with mood icon
+- Horizontal scrolling category tabs with icons
+- Fade indicators for scroll overflow
+- Extracted from MoodSelectionPanel
+
+**MoodEditor Component** (`src/components/modes/mood/MoodEditor.tsx`)
+- Full-screen expanded view with 5 vertical color columns
+- Top bar: Back button, mood name/icon, Apply Palette button
+- Each column shows hex code, color name, edit button
+- Click column to open color picker
+- Copy hex on click with "Copied!" feedback
+- 150ms soft fade transition on color changes
+
+**UI Store** (`src/store/ui.ts`)
+- `hideCommandCenter` state for global command bar visibility
+- Used by MoodView to hide command bar during edit mode
+
+#### Changed
+
+**RefinementSliders** (`src/components/modes/mood/RefinementSliders.tsx`)
+- Added `variant?: 'sidebar' | 'overlay'` prop
+- `overlay` variant: Horizontal layout, fixed bottom, safe area padding
+- 3-column slider grid on desktop, stacked on mobile
+- Regenerate button inline with sliders
+
+**MoodView** (`src/components/modes/mood/MoodView.tsx`)
+- Complete rewrite as state orchestrator
+- Two view states: `browse` (grid) and `edit` (editor)
+- Manages category, mood selection, refinements, editor colors
+- Uses LayoutGroup + AnimatePresence for view transitions
+- Sets `hideCommandCenter` when in edit mode
+
+**CommandCenter** (`src/components/CommandCenter/index.tsx`)
+- Now respects `hideCommandCenter` from UI store
+- AnimatePresence wrapper for smooth show/hide
+
+#### Removed
+
+**MoodSelectionPanel** (`src/components/modes/mood/MoodSelectionPanel.tsx`)
+- Functionality split into MoodHeader, MoodGrid, MoodCard
+
+#### Technical
+
+**New Files (6 total)**
+```
+src/hooks/useMoodPaletteCache.ts
+src/components/modes/mood/MoodHeader.tsx
+src/components/modes/mood/MoodGrid.tsx
+src/components/modes/mood/MoodCard.tsx
+src/components/modes/mood/MoodEditor.tsx
+src/store/ui.ts
+```
+
+**Modified Files (3 total)**
+```
+src/components/modes/mood/MoodView.tsx
+src/components/modes/mood/RefinementSliders.tsx
+src/components/CommandCenter/index.tsx
+```
+
+**Deleted Files (1 total)**
+```
+src/components/modes/mood/MoodSelectionPanel.tsx
+```
+
+- Build passes with no errors
+- No render-time setState issues (fixed with useRef pattern)
+- Command center hidden during mood edit to prevent UI overlap
+- 150ms CSS transition for smooth color updates on slider changes
+
+---
+
 ## [0.18.0] - 2026-01-26
 
 ### Phase 11: Expanded Mood Presets with Categories

@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { CommandBar } from "./CommandBar";
 import { CommandPanel } from "./CommandPanel";
 import { usePaletteStore } from "@/store/palette";
+import { useUIStore } from "@/store/ui";
 
 // Lazy load modal components
 const ExportModal = dynamic(
@@ -68,6 +69,7 @@ export function CommandCenter() {
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { undo, redo, shuffle, invert, savePalette } = usePaletteStore();
+  const hideCommandCenter = useUIStore((state) => state.hideCommandCenter);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -104,20 +106,25 @@ export function CommandCenter() {
   return (
     <>
       {/* Main command bar - respects safe area for devices with home indicator */}
-      <motion.div
-        className="fixed left-1/2 -translate-x-1/2 z-40"
-        style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        <CommandBar
-          onTogglePanel={() => setShowPanel(!showPanel)}
-          isPanelOpen={showPanel}
-          onShowToast={showToastMessage}
-          onExport={() => setShowExportModal(true)}
-        />
-      </motion.div>
+      <AnimatePresence>
+        {!hideCommandCenter && (
+          <motion.div
+            className="fixed left-1/2 -translate-x-1/2 z-40"
+            style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <CommandBar
+              onTogglePanel={() => setShowPanel(!showPanel)}
+              isPanelOpen={showPanel}
+              onShowToast={showToastMessage}
+              onExport={() => setShowExportModal(true)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Command panel */}
       <CommandPanel

@@ -11,7 +11,7 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 11 complete. Expanded Mood Presets with Categories.
+Phase 12 complete. Mood Mode Redesign with Grid of Palette Cards.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
@@ -23,21 +23,23 @@ Phase 11 complete. Expanded Mood Presets with Categories.
 - Supabase community database active
 - AI-powered palette generation via Claude API
 - Mobile-optimized with touch targets and safe areas
-- **64 mood presets across 7 categories** (was 12)
+- **64 mood presets across 7 categories** with grid UI
 - Stripe in test mode
 
-**Phase 11 Complete (Expanded Mood Presets):**
-- 64 moods (up from 12) across 7 categories
-- Categories: Emotions, Seasons, Nature, Aesthetics, Industry, Cultural, Abstract
-- Horizontal scrolling category tabs with icons
-- 64 unique mood icons following existing style
-- Category-filtered mood list with smooth transitions
+**Phase 12 Complete (Mood Mode Redesign):**
+- Browse mode: Full-screen grid of mood cards
+- Edit mode: Card expands to full view with vertical columns
+- 5-color horizontal stripes per card with hex hover overlay
+- Responsive grid (1-4 columns based on viewport)
+- Overlay refinement sliders at bottom in edit mode
+- Palette caching for fast category switching
+- 150ms soft fade on color changes
 
 **Recent Phases:**
+- Phase 11: Expanded Mood Presets (64 moods, 7 categories)
 - Phase 10: Mobile UI/UX (touch targets, safe areas)
 - Phase 9: Coolors-style ColorColumn actions
 - Phase 8: Enhanced Tailwind export (v3/v4, color spaces)
-- Phase 7: Context mode enhancement (shade scales, previews)
 
 **Next (Phase 4 - Platform Integrations):**
 - Figma plugin
@@ -104,7 +106,7 @@ src/
 │   ├── modes/
 │   │   ├── immersive/    # ImmersiveView, ColorColumn
 │   │   ├── context/
-│   │   ├── mood/
+│   │   ├── mood/         # MoodView, MoodHeader, MoodGrid, MoodCard, MoodEditor
 │   │   ├── playground/
 │   │   ├── gradient/     # GradientView.tsx
 │   │   └── explore/      # ExploreView, FilterBar, Grid, Card
@@ -142,9 +144,11 @@ src/
 │   ├── palette.ts        # Main state + paletteSize
 │   ├── subscription.ts   # Premium state + verification
 │   ├── theme.ts          # Dark/light theme state
-│   └── community.ts      # Explorer state, likes, filters
+│   ├── community.ts      # Explorer state, likes, filters
+│   └── ui.ts             # UI state (hideCommandCenter)
 └── hooks/
-    └── useKeyboard.ts    # All keyboard shortcuts
+    ├── useKeyboard.ts    # All keyboard shortcuts
+    └── useMoodPaletteCache.ts  # Mood palette pre-generation
 ```
 
 ---
