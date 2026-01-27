@@ -24,7 +24,7 @@ const modes: ModeOption[] = [
     href: "/immersive",
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <rect x="3" y="3" width="18" height="18" rx="4" />
       </svg>
     ),
   },
@@ -63,7 +63,7 @@ const modes: ModeOption[] = [
     premium: true,
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <rect x="3" y="3" width="18" height="18" rx="4" />
         <path d="M3 9h18" />
         <path d="M3 15h18" />
       </svg>
@@ -75,7 +75,7 @@ const modes: ModeOption[] = [
     href: "/play",
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="2" y="4" width="20" height="16" rx="2" />
+        <rect x="2" y="4" width="20" height="16" rx="4" />
         <path d="M12 8v8" />
         <path d="M8 12h8" />
       </svg>

@@ -52,6 +52,7 @@ Competitors are functional but boring. We differentiate on:
 - **Global shade control**: Shift entire palette to any shade level (50-950)
 - **Drag reorder**: Drag handle to rearrange colors
 - **Remove at index**: X button to remove specific colors (min 2)
+- **Layout toggle**: Switch between vertical columns and horizontal strips (persisted)
 
 ### Color Psychology (Unique)
 - Meaning and emotions for each color
@@ -138,6 +139,8 @@ All sprints complete. Now implementing competitive roadmap.
 | 10 | Mobile UI/UX (touch targets, safe areas, tap-toggle) | ✅ |
 | 11 | Expanded mood presets (64 moods, 7 categories) | ✅ |
 | 12 | Mood mode redesign (grid cards, expand to edit) | ✅ |
+| 13 | Mood mode consolidation + global shade control | ✅ |
+| 14 | Palette layout toggle + UI polish | ✅ |
 | 4 | Platform integrations (Figma, Chrome, VS Code) | Pending |
 | 5 | SVG recolor, expanded templates | Pending |
 
@@ -217,6 +220,7 @@ localStorage for user preferences, Supabase for community palettes.
 | Copy button | Yes | Yes | ✅ Parity |
 | Mobile touch targets | Basic | 44px+ HIG | ✅ Advantage |
 | Safe area support | Partial | Full | ✅ Advantage |
+| Layout toggle (columns/strips) | No | Yes | ✅ Advantage |
 | Figma plugin | Yes | Pending | Phase 4 |
 
 ---

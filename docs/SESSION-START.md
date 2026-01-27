@@ -1,7 +1,7 @@
 # HueGo - Session Start Guide
 
 > **Read this before doing anything.**
-> Last Updated: 2026-01-26
+> Last Updated: 2026-01-27
 > Production: https://huego-production.up.railway.app
 > Dev: `npm run dev` (port 3377)
 
@@ -11,7 +11,7 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 13 complete. Mood Mode Consolidation + Global Shade Control.
+Phase 14 complete. Palette Layout Toggle + UI Polish.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
@@ -25,21 +25,22 @@ Phase 13 complete. Mood Mode Consolidation + Global Shade Control.
 - Mobile-optimized with touch targets and safe areas
 - **64 mood presets across 7 categories** with grid UI
 - **Global shade control** in main CommandBar
+- **Palette layout toggle** (columns vs horizontal strips)
 - Stripe in test mode
 
-**Phase 13 Complete (Mood Mode Consolidation):**
-- MoodEditor now uses ColorColumn from Immersive mode (DRY)
-- Full action pill in Mood: lock, drag, remove, shades, save, info
-- Global shade control - shift entire palette to any shade (50-950)
-- Refinement sliders transform colors smoothly (no regeneration)
-- ShadePopover uses portal (escapes transform context)
-- Simplified MoodCard hover state
+**Phase 14 Complete (Layout Toggle + UI Polish):**
+- Toggle between vertical columns and horizontal strips
+- Shared across Immersive and Mood Editor views
+- Layout preference persisted to localStorage
+- ColorColumn supports `orientation` prop (vertical/horizontal)
+- Fixed ModeSelector nested border mismatch in nav bar
+- Rounded mode icons to match pill-shaped UI
 
 **Recent Phases:**
+- Phase 13: Mood Mode Consolidation + Global Shade Control
 - Phase 12: Mood Mode Redesign (grid of palette cards)
 - Phase 11: Expanded Mood Presets (64 moods, 7 categories)
 - Phase 10: Mobile UI/UX (touch targets, safe areas)
-- Phase 9: Coolors-style ColorColumn actions
 
 **Next (Phase 4 - Platform Integrations):**
 - Figma plugin
@@ -102,7 +103,8 @@ src/
 │   │   └── ModePageLayout.tsx
 │   ├── ui/
 │   │   ├── ColorEditButton.tsx  # With suggestions popover
-│   │   └── HydrationLoader.tsx
+│   │   ├── HydrationLoader.tsx
+│   │   └── LayoutToggle.tsx     # Column/strip layout toggle
 │   ├── modes/
 │   │   ├── immersive/    # ImmersiveView, ColorColumn
 │   │   ├── context/
@@ -145,7 +147,7 @@ src/
 │   ├── subscription.ts   # Premium state + verification
 │   ├── theme.ts          # Dark/light theme state
 │   ├── community.ts      # Explorer state, likes, filters
-│   └── ui.ts             # UI state (hideCommandCenter)
+│   └── ui.ts             # UI state (hideCommandCenter, paletteLayout)
 └── hooks/
     ├── useKeyboard.ts    # All keyboard shortcuts
     └── useMoodPaletteCache.ts  # Mood palette pre-generation

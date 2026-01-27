@@ -6,6 +6,8 @@ import type { Color } from "@/lib/types";
 import { ShadePopover } from "@/components/ui/ShadePopover";
 import { MIN_PALETTE_SIZE } from "@/lib/feature-limits";
 
+export type ColorColumnOrientation = "vertical" | "horizontal";
+
 interface ColorColumnProps {
   color: Color;
   index: number;
@@ -21,6 +23,8 @@ interface ColorColumnProps {
   isActive: boolean;
   /** Disable layout animations for smooth color transitions (e.g., in mood mode) */
   disableLayoutAnimation?: boolean;
+  /** Layout orientation - vertical columns (default) or horizontal strips */
+  orientation?: ColorColumnOrientation;
 }
 
 export const ColorColumn = memo(function ColorColumn({
@@ -37,7 +41,9 @@ export const ColorColumn = memo(function ColorColumn({
   onReorder,
   isActive,
   disableLayoutAnimation = false,
+  orientation = "vertical",
 }: ColorColumnProps) {
+  const isHorizontal = orientation === "horizontal";
   const [isHovered, setIsHovered] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -141,18 +147,21 @@ export const ColorColumn = memo(function ColorColumn({
     (_: unknown, info: PanInfo) => {
       setIsDragging(false);
 
-      // Calculate which column to swap with based on drag distance
-      const columnWidth = columnRef.current?.offsetWidth || 200;
-      const offsetColumns = Math.round(info.offset.x / columnWidth);
+      // Calculate which column/row to swap with based on drag distance
+      const dimension = isHorizontal
+        ? columnRef.current?.offsetHeight || 100
+        : columnRef.current?.offsetWidth || 200;
+      const offset = isHorizontal ? info.offset.y : info.offset.x;
+      const offsetSteps = Math.round(offset / dimension);
 
-      if (offsetColumns !== 0) {
-        const newIndex = Math.max(0, Math.min(totalColors - 1, index + offsetColumns));
+      if (offsetSteps !== 0) {
+        const newIndex = Math.max(0, Math.min(totalColors - 1, index + offsetSteps));
         if (newIndex !== index) {
           onReorder(newIndex);
         }
       }
     },
-    [index, totalColors, onReorder]
+    [index, totalColors, onReorder, isHorizontal]
   );
 
   // Memoize text colors based on contrast color
@@ -174,7 +183,9 @@ export const ColorColumn = memo(function ColorColumn({
   return (
     <motion.div
       ref={columnRef}
-      className="relative flex-1 flex flex-col items-center justify-center cursor-pointer no-select transition-colors duration-200"
+      className={`relative flex-1 flex items-center justify-center cursor-pointer no-select transition-colors duration-200 ${
+        isHorizontal ? "flex-row w-full" : "flex-col"
+      }`}
       style={{ backgroundColor: color.hex }}
       layout={!disableLayoutAnimation}
       layoutId={disableLayoutAnimation ? undefined : `color-column-${color.hex}`}
@@ -188,10 +199,10 @@ export const ColorColumn = memo(function ColorColumn({
           : "0 0 0 0 rgba(0, 0, 0, 0)",
         transition: disableLayoutAnimation ? { duration: 0.15 } : { delay: index * 0.05, duration: 0.3 },
       }}
-      drag="x"
+      drag={isHorizontal ? "y" : "x"}
       dragListener={false}
       dragControls={dragControls}
-      dragConstraints={{ left: 0, right: 0 }}
+      dragConstraints={isHorizontal ? { top: 0, bottom: 0 } : { left: 0, right: 0 }}
       dragElastic={0.1}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
@@ -224,9 +235,12 @@ export const ColorColumn = memo(function ColorColumn({
         aria-label={`Edit color ${index + 1}`}
       />
 
-      {/* Lock indicator - top right, always visible when locked */}
+      {/* Lock indicator - top right for columns, right side for strips */}
       <motion.div
-        className="absolute top-16 right-4 md:top-20 md:right-6"
+        className={isHorizontal
+          ? "absolute top-1/2 -translate-y-1/2 right-3 md:right-4"
+          : "absolute top-16 right-4 md:top-20 md:right-6"
+        }
         initial={{ opacity: 0 }}
         animate={{
           opacity: isLocked ? 0.9 : isHovered ? 0.4 : 0.15,
@@ -329,7 +343,11 @@ export const ColorColumn = memo(function ColorColumn({
       <AnimatePresence>
         {isMobile && !mobileExpanded && (
           <motion.div
-            className="absolute bottom-16 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full text-xs font-medium"
+            className={`absolute px-3 py-1.5 rounded-full text-xs font-medium ${
+              isHorizontal
+                ? "left-1/2 -translate-x-1/2 bottom-2"
+                : "bottom-16 left-1/2 -translate-x-1/2"
+            }`}
             style={{
               backgroundColor:
                 color.contrastColor === "white"
@@ -351,7 +369,11 @@ export const ColorColumn = memo(function ColorColumn({
         {(isHovered || mobileExpanded) && (
           <motion.div
             ref={actionPillRef}
-            className="absolute bottom-16 md:bottom-20 left-1/2 flex items-center gap-1 px-2 py-1.5 rounded-full backdrop-blur-xl border"
+            className={`absolute flex items-center gap-1 px-2 py-1.5 rounded-full backdrop-blur-xl border ${
+              isHorizontal
+                ? "left-1/2 bottom-2"
+                : "bottom-16 md:bottom-20 left-1/2"
+            }`}
             style={{
               backgroundColor:
                 color.contrastColor === "white"
@@ -537,9 +559,13 @@ export const ColorColumn = memo(function ColorColumn({
         }}
       />
 
-      {/* Bottom index indicator */}
+      {/* Index indicator - bottom for columns, left side for strips */}
       <motion.div
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs font-mono"
+        className={`absolute text-xs font-mono ${
+          isHorizontal
+            ? "left-3 md:left-4 top-1/2 -translate-y-1/2"
+            : "bottom-4 left-1/2 -translate-x-1/2"
+        }`}
         style={{ color: textColorMuted }}
         initial={false}
         animate={{ opacity: isHovered ? 0.6 : 0.3 }}

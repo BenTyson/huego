@@ -4,6 +4,76 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.21.0] - 2026-01-27
+
+### Phase 14: Palette Layout Toggle + UI Polish
+
+Added toggleable layout for full-screen palette views. Users can switch between vertical columns (default) and horizontal strips in both Immersive and Mood Editor. Preference persists via localStorage. Also fixed navigation bar visual inconsistencies.
+
+#### Added
+
+**Layout Toggle** (`src/components/ui/LayoutToggle.tsx`)
+- Toggle button to switch between vertical columns and horizontal strips
+- Animated icon rotates 90° to indicate current layout
+- Appears in top-right of Immersive view and in Mood Editor header bar
+
+**Palette Layout State** (`src/store/ui.ts`)
+- `paletteLayout: "columns" | "strips"` state with Zustand persist middleware
+- `togglePaletteLayout()` action
+- `usePaletteLayout()` selector hook
+- Persisted to localStorage under `huego-ui` key
+
+**ColorColumn Orientation** (`src/components/modes/immersive/ColorColumn.tsx`)
+- `orientation` prop: `"vertical"` (default) or `"horizontal"`
+- Horizontal mode: drag direction switches to vertical axis
+- Action pill repositioned to bottom-center in strip mode
+- Lock indicator moves to right side of strip
+- Index indicator moves to left side of strip
+- Mobile tap hint repositioned for strip layout
+
+#### Changed
+
+**ImmersiveView** (`src/components/modes/immersive/ImmersiveView.tsx`)
+- Reads `paletteLayout` from UI store
+- Passes `orientation` prop to all ColorColumn instances
+- Strips mode applies `pt-16 pb-20` padding for header/command bar clearance
+- Layout toggle positioned below navigation bar
+
+**MoodEditor** (`src/components/modes/mood/MoodEditor.tsx`)
+- Reads `paletteLayout` from UI store
+- Passes `orientation` prop to all ColorColumn instances
+- Layout toggle replaces empty spacer in header bar
+
+#### Fixed
+
+**ModeSelector** (`src/components/Navigation/ModeSelector.tsx`)
+- Removed `bg-command-bg`, `backdrop-blur-md`, `border border-command-border` from button
+- Changed `rounded-lg` to `rounded-full` to match parent pill container
+- Eliminates nested rectangle-inside-pill border mismatch
+
+**Mode Icons** (`src/components/ModeToggle.tsx`)
+- Increased `rx` from `2` to `4` on Immersive, Gradient, and Play mode icons
+- More rounded rectangle shape harmonizes with pill-shaped UI
+
+#### Technical
+
+**New Files (1)**
+```
+src/components/ui/LayoutToggle.tsx
+```
+
+**Modified Files (6)**
+```
+src/store/ui.ts
+src/components/modes/immersive/ColorColumn.tsx
+src/components/modes/immersive/ImmersiveView.tsx
+src/components/modes/mood/MoodEditor.tsx
+src/components/Navigation/ModeSelector.tsx
+src/components/ModeToggle.tsx
+```
+
+---
+
 ## [0.20.0] - 2026-01-26
 
 ### Phase 13: Mood Mode Consolidation + Global Shade Control

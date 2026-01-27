@@ -91,7 +91,7 @@ export function ModeSelector() {
   return (
     <div className="relative">
       <motion.button
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-command-bg backdrop-blur-md border border-command-border text-foreground/90 hover:text-foreground hover:bg-command-hover transition-colors text-sm font-medium"
+        className="flex items-center gap-2 px-3 py-2 rounded-full text-foreground/90 hover:text-foreground hover:bg-command-hover transition-colors text-sm font-medium"
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}

@@ -3,15 +3,18 @@
 import { useCallback, useState, useEffect } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { usePaletteStore, useColors, useLocked, useSavedColors } from "@/store/palette";
+import { usePaletteLayout } from "@/store/ui";
 import { createColor } from "@/lib/colors";
 import { ColorColumn } from "./ColorColumn";
 import { ColorInfoPanel } from "@/components/ColorInfoPanel";
+import { LayoutToggle } from "@/components/ui/LayoutToggle";
 import type { Color } from "@/lib/types";
 
 export function ImmersiveView() {
   // Use individual selectors for optimized re-renders
   const colors = useColors();
   const locked = useLocked();
+  const paletteLayout = usePaletteLayout();
   // savedColors is accessed via isSavedColor - this hook ensures re-renders on savedColors changes
   useSavedColors();
   const {
@@ -27,6 +30,8 @@ export function ImmersiveView() {
   const [showHint, setShowHint] = useState(true);
   const [infoColor, setInfoColor] = useState<Color | null>(null);
   const [showInfoPanel, setShowInfoPanel] = useState(false);
+
+  const isStrips = paletteLayout === "strips";
 
   // Hide hint after first generation
   useEffect(() => {
@@ -78,12 +83,15 @@ export function ImmersiveView() {
 
   return (
     <div className="relative h-dvh w-screen overflow-hidden">
-      {/* Color columns */}
+      {/* Color columns/strips */}
       <LayoutGroup>
         <motion.div
-          className="flex h-full w-full flex-col md:flex-row"
+          className={`flex h-full w-full ${
+            isStrips ? "flex-col pt-16 pb-20" : "flex-col md:flex-row"
+          }`}
           initial={false}
           animate={{ opacity: 1 }}
+          layout
         >
           <AnimatePresence mode="sync">
             {colors.map((color, index) => (
@@ -101,11 +109,17 @@ export function ImmersiveView() {
                 onShowInfo={() => handleShowInfo(color)}
                 onReorder={(toIndex) => handleReorder(index, toIndex)}
                 isActive={activeIndex === index}
+                orientation={isStrips ? "horizontal" : "vertical"}
               />
             ))}
           </AnimatePresence>
         </motion.div>
       </LayoutGroup>
+
+      {/* Layout toggle - positioned below navigation */}
+      <div className="absolute top-20 right-4 z-10">
+        <LayoutToggle />
+      </div>
 
       {/* Spacebar hint */}
       <AnimatePresence>

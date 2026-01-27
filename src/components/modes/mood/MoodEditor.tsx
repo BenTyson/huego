@@ -9,7 +9,9 @@ import { RefinementSliders } from "./RefinementSliders";
 import { moodIcons } from "@/lib/mood-icons";
 import { ColorColumn } from "@/components/modes/immersive/ColorColumn";
 import { ColorInfoPanel } from "@/components/ColorInfoPanel";
+import { LayoutToggle } from "@/components/ui/LayoutToggle";
 import { useColors, useLocked, useSavedColors, usePaletteStore } from "@/store/palette";
+import { usePaletteLayout } from "@/store/ui";
 
 interface MoodEditorProps {
   mood: MoodProfile;
@@ -31,6 +33,7 @@ export const MoodEditor = memo(function MoodEditor({
   // Global store hooks
   const colors = useColors();
   const locked = useLocked();
+  const paletteLayout = usePaletteLayout();
   useSavedColors(); // Ensures re-renders on savedColors changes
   const {
     toggleLock,
@@ -44,6 +47,8 @@ export const MoodEditor = memo(function MoodEditor({
   // Local state for ColorInfoPanel
   const [infoColor, setInfoColor] = useState<Color | null>(null);
   const [showInfoPanel, setShowInfoPanel] = useState(false);
+
+  const isStrips = paletteLayout === "strips";
 
   const handleColorChange = useCallback(
     (index: number, hex: string) => {
@@ -121,12 +126,16 @@ export const MoodEditor = memo(function MoodEditor({
           </div>
         </div>
 
-        {/* Empty div for layout balance since we removed the Apply button */}
-        <div className="w-[88px] hidden sm:block" />
+        {/* Layout toggle */}
+        <div className="flex items-center gap-2">
+          <LayoutToggle />
+        </div>
       </div>
 
-      {/* Color Columns - pb-36 provides clearance for the fixed RefinementSliders */}
-      <div className="flex-1 flex flex-col md:flex-row min-h-0 pb-36">
+      {/* Color Columns/Strips - pb-36 provides clearance for the fixed RefinementSliders */}
+      <div className={`flex-1 flex min-h-0 pb-36 ${
+        isStrips ? "flex-col" : "flex-col md:flex-row"
+      }`}>
         {colors.map((color, index) => (
           <ColorColumn
             key={index}
@@ -143,6 +152,7 @@ export const MoodEditor = memo(function MoodEditor({
             onReorder={(toIndex) => handleReorder(index, toIndex)}
             isActive={false}
             disableLayoutAnimation
+            orientation={isStrips ? "horizontal" : "vertical"}
           />
         ))}
       </div>
