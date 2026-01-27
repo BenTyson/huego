@@ -66,12 +66,16 @@ interface PaletteState {
   deleteSavedColor: (hex: string) => void;
   reset: () => void;
 
+  // Shade base (original colors before shade shifting)
+  shadeBaseColors: Color[] | null;
+
   // Batch operations
   shuffle: () => void;
   invert: () => void;
   adjustChroma: (delta: number) => void; // +/- percentage
   adjustLightness: (delta: number) => void; // +/- percentage
   shiftToShade: (shade: ShadeLevel) => void; // Shift all colors to a shade level
+  clearShadeBase: () => void;
 
   // AI actions
   generateAISuggestions: (prompt: string, isPremium: boolean) => Promise<void>;
@@ -96,6 +100,9 @@ export const usePaletteStore = create<PaletteState>()(
       historyIndex: -1,
       savedPalettes: [],
       savedColors: [],
+
+      // Shade base state
+      shadeBaseColors: null,
 
       // AI state
       aiSuggestions: null,
@@ -134,6 +141,7 @@ export const usePaletteStore = create<PaletteState>()(
           colors: newColors,
           history: newHistory,
           historyIndex: newHistory.length - 1,
+          shadeBaseColors: null,
         });
       },
 
@@ -150,12 +158,12 @@ export const usePaletteStore = create<PaletteState>()(
         const { colors } = get();
         const newColors = [...colors];
         newColors[index] = color;
-        set({ colors: newColors });
+        set({ colors: newColors, shadeBaseColors: null });
       },
 
       // Set all colors at once
       setColors: (colors: Color[]) => {
-        set({ colors });
+        set({ colors, shadeBaseColors: null });
       },
 
       // Switch mode
@@ -215,6 +223,7 @@ export const usePaletteStore = create<PaletteState>()(
           colors: newColors,
           locked: [...locked, false],
           paletteSize: newSize,
+          shadeBaseColors: null,
         });
       },
 
@@ -228,6 +237,7 @@ export const usePaletteStore = create<PaletteState>()(
           colors: colors.slice(0, -1),
           locked: locked.slice(0, -1),
           paletteSize: colors.length - 1,
+          shadeBaseColors: null,
         });
       },
 
@@ -248,6 +258,7 @@ export const usePaletteStore = create<PaletteState>()(
           colors: newColors,
           locked: newLocked,
           paletteSize: newColors.length,
+          shadeBaseColors: null,
         });
       },
 
@@ -317,6 +328,7 @@ export const usePaletteStore = create<PaletteState>()(
           colors: palette.colors,
           locked: palette.locked,
           paletteSize: palette.colors.length,
+          shadeBaseColors: null,
         });
       },
 
@@ -332,7 +344,7 @@ export const usePaletteStore = create<PaletteState>()(
         newColors.splice(toIndex, 0, movedColor);
         newLocked.splice(toIndex, 0, movedLock);
 
-        set({ colors: newColors, locked: newLocked });
+        set({ colors: newColors, locked: newLocked, shadeBaseColors: null });
       },
 
       // Toggle a color as saved/favorite
@@ -386,6 +398,7 @@ export const usePaletteStore = create<PaletteState>()(
           paletteSize: DEFAULT_PALETTE_SIZE,
           history: [],
           historyIndex: -1,
+          shadeBaseColors: null,
         });
       },
 
@@ -402,7 +415,7 @@ export const usePaletteStore = create<PaletteState>()(
           [newLocked[i], newLocked[j]] = [newLocked[j], newLocked[i]];
         }
 
-        set({ colors: newColors, locked: newLocked });
+        set({ colors: newColors, locked: newLocked, shadeBaseColors: null });
       },
 
       // Invert palette (swap light/dark)
@@ -419,7 +432,7 @@ export const usePaletteStore = create<PaletteState>()(
           return createColor(oklchToHex(invertedOklch));
         });
 
-        set({ colors: newColors });
+        set({ colors: newColors, shadeBaseColors: null });
       },
 
       // Adjust chroma (saturation) by percentage
@@ -436,7 +449,7 @@ export const usePaletteStore = create<PaletteState>()(
           return createColor(oklchToHex(adjustedOklch));
         });
 
-        set({ colors: newColors });
+        set({ colors: newColors, shadeBaseColors: null });
       },
 
       // Adjust lightness by percentage
@@ -453,19 +466,28 @@ export const usePaletteStore = create<PaletteState>()(
           return createColor(oklchToHex(adjustedOklch));
         });
 
-        set({ colors: newColors });
+        set({ colors: newColors, shadeBaseColors: null });
       },
 
       // Shift all colors to a specific shade level
       shiftToShade: (shade: ShadeLevel) => {
-        const { colors } = get();
-        const newColors = colors.map((color) => {
+        const { colors, shadeBaseColors } = get();
+        // Save base on first shift
+        const base = shadeBaseColors || colors;
+        if (!shadeBaseColors) {
+          set({ shadeBaseColors: colors });
+        }
+        // Always compute from base
+        const newColors = base.map((color) => {
           const shadeHex = getShade(color.hex, shade);
           return createColor(shadeHex);
         });
 
         set({ colors: newColors });
       },
+
+      // Clear shade base (return to original colors)
+      clearShadeBase: () => set({ shadeBaseColors: null }),
 
       // Generate AI suggestions
       generateAISuggestions: async (prompt: string, isPremium: boolean) => {
@@ -540,6 +562,7 @@ export const usePaletteStore = create<PaletteState>()(
           history: newHistory,
           historyIndex: newHistory.length - 1,
           aiSuggestions: null,
+          shadeBaseColors: null,
         });
       },
 
@@ -558,7 +581,7 @@ export const usePaletteStore = create<PaletteState>()(
         paletteSize: state.paletteSize,
         savedPalettes: state.savedPalettes,
         savedColors: state.savedColors,
-        // Don't persist history to keep localStorage small
+        // Don't persist history or shadeBaseColors to keep localStorage small
       }),
     }
   )

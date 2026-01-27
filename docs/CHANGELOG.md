@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.21.1] - 2026-01-27
+
+### Fix: Shade Shift Base Palette Preservation
+
+Fixed destructive shade shifting — repeated shade shifts no longer destroy chroma information. The store now snapshots the original palette before the first shade shift and always computes subsequent shifts from that base.
+
+#### Fixed
+
+**Destructive Shade Shifting** (`src/store/palette.ts`)
+- Shifting to shade 950 (near-black) then back to 500 now returns vibrant colors instead of muddy grays
+- `shiftToShade()` saves original colors as `shadeBaseColors` on first shift
+- All subsequent shifts compute from the base, not from already-shifted colors
+
+#### Added
+
+**Shade Base State** (`src/store/palette.ts`)
+- `shadeBaseColors: Color[] | null` — stores original palette before shade shifting
+- `clearShadeBase()` action — resets shade base to null
+- Base automatically cleared on any non-shade palette mutation (generate, setColor, setColors, loadPalette, applySuggestion, shuffle, invert, adjustChroma, adjustLightness, addColor, removeColor, removeColorAt, reorderColors, reset)
+- Excluded from localStorage persistence (not in `partialize` whitelist)
+
+#### Technical
+
+**Modified Files (1)**
+```
+src/store/palette.ts
+```
+
+- Build passes with no errors
+- No new files, no new dependencies
+
+---
+
 ## [0.21.0] - 2026-01-27
 
 ### Phase 14: Palette Layout Toggle + UI Polish
@@ -1592,6 +1625,10 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 9 (Coolors-style Actions) complete | ✅ | 2026-01-25 |
 | Phase 10 (Mobile UI/UX) complete | ✅ | 2026-01-25 |
 | Phase 11 (Expanded Mood Presets) complete | ✅ | 2026-01-26 |
+| Phase 12 (Mood Mode Redesign) complete | ✅ | 2026-01-26 |
+| Phase 13 (Mood Consolidation + Shade Control) complete | ✅ | 2026-01-26 |
+| Phase 14 (Layout Toggle + UI Polish) complete | ✅ | 2026-01-27 |
+| Fix: Shade shift base preservation | ✅ | 2026-01-27 |
 
 ---
 

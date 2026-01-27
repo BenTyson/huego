@@ -415,11 +415,16 @@ interface PaletteState {
   isSavedColor: (hex: string) => boolean;
   deleteSavedColor: (hex: string) => void;
 
+  // Shade base (original colors before shade shifting)
+  shadeBaseColors: Color[] | null;
+
   // Batch operations
   shuffle: () => void;
   invert: () => void;
   adjustChroma: (delta: number) => void;
   adjustLightness: (delta: number) => void;
+  shiftToShade: (shade: ShadeLevel) => void;
+  clearShadeBase: () => void;
 }
 ```
 

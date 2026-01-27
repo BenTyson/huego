@@ -28,6 +28,11 @@ Phase 14 complete. Palette Layout Toggle + UI Polish.
 - **Palette layout toggle** (columns vs horizontal strips)
 - Stripe in test mode
 
+**Latest Fix (0.21.1): Shade Shift Base Preservation**
+- `shadeBaseColors` state preserves original palette before shade shifts
+- Repeated shade shifts no longer destroy chroma (no more muddy grays)
+- Base auto-clears on any non-shade palette mutation
+
 **Phase 14 Complete (Layout Toggle + UI Polish):**
 - Toggle between vertical columns and horizontal strips
 - Shared across Immersive and Mood Editor views
