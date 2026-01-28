@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripeServer } from "@/lib/stripe";
+import { supabase } from "@/lib/supabase";
 import Stripe from "stripe";
 
 // Disable body parsing - we need raw body for webhook verification
@@ -44,10 +45,34 @@ export async function POST(request: NextRequest) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       console.log("Checkout completed:", session.id);
-      // In production, you would:
-      // 1. Store subscription info in database
-      // 2. Associate with user account
-      // For MVP, we rely on client-side localStorage after redirect
+
+      // Handle mosaic color claims
+      if (session.metadata?.product === "mosaic-color-claim" && supabase) {
+        const hex3 = session.metadata.hex3;
+        if (hex3) {
+          const { error: updateError } = await supabase
+            .from("color_claims")
+            .update({
+              payment_status: "completed",
+              stripe_payment_intent_id:
+                typeof session.payment_intent === "string"
+                  ? session.payment_intent
+                  : session.payment_intent?.id || null,
+              claimed_at: new Date().toISOString(),
+              reserved_until: null, // Clear reservation expiry
+              updated_at: new Date().toISOString(),
+            })
+            .eq("stripe_checkout_session_id", session.id)
+            .eq("hex3", hex3);
+
+          if (updateError) {
+            console.error("Error confirming mosaic claim:", updateError);
+          } else {
+            console.log(`Mosaic color #${hex3} claimed successfully`);
+          }
+        }
+      }
+
       break;
     }
 

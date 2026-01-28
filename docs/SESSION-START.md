@@ -1,7 +1,7 @@
 # HueGo - Session Start Guide
 
 > **Read this before doing anything.**
-> Last Updated: 2026-01-27
+> Last Updated: 2026-01-28
 > Production: https://huego-production.up.railway.app
 > Dev: `npm run dev` (port 3377)
 
@@ -11,10 +11,11 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 15 complete. Playground Redesign — Color Lab.
+Phase 16 complete. The Mosaic — Community Color Ownership.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
+- **The Mosaic** — 4,096 claimable colors at `/mosaic`
 - Variable palette size (2-10 colors)
 - Dark/light theme support
 - Color psychology info panel
@@ -29,25 +30,27 @@ Phase 15 complete. Playground Redesign — Color Lab.
 - **Color Lab** — adaptive discovery with 4-direction swipe + two-phase flow
 - Stripe in test mode
 
-**Phase 15 Complete (Color Lab — Playground Redesign):**
-- Adaptive color engine learns from accepted/rejected swipes
-- 4-direction swipe: Right=Add, Left=Skip, Up=Save, Down=Similar
-- Two-phase flow: Discovery (swipe) → Refinement (full editor)
-- Harmony badges and psychology keywords on swipe cards
-- Palette strip with animated circular swatches
-- Keyboard support (arrow keys, space, backspace)
-- Onboarding hints auto-dismiss after 3 swipes
+**Phase 16 Complete (The Mosaic):**
+- 64×64 grid of all 4,096 12-bit hex colors (`#RGB`)
+- Claim any color for $10 via Stripe Checkout
+- Give it a custom name and write a 280-char blurb
+- Unclaimed colors at 35% opacity, claimed glow at full vibrancy
+- Reservation system prevents double-claims (15-min hold)
+- Post-checkout personalization form at `/mosaic/success`
+- Navigation link added to header
 
 **Recent Phases:**
+- Phase 15: Playground Redesign — Color Lab
 - Phase 14: Palette Layout Toggle + UI Polish
 - Phase 13: Mood Mode Consolidation + Global Shade Control
 - Phase 12: Mood Mode Redesign (grid of palette cards)
 - Phase 11: Expanded Mood Presets (64 moods, 7 categories)
-- Phase 10: Mobile UI/UX (touch targets, safe areas)
 
-**Next:**
-- Color Duel (tournament bracket), Color Rush (speed round), Color Forge
-- Phase 4: Platform integrations (Figma, Chrome, VS Code)
+**Next (The Mosaic Future Phases):**
+- Phase 2: Permalinks + social sharing (`/mosaic/[hex]`, OG images)
+- Phase 3: Realtime + polish (live updates, search, mobile)
+- Phase 4: Profiles + name integration
+- Phase 5: Advanced (pay-what-you-want, leaderboard, refunds)
 
 ---
 
@@ -78,6 +81,9 @@ src/
 │   ├── play/             # Swipe mode (free)
 │   ├── gradient/         # Gradient mode (premium)
 │   ├── explore/          # Community explorer (free)
+│   ├── mosaic/           # The Mosaic — color claiming
+│   │   ├── page.tsx      # Main 64×64 grid
+│   │   └── success/      # Post-checkout personalization
 │   ├── p/[id]/           # Shared palettes
 │   ├── api/
 │   │   ├── ai/           # AI routes
@@ -87,9 +93,13 @@ src/
 │   │   │   ├── palettes/ # GET list, POST publish
 │   │   │   │   └── [id]/like/  # POST toggle like
 │   │   │   └── publish/  # POST publish palette
+│   │   ├── mosaic/       # Mosaic API routes
+│   │   │   ├── colors/   # GET all claims + stats
+│   │   │   ├── claim/    # POST create reservation + Stripe checkout
+│   │   │   └── personalize/  # POST set name + blurb after payment
 │   │   ├── export/       # Server-validated export
 │   │   ├── verify-subscription/  # Subscription validation
-│   │   ├── webhook/      # Stripe webhooks
+│   │   ├── webhook/      # Stripe webhooks (incl. mosaic claims)
 │   │   └── subscription/
 │   └── checkout/         # Success/cancel pages
 ├── components/
@@ -114,6 +124,14 @@ src/
 │   │   ├── playground/   # PlaygroundView, DiscoveryPhase, RefinementPhase, SwipeCard, PaletteStrip
 │   │   ├── gradient/     # GradientView.tsx
 │   │   └── explore/      # ExploreView, FilterBar, Grid, Card
+│   ├── mosaic/           # The Mosaic components
+│   │   ├── MosaicView.tsx        # Main view orchestrator
+│   │   ├── MosaicGrid.tsx        # 64×64 CSS grid with event delegation
+│   │   ├── MosaicCell.tsx        # Single memo'd color cell
+│   │   ├── MosaicColorPanel.tsx  # Slide-over detail panel
+│   │   ├── MosaicClaimFlow.tsx   # Claim button → Stripe redirect
+│   │   ├── MosaicStatsBar.tsx    # Progress bar + recent claims
+│   │   └── MosaicSuccessView.tsx # Post-checkout personalization
 │   ├── ModeToggle.tsx
 │   ├── ThemeToggle.tsx   # Dark/light mode toggle
 │   ├── ColorInfoPanel.tsx # Color psychology slide-out
@@ -133,6 +151,8 @@ src/
 │   ├── export.ts         # Export formats (9 total)
 │   ├── mood.ts           # 64 mood profiles, 7 categories
 │   ├── mood-icons.tsx    # 64 mood icons + color previews
+│   ├── mosaic-grid.ts    # 4,096 color grid generation + OKLCH sorting
+│   ├── mosaic-types.ts   # Mosaic interfaces and constants
 │   ├── import.ts         # Import parsing
 │   ├── extract.ts        # Image extraction (k-means)
 │   ├── gradient.ts       # Gradient generation
@@ -150,6 +170,7 @@ src/
 │   ├── subscription.ts   # Premium state + verification
 │   ├── theme.ts          # Dark/light theme state
 │   ├── community.ts      # Explorer state, likes, filters
+│   ├── mosaic.ts         # Mosaic claims, stats, UI state
 │   └── ui.ts             # UI state (hideCommandCenter, paletteLayout)
 └── hooks/
     ├── useKeyboard.ts    # All keyboard shortcuts

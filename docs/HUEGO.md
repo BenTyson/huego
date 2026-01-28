@@ -7,7 +7,7 @@
 
 ## What
 
-Color palette generator with 6 distinct UI modes, community palette explorer, image extraction, gradient generation, and professional export tools.
+Color palette generator with 6 distinct UI modes, community palette explorer, image extraction, gradient generation, professional export tools, and The Mosaic — a 4,096-color community artwork.
 
 ## Why
 
@@ -61,6 +61,14 @@ Competitors are functional but boring. We differentiate on:
 - **Harmony Badges**: Each card shows relationship to your palette (Analogous, Complementary, etc.)
 - **Psychology Keywords**: Color emotion tags on each card
 - **Onboarding Hints**: Auto-dismissing gesture guide for new users
+
+### The Mosaic (`/mosaic`)
+- **4,096 Colors**: Every 12-bit shorthand hex (`#RGB`) in a 64×64 grid
+- **Claim for $10**: Own a color forever, give it a custom name
+- **Write a Blurb**: 280-character description of why you chose it
+- **Visual Hierarchy**: Unclaimed at 35% opacity, claimed glow at full vibrancy
+- **Reservation System**: 15-minute hold during checkout prevents double-claims
+- **Living Artwork**: Grid progressively "comes alive" as community claims colors
 
 ### Color Psychology (Unique)
 - Meaning and emotions for each color
@@ -150,6 +158,7 @@ All sprints complete. Now implementing competitive roadmap.
 | 13 | Mood mode consolidation + global shade control | ✅ |
 | 14 | Palette layout toggle + UI polish | ✅ |
 | 15 | Playground redesign — Color Lab (adaptive discovery) | ✅ |
+| 16 | The Mosaic — community color ownership | ✅ |
 | 4 | Platform integrations (Figma, Chrome, VS Code) | Pending |
 | 5 | SVG recolor, expanded templates | Pending |
 
@@ -238,6 +247,7 @@ localStorage for user preferences, Supabase for community palettes.
 | Layout toggle (columns/strips) | No | Yes | ✅ Advantage |
 | Adaptive color discovery | No | Yes (learns from swipes) | ✅ Advantage |
 | 4-direction swipe gestures | No | Yes (add/skip/save/similar) | ✅ Advantage |
+| Community color ownership | No | Yes (The Mosaic, $10/color) | ✅ Advantage |
 | Figma plugin | Yes | Pending | Phase 4 |
 
 ---

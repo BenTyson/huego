@@ -447,6 +447,87 @@ useCanRedo(): boolean
 
 ---
 
+## The Mosaic (`src/lib/mosaic-grid.ts`, `src/store/mosaic.ts`)
+
+### Overview
+
+A 64×64 grid of 4,096 colors (all 12-bit shorthand hex values `#RGB`). Users pay $10 to claim a color, name it, and write a blurb. Creates a living community artwork at `/mosaic`.
+
+### Grid Algorithm
+
+```typescript
+// All 4,096 colors generated from 16³ combinations
+for (r = 0; r < 16; r++)
+  for (g = 0; g < 16; g++)
+    for (b = 0; b < 16; b++)
+      // Expand nibble: 0xF → 0xFF (multiply by 17)
+      colors.push({ hex3: rgb hex, hex6: expanded })
+
+// Sorted by OKLCH for visual coherence:
+// - Achromatic (chroma < 0.02) → leftmost columns, sorted by lightness
+// - Chromatic → sorted by hue (columns) × lightness (rows, light on top)
+```
+
+### Key Functions
+
+```typescript
+getMosaicGrid(): MosaicColorEntry[]      // Cached 4,096 entries
+getMosaicLookup(): Map<string, Entry>    // hex3 → entry map
+getMosaicColor(hex3: string): Entry      // Single color lookup
+```
+
+### Mosaic Store
+
+```typescript
+interface MosaicState {
+  claims: ColorClaim[];
+  claimMap: Map<string, ColorClaim>;  // O(1) lookup
+  stats: MosaicStats | null;
+  selectedHex3: string | null;
+  hoveredHex3: string | null;
+
+  fetchClaims: () => Promise<void>;
+  getClaim: (hex3: string) => ColorClaim | undefined;
+  handleRealtimeClaim: (claim: ColorClaim) => void;
+}
+```
+
+### Claim Flow
+
+1. User clicks unclaimed color → panel opens
+2. Click "Claim for $10" → POST `/api/mosaic/claim`
+3. API creates reservation row (15-min expiry) + Stripe Checkout session
+4. User completes Stripe payment
+5. Webhook receives `checkout.session.completed` with metadata
+6. Reservation updated to `payment_status='completed'`
+7. User redirected to `/mosaic/success` for personalization
+8. POST `/api/mosaic/personalize` saves custom name + blurb
+
+### Database Schema
+
+```sql
+CREATE TABLE color_claims (
+  hex3 TEXT NOT NULL UNIQUE,  -- "f0a" (prevents double-claims)
+  payment_status TEXT CHECK (IN ('pending', 'completed', 'refunded')),
+  reserved_until TIMESTAMPTZ,  -- 15-min reservation expiry
+  custom_color_name TEXT,
+  blurb TEXT CHECK (char_length(blurb) <= 280),
+  stripe_checkout_session_id TEXT,
+  ...
+);
+```
+
+### Related Files
+
+- Grid algorithm: `src/lib/mosaic-grid.ts`
+- Types: `src/lib/mosaic-types.ts`
+- Store: `src/store/mosaic.ts`
+- API: `src/app/api/mosaic/`
+- Components: `src/components/mosaic/`
+- Pages: `src/app/mosaic/`
+
+---
+
 ## Subscription Store (`src/store/subscription.ts`)
 
 ### Server-Side Validation

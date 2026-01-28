@@ -4,6 +4,109 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.23.0] - 2026-01-28
+
+### Phase 16: The Mosaic — Community Color Ownership
+
+A 64×64 grid of 4,096 colors (every 12-bit shorthand hex `#RGB`). Users pay $10 to claim a color, give it a custom name, and write a blurb. Unclaimed colors appear muted (35% opacity); claimed colors glow at full vibrancy. A living, community-built artwork at `/mosaic`.
+
+#### Added
+
+**Mosaic Grid Algorithm** (`src/lib/mosaic-grid.ts`)
+- Generates all 4,096 12-bit colors: 16 values per channel (0x00, 0x11, ..., 0xFF)
+- Converts each to OKLCH using existing `rgbToOklch()` for perceptual sorting
+- Achromatic colors (chroma < 0.02) placed in leftmost columns sorted by lightness
+- Chromatic colors sorted by hue (horizontal) × lightness (vertical, light on top)
+- Cached as module constant after first computation
+- `getMosaicGrid()`, `getMosaicLookup()`, `getMosaicColor(hex3)` exports
+
+**Mosaic Types** (`src/lib/mosaic-types.ts`)
+- `MosaicColorEntry` — hex3, hex6, rgb, oklch, gridRow, gridCol
+- `ColorClaim` — id, hex3, hex6, owner_display_name, custom_color_name, blurb, claimed_at, payment_status
+- `MosaicStats` — totalColors (4096), claimedCount, reservedCount, recentClaims
+- `ClaimRequest/Response`, `PersonalizeRequest/Response`
+- Constants: `MOSAIC_GRID_SIZE=64`, `MOSAIC_TOTAL_COLORS=4096`, `MOSAIC_CELL_SIZE=15`, `MOSAIC_CLAIM_PRICE=1000`
+
+**Database Schema** (`supabase/migrations/20250127_mosaic_color_claims.sql`)
+- `color_claims` table with `UNIQUE` on `hex3` (prevents double-claims at DB level)
+- Stripe integration fields: `stripe_checkout_session_id`, `stripe_payment_intent_id`
+- Reservation system: `reserved_at`, `reserved_until`, 15-minute expiry
+- `payment_status`: pending → completed → refunded
+- `cleanup_expired_reservations()` PostgreSQL function
+- Indexes on payment_status, claimed_at, fingerprint, reservation expiry
+- RLS policies for read/write
+
+**Zustand Store** (`src/store/mosaic.ts`)
+- `claims: ColorClaim[]` + `claimMap: Map<string, ColorClaim>` for O(1) lookup
+- `fetchClaims()` — GET `/api/mosaic/colors`
+- `selectedHex3`, `hoveredHex3` for UI state
+- `handleRealtimeClaim()` for future live updates (Phase 3)
+- Persists only UI preferences, not fetched data
+
+**API Endpoints**
+- `GET /api/mosaic/colors` — Fetch all claims + stats (cleans expired reservations on read)
+- `POST /api/mosaic/claim` — Create reservation + Stripe Checkout session (`mode: "payment"`, $10)
+- `POST /api/mosaic/personalize` — Set custom name + blurb after payment confirmation
+
+**Webhook Integration** (`src/app/api/webhook/route.ts`)
+- Extended `checkout.session.completed` handler
+- Checks `session.metadata?.product === 'mosaic-color-claim'`
+- Updates reservation to `payment_status='completed'`, sets `claimed_at`
+
+**Mosaic Components** (`src/components/mosaic/`)
+- `MosaicView.tsx` — Main view: header, stats bar, grid, detail panel
+- `MosaicGrid.tsx` — 64×64 CSS grid with event delegation (zero per-cell listeners)
+- `MosaicCell.tsx` — Single memo'd div, `opacity: isClaimed ? 1 : 0.35`, `data-hex` attr
+- `MosaicColorPanel.tsx` — Slide-over panel showing color details or claim CTA
+- `MosaicClaimFlow.tsx` — "$10 Claim" button → POST to claim API → redirect to Stripe
+- `MosaicStatsBar.tsx` — Progress bar + recent claims swatches
+- `MosaicSuccessView.tsx` — Post-checkout personalization form (color name, display name, blurb)
+
+**Navigation** (`src/components/Navigation/MosaicLink.tsx`)
+- 4-square grid icon, active state on `/mosaic` routes
+- Added to NavigationBar between Explore and Help
+
+**Pages**
+- `/mosaic` — Main grid page with ModePageLayout wrapper
+- `/mosaic/success` — Post-checkout personalization page
+
+#### Technical
+
+**New Files (19)**
+```
+supabase/migrations/20250127_mosaic_color_claims.sql
+src/lib/mosaic-types.ts
+src/lib/mosaic-grid.ts
+src/store/mosaic.ts
+src/app/api/mosaic/colors/route.ts
+src/app/api/mosaic/claim/route.ts
+src/app/api/mosaic/personalize/route.ts
+src/app/mosaic/page.tsx
+src/app/mosaic/layout.tsx
+src/app/mosaic/success/page.tsx
+src/components/mosaic/MosaicView.tsx
+src/components/mosaic/MosaicGrid.tsx
+src/components/mosaic/MosaicCell.tsx
+src/components/mosaic/MosaicColorPanel.tsx
+src/components/mosaic/MosaicClaimFlow.tsx
+src/components/mosaic/MosaicStatsBar.tsx
+src/components/mosaic/MosaicSuccessView.tsx
+src/components/mosaic/index.ts
+src/components/Navigation/MosaicLink.tsx
+```
+
+**Modified Files (2)**
+```
+src/app/api/webhook/route.ts
+src/components/Navigation/NavigationBar.tsx
+```
+
+- Build passes with no source-level type errors
+- Performance: 4,096 flat divs in CSS grid is lightweight; event delegation means zero per-cell listeners
+- `React.memo` on MosaicCell ensures only re-render when `isClaimed` flips
+
+---
+
 ## [0.22.0] - 2026-01-27
 
 ### Phase 15: Playground Redesign — Color Lab
@@ -1720,6 +1823,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 14 (Layout Toggle + UI Polish) complete | ✅ | 2026-01-27 |
 | Fix: Shade shift base preservation | ✅ | 2026-01-27 |
 | Phase 15 (Color Lab — Playground Redesign) complete | ✅ | 2026-01-27 |
+| Phase 16 (The Mosaic) complete | ✅ | 2026-01-28 |
 
 ---
 

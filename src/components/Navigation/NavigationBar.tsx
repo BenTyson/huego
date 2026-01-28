@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ModeSelector } from "./ModeSelector";
 import { ExploreLink } from "./ExploreLink";
+import { MosaicLink } from "./MosaicLink";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { ThemeToggle } from "../ThemeToggle";
 
@@ -59,6 +60,9 @@ export function NavigationBar() {
 
           {/* Explore link */}
           <ExploreLink />
+
+          {/* Mosaic link */}
+          <MosaicLink />
 
           {/* Help button - 44px touch target on mobile */}
           <motion.button
