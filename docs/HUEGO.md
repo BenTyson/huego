@@ -64,9 +64,10 @@ Competitors are functional but boring. We differentiate on:
 
 ### The Mosaic (`/mosaic`)
 - **4,096 Colors**: Every 12-bit shorthand hex (`#RGB`) in a 64×64 grid
+- **Full-Bleed Layout**: Edge-to-edge viewport, dynamic cell sizing, immersive experience
 - **Claim for $10**: Own a color forever, give it a custom name
 - **Write a Blurb**: 280-character description of why you chose it
-- **Visual Hierarchy**: Unclaimed at 35% opacity, claimed glow at full vibrancy
+- **Hover Preview**: 2x scale zoom with shadow on hover
 - **Reservation System**: 15-minute hold during checkout prevents double-claims
 - **Living Artwork**: Grid progressively "comes alive" as community claims colors
 

@@ -463,9 +463,13 @@ for (r = 0; r < 16; r++)
       // Expand nibble: 0xF → 0xFF (multiply by 17)
       colors.push({ hex3: rgb hex, hex6: expanded })
 
-// Sorted by OKLCH for visual coherence:
-// - Achromatic (chroma < 0.02) → leftmost columns, sorted by lightness
-// - Chromatic → sorted by hue (columns) × lightness (rows, light on top)
+// Unified hue-based layout (no achromatic/chromatic split):
+// 1. Sort all 4,096 colors by OKLCH hue
+// 2. Divide into 64 columns of 64 colors each
+// 3. Each column sorted by: lightness + chroma * 0.25 (bright top, dark bottom)
+//
+// Note: Still has visible chroma noise. See CHANGELOG 0.23.1 "Lessons Learned"
+// for failed approaches and potential solutions (Hilbert curve, SOM).
 ```
 
 ### Key Functions

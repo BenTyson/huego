@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { ModePageLayout } from "@/components/layout/ModePageLayout";
 
 const MosaicView = dynamic(
   () => import("@/components/mosaic").then((mod) => mod.MosaicView),
@@ -10,8 +9,8 @@ const MosaicView = dynamic(
 
 export default function MosaicPage() {
   return (
-    <ModePageLayout enableGenerate={false}>
+    <div className="h-screen w-screen overflow-hidden bg-white">
       <MosaicView />
-    </ModePageLayout>
+    </div>
   );
 }

@@ -4,6 +4,80 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.23.1] - 2026-01-28
+
+### Phase 16b: Mosaic Grid Sorting Overhaul + Full-Bleed Layout
+
+Reworked the mosaic grid sorting algorithm (3 iterations) and converted the mosaic page to a full-bleed, edge-to-edge layout that fills the viewport. Grid sorting remains an open problem — see "Lessons Learned" below.
+
+#### Changed
+
+**Grid Sorting Algorithm** (`src/lib/mosaic-grid.ts`)
+- Removed achromatic/chromatic split entirely — all 4,096 colors now placed by hue (columns) × lightness (rows)
+- Sort: all colors by OKLCH hue, divided into 64 columns of 64, each column sorted by `l + c * 0.25`
+- Previous achromatic zone (20 columns of low-chroma colors) was visually noisy and unfixable with any 2D sort
+
+**Full-Bleed Mosaic Layout** (`src/components/mosaic/`)
+- Removed `ModePageLayout` wrapper, header, and `MosaicStatsBar` from mosaic page
+- Grid now fills entire viewport edge-to-edge (no padding, no borders)
+- Cell size dynamically calculated: `Math.ceil(Math.max(vw, vh) / 64)` with resize listener
+- Added floating "HueGo" logo (top-left, 30% opacity, links back to `/immersive`)
+- CSS hover effects moved to `globals.css` class `.mosaic-cell` (scale 2x, z-index 100, box-shadow)
+- Removed per-cell opacity logic (all cells full opacity)
+
+#### Lessons Learned: Mosaic Grid Sorting Trials
+
+> **For future agents**: We tried 3 approaches to fix scattered low-chroma "noise" tiles in the mosaic. None fully solved the visual smoothness problem. The core challenge is mapping 3D color (hue × lightness × chroma) onto a 2D grid — one dimension must be sacrificed or compressed, and that dimension creates visible noise.
+
+**Approach 1: Raise chroma threshold + fix overflow** (FAILED)
+- Changed `CHROMA_THRESHOLD` from 0.08 → 0.12
+- Used `Math.floor` for achromatic columns to prevent overflow
+- Sorted overflow (highest-chroma achromatic) into chromatic pool
+- Changed sort weight from `c*0.6 + l*0.4` to `l + c*0.25`
+- **Result**: Chromatic zone improved, but achromatic zone (20 columns) still a noisy mess — 1,284 low-chroma colors spanning all hues sorted only by lightness created a speckled appearance
+
+**Approach 2: Achromatic columns by chroma, rows by lightness** (FAILED)
+- Kept achromatic sorted by chroma ascending for column placement
+- Each achromatic column sorted independently by lightness
+- Theory: truly gray on far left, slightly tinted near boundary
+- **Result**: Still noisy — within each narrow chroma band, colors still span all hues, so adjacent tiles in a column have completely different tints
+
+**Approach 3: Unified hue-based layout, no achromatic zone** (CURRENT)
+- Eliminated achromatic/chromatic split entirely
+- All 4,096 colors sorted by hue into 64 columns, each column sorted by `l + c*0.25`
+- 4096/64 = exactly 64 per column, zero overflow
+- Only 16 pure grays (c=0.0000) cluster at h≈89.9 (yellow-green column)
+- **Result**: Better than approaches 1-2 (full rainbow, no dead zone), but still has visible chroma noise within columns. Low-chroma colors (c=0.03-0.12) create visible light/pastel spots among vivid colors in the same hue column.
+
+**Data analysis** (for future reference):
+- `c < 0.01`: 16 colors (0 columns) — the 16 pure grays #000-#FFF
+- `c < 0.02`: 29 colors (0 columns)
+- `c < 0.03`: 83 colors (1 column)
+- `c < 0.05`: 219 colors (3 columns)
+- `c < 0.08`: 571 colors (8 columns) — original threshold
+- `c < 0.12`: 1,284 colors (20 columns)
+- Pure grays get h≈89.9 from `atan2(0,0)`, black gets h=0
+
+**What might actually work** (untried):
+- **Hilbert curve** through OKLCH space — maps 3D color to 1D path preserving locality, then lays out on 2D grid. Best-known approach for smooth 2D color arrangements.
+- **Self-organizing map (SOM)** — neural net approach, computationally expensive but produces the smoothest results
+- **Two-pass approach**: First pass assigns hue columns; second pass uses a traveling-salesman-style local swap optimization to minimize perceptual distance between adjacent cells
+- **Accept the noise**: The 12-bit color space has inherent chroma gaps — some hue bands have many more low-chroma members than others. Perfect smoothness may require pre-computed lookup tables or hand-tuned placement.
+
+#### Technical
+
+**Modified Files (6)**
+```
+src/lib/mosaic-grid.ts         — Unified hue-based sort (removed achromatic split)
+src/app/mosaic/page.tsx        — Full-bleed layout (removed ModePageLayout)
+src/components/mosaic/MosaicView.tsx  — Floating logo, removed header/stats
+src/components/mosaic/MosaicGrid.tsx  — Dynamic cell sizing, viewport-filling
+src/components/mosaic/MosaicCell.tsx  — CSS class hover, dynamic cellSize prop
+src/app/globals.css            — .mosaic-cell hover styles (scale 2x, z-index 100)
+```
+
+---
+
 ## [0.23.0] - 2026-01-28
 
 ### Phase 16: The Mosaic — Community Color Ownership

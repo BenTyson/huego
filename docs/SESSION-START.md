@@ -11,11 +11,11 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 16 complete. The Mosaic — Community Color Ownership.
+Phase 16b complete. Mosaic Grid Sorting Overhaul + Full-Bleed Layout.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
-- **The Mosaic** — 4,096 claimable colors at `/mosaic`
+- **The Mosaic** — 4,096 claimable colors at `/mosaic` (full-bleed layout)
 - Variable palette size (2-10 colors)
 - Dark/light theme support
 - Color psychology info panel
@@ -30,23 +30,23 @@ Phase 16 complete. The Mosaic — Community Color Ownership.
 - **Color Lab** — adaptive discovery with 4-direction swipe + two-phase flow
 - Stripe in test mode
 
-**Phase 16 Complete (The Mosaic):**
-- 64×64 grid of all 4,096 12-bit hex colors (`#RGB`)
-- Claim any color for $10 via Stripe Checkout
-- Give it a custom name and write a 280-char blurb
-- Unclaimed colors at 35% opacity, claimed glow at full vibrancy
-- Reservation system prevents double-claims (15-min hold)
-- Post-checkout personalization form at `/mosaic/success`
-- Navigation link added to header
+**Phase 16b Complete (Mosaic Overhaul):**
+- Full-bleed edge-to-edge mosaic layout (no header, no stats bar)
+- Dynamic cell sizing fills viewport on any screen
+- Unified hue-based grid sort (no achromatic zone)
+- CSS hover effects (scale 2x, z-index 100)
+- Floating HueGo logo (top-left, links to /immersive)
+- **OPEN ISSUE**: Grid still has visible chroma noise — low-chroma colors create pastel spots among vivid colors. See CHANGELOG 0.23.1 "Lessons Learned" for 3 failed approaches and potential solutions (Hilbert curve, SOM, traveling salesman swap optimization).
 
 **Recent Phases:**
+- Phase 16: The Mosaic — Community Color Ownership
 - Phase 15: Playground Redesign — Color Lab
 - Phase 14: Palette Layout Toggle + UI Polish
 - Phase 13: Mood Mode Consolidation + Global Shade Control
 - Phase 12: Mood Mode Redesign (grid of palette cards)
-- Phase 11: Expanded Mood Presets (64 moods, 7 categories)
 
 **Next (The Mosaic Future Phases):**
+- **Grid smoothness fix** — Hilbert curve or SOM approach to eliminate chroma noise
 - Phase 2: Permalinks + social sharing (`/mosaic/[hex]`, OG images)
 - Phase 3: Realtime + polish (live updates, search, mobile)
 - Phase 4: Profiles + name integration

@@ -1,7 +1,6 @@
 "use client";
 
 import { memo } from "react";
-import { MOSAIC_CELL_SIZE } from "@/lib/mosaic-types";
 
 interface MosaicCellProps {
   hex3: string;
@@ -9,6 +8,7 @@ interface MosaicCellProps {
   gridRow: number;
   gridCol: number;
   isClaimed: boolean;
+  cellSize: number;
 }
 
 export const MosaicCell = memo(function MosaicCell({
@@ -17,19 +17,19 @@ export const MosaicCell = memo(function MosaicCell({
   gridRow,
   gridCol,
   isClaimed,
+  cellSize,
 }: MosaicCellProps) {
   return (
     <div
       data-hex={hex3}
+      className="mosaic-cell"
       style={{
         gridRow: gridRow + 1,
         gridColumn: gridCol + 1,
-        width: MOSAIC_CELL_SIZE,
-        height: MOSAIC_CELL_SIZE,
+        width: cellSize,
+        height: cellSize,
         backgroundColor: hex6,
-        opacity: isClaimed ? 1 : 0.35,
         cursor: "pointer",
-        transition: "opacity 0.3s ease, transform 0.15s ease",
       }}
       title={`#${hex3.toUpperCase()}`}
     />

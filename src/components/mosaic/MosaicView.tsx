@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { useMosaicStore } from "@/store/mosaic";
 import { MosaicGrid } from "./MosaicGrid";
 import { MosaicColorPanel } from "./MosaicColorPanel";
-import { MosaicStatsBar } from "./MosaicStatsBar";
 
 export function MosaicView() {
   const fetchClaims = useMosaicStore((s) => s.fetchClaims);
@@ -16,30 +16,17 @@ export function MosaicView() {
   }, [fetchClaims]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-24 pb-12 px-4">
-      {/* Header */}
-      <motion.div
-        className="text-center mb-6 max-w-xl"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+    <div className="h-full w-full overflow-hidden">
+      {/* Floating Logo */}
+      <Link
+        href="/immersive"
+        className="fixed top-4 left-4 z-50 opacity-30 hover:opacity-100 transition-opacity duration-300"
       >
-        <h1 className="text-3xl font-bold text-foreground mb-2">The Mosaic</h1>
-        <p className="text-foreground/60 text-sm">
-          4,096 colors. Claim one, name it, make it yours.
-        </p>
-      </motion.div>
+        <span className="text-lg font-bold text-zinc-800">HueGo</span>
+      </Link>
 
-      {/* Stats */}
-      <MosaicStatsBar />
-
-      {/* Grid */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1 }}
-      >
-        <MosaicGrid />
-      </motion.div>
+      {/* Grid - fills entire viewport */}
+      <MosaicGrid />
 
       {/* Detail panel */}
       {selectedHex3 && <MosaicColorPanel />}

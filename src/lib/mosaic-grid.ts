@@ -1,5 +1,5 @@
 // Mosaic grid generation — 4,096 shorthand hex colors arranged in a 64x64 grid
-// Sorted by hue (horizontal) x lightness (vertical) with achromatic colors on the left
+// Sorted by hue (horizontal) x lightness (vertical)
 
 import { rgbToOklch } from "./colors";
 import type { RGB, OKLCH } from "./types";
@@ -51,54 +51,30 @@ function generateAll12BitColors(): ColorWithOklch[] {
 
 /**
  * Build the 64x64 mosaic grid sorted by hue x lightness.
- * Achromatic colors (low chroma) go in leftmost columns sorted by lightness.
- * Chromatic colors fill the rest sorted by hue (columns) x lightness (rows).
+ * All colors are placed by hue (columns) x lightness (rows).
+ * 4096 colors / 64 = exactly 64 per column, zero overflow.
  */
 function buildMosaicGrid(): MosaicColorEntry[] {
   const allColors = generateAll12BitColors();
-  const CHROMA_THRESHOLD = 0.02;
 
-  // Separate achromatic vs chromatic
-  const achromatic = allColors.filter((c) => c.oklch.c < CHROMA_THRESHOLD);
-  const chromatic = allColors.filter((c) => c.oklch.c >= CHROMA_THRESHOLD);
+  // Sort all colors by hue — every color goes into hue-based columns
+  allColors.sort((a, b) => a.oklch.h - b.oklch.h);
 
-  // Sort achromatic by lightness (dark to light, top to bottom)
-  achromatic.sort((a, b) => a.oklch.l - b.oklch.l);
-
-  // Figure out how many columns achromatic colors need
-  const achromaticCols = Math.ceil(achromatic.length / MOSAIC_GRID_SIZE);
-  const chromaticCols = MOSAIC_GRID_SIZE - achromaticCols;
-
+  const colorsPerCol = allColors.length / MOSAIC_GRID_SIZE; // 4096/64 = 64 exact
   const grid: MosaicColorEntry[] = [];
 
-  // Place achromatic colors in leftmost columns, top to bottom
-  for (let i = 0; i < achromatic.length; i++) {
-    const col = Math.floor(i / MOSAIC_GRID_SIZE);
-    const row = i % MOSAIC_GRID_SIZE;
-    const c = achromatic[i];
-    grid.push({
-      hex3: c.hex3,
-      hex6: c.hex6,
-      rgb: c.rgb,
-      oklch: c.oklch,
-      gridRow: row,
-      gridCol: col,
-    });
-  }
-
-  // Sort chromatic colors by hue for column placement
-  chromatic.sort((a, b) => a.oklch.h - b.oklch.h);
-
-  // Divide chromatic colors into columns by hue
-  const colorsPerCol = Math.ceil(chromatic.length / chromaticCols);
-
-  for (let colIdx = 0; colIdx < chromaticCols; colIdx++) {
+  for (let colIdx = 0; colIdx < MOSAIC_GRID_SIZE; colIdx++) {
     const startIdx = colIdx * colorsPerCol;
-    const endIdx = Math.min(startIdx + colorsPerCol, chromatic.length);
-    const columnColors = chromatic.slice(startIdx, endIdx);
+    const endIdx = startIdx + colorsPerCol;
+    const columnColors = allColors.slice(startIdx, endIdx);
 
-    // Sort each column by lightness (light on top, dark on bottom)
-    columnColors.sort((a, b) => b.oklch.l - a.oklch.l);
+    // Lightness-dominant sort with gentle chroma influence (weight 0.25)
+    // Bright+vivid at top, dark+muted at bottom
+    columnColors.sort((a, b) => {
+      const scoreA = a.oklch.l + a.oklch.c * 0.25;
+      const scoreB = b.oklch.l + b.oklch.c * 0.25;
+      return scoreB - scoreA;
+    });
 
     for (let rowIdx = 0; rowIdx < columnColors.length; rowIdx++) {
       const c = columnColors[rowIdx];
@@ -108,7 +84,7 @@ function buildMosaicGrid(): MosaicColorEntry[] {
         rgb: c.rgb,
         oklch: c.oklch,
         gridRow: rowIdx,
-        gridCol: colIdx + achromaticCols,
+        gridCol: colIdx,
       });
     }
   }

@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { useMosaicStore, useMosaicClaimMap } from "@/store/mosaic";
 import { getMosaicGrid } from "@/lib/mosaic-grid";
-import { MOSAIC_GRID_SIZE, MOSAIC_CELL_SIZE } from "@/lib/mosaic-types";
+import { MOSAIC_GRID_SIZE } from "@/lib/mosaic-types";
 import { MosaicCell } from "./MosaicCell";
 
 export function MosaicGrid() {
@@ -11,6 +11,24 @@ export function MosaicGrid() {
   const setSelectedHex3 = useMosaicStore((s) => s.setSelectedHex3);
   const setHoveredHex3 = useMosaicStore((s) => s.setHoveredHex3);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Calculate cell size to fill viewport
+  const [cellSize, setCellSize] = useState(15);
+
+  useEffect(() => {
+    const updateSize = () => {
+      // Use the larger dimension to ensure grid fills the screen
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      // Cell size = larger dimension / grid size, so grid always fills or exceeds viewport
+      const size = Math.max(vw, vh) / MOSAIC_GRID_SIZE;
+      setCellSize(Math.ceil(size));
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
 
   const grid = getMosaicGrid();
 
@@ -41,20 +59,19 @@ export function MosaicGrid() {
     setHoveredHex3(null);
   }, [setHoveredHex3]);
 
-  const gridPx = MOSAIC_GRID_SIZE * MOSAIC_CELL_SIZE;
+  const gridPx = MOSAIC_GRID_SIZE * cellSize;
 
   return (
     <div
-      className="overflow-auto rounded-xl border border-command-border bg-black/20 p-2"
-      style={{ maxWidth: "95vw", maxHeight: "80vh" }}
+      className="w-screen h-screen overflow-auto"
     >
       <div
         ref={containerRef}
         className="relative"
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${MOSAIC_GRID_SIZE}, ${MOSAIC_CELL_SIZE}px)`,
-          gridTemplateRows: `repeat(${MOSAIC_GRID_SIZE}, ${MOSAIC_CELL_SIZE}px)`,
+          gridTemplateColumns: `repeat(${MOSAIC_GRID_SIZE}, ${cellSize}px)`,
+          gridTemplateRows: `repeat(${MOSAIC_GRID_SIZE}, ${cellSize}px)`,
           width: gridPx,
           height: gridPx,
           gap: 0,
@@ -73,6 +90,7 @@ export function MosaicGrid() {
             isClaimed={
               claimMap.get(entry.hex3)?.payment_status === "completed"
             }
+            cellSize={cellSize}
           />
         ))}
       </div>
