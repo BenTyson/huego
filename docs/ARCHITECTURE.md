@@ -527,7 +527,9 @@ ModePageLayout
 │   ├── ImmersiveView → ColorColumn[]
 │   ├── ContextView → PaletteSidebar, PreviewTypeSelector, [Preview]
 │   ├── MoodView → MoodSelectionPanel, RefinementSliders
-│   ├── PlaygroundView → SwipeCards
+│   ├── PlaygroundView (state machine: discovery | refinement)
+│   │   ├── DiscoveryPhase → SwipeCard, PaletteStrip
+│   │   └── RefinementPhase → ColorColumn[], RefinementSliders
 │   └── GradientView → GradientPreview, GradientControls
 ├── CommandCenter (bottom action bar)
 │   ├── CommandBar
@@ -841,6 +843,70 @@ Components: screen size, color depth, timezone, language, platform, hardware con
 - Page: `src/app/explore/page.tsx`
 - Components: `src/components/modes/explore/*`
 - Modal: `src/components/PublishModal.tsx`
+
+---
+
+## Adaptive Color Engine (`src/lib/adaptive-color.ts`)
+
+### Overview
+
+Machine-learning-style color generation engine for Color Lab (Playground). Tracks accepted/rejected colors in OKLCH space and biases future candidates toward user preferences.
+
+### Key Types
+
+```typescript
+interface AdaptiveEngineStats {
+  reviewed: number;
+  accepted: number;
+  rejected: number;
+}
+
+interface AdaptiveColorEngine {
+  generateCandidate: () => Color;
+  generateNearNeighbor: (base: Color) => Color;
+  recordAccept: (color: Color) => void;
+  recordReject: (color: Color) => void;
+  reset: () => void;
+  getStats: () => AdaptiveEngineStats;
+}
+
+type HarmonyLabel = "Analogous" | "Complementary" | "Contrasting" | "Neutral";
+```
+
+### Key Functions
+
+```typescript
+createAdaptiveEngine(): AdaptiveColorEngine  // Factory, creates engine instance
+classifyHarmony(candidateHue: number, paletteColors: Color[]): HarmonyLabel
+getPsychologyKeyword(hue: number): string    // First emotion from color psychology
+```
+
+### Algorithm
+
+1. **< 2 accepted**: Fully random candidates (L: 0.35-0.75, C: 0.08-0.2, H: 0-360)
+2. **2+ accepted**: Biased generation toward learned preferences
+   - Hue center via circular mean of accepted hues
+   - Hue spread: avg distance × 1.5, clamped [30°, 120°]
+   - Lightness/chroma ranges derived from accepted colors ± padding
+   - Rejected hue zones avoided (10° buckets, 2+ rejections to activate, 20° radius)
+   - 30% wildcard chance for diversity
+3. **Near neighbor**: Base ± (hue 15°, lightness 0.08, chroma 0.03)
+
+### Integration
+
+- Engine instantiated via `useRef(createAdaptiveEngine())` in PlaygroundView
+- Passed to DiscoveryPhase as `engineRef`
+- Persists across Discovery ↔ Refinement phase transitions
+- Uses `forceInGamut`, `clampOklch`, `oklchToHex`, `createColor` from colors.ts
+- Uses `randomInRange`, `randomHue`, `normalizeHue` from random.ts
+
+### Related Files
+
+- View: `src/components/modes/playground/PlaygroundView.tsx`
+- Discovery: `src/components/modes/playground/DiscoveryPhase.tsx`
+- Card: `src/components/modes/playground/SwipeCard.tsx`
+- Strip: `src/components/modes/playground/PaletteStrip.tsx`
+- Refinement: `src/components/modes/playground/RefinementPhase.tsx`
 
 ---
 

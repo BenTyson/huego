@@ -10,7 +10,7 @@ const PlaygroundView = dynamic(
 
 export default function PlaygroundPage() {
   return (
-    <ModePageLayout enableGenerate={false}>
+    <ModePageLayout enableGenerate={true}>
       <PlaygroundView />
     </ModePageLayout>
   );

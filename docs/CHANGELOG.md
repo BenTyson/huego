@@ -4,6 +4,96 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.22.0] - 2026-01-27
+
+### Phase 15: Playground Redesign — Color Lab
+
+Rewrote Playground (/play) from a bare-bones Tinder swipe into a smart two-phase color discovery engine. Discovery Phase uses an adaptive algorithm that learns from accepted/rejected colors and biases future candidates. Refinement Phase transitions to a full ColorColumn editor reusing existing infrastructure.
+
+#### Added
+
+**Adaptive Color Engine** (`src/lib/adaptive-color.ts`)
+- Factory pattern `createAdaptiveEngine()` returning engine object with full state management
+- `generateCandidate()` — random if <2 accepted, biased toward learned preferences otherwise (30% wildcard chance)
+- `generateNearNeighbor(base)` — generates variation: hue ±15°, lightness ±0.08, chroma ±0.03
+- `recordAccept(color)` / `recordReject(color)` — updates preferences and recomputes avoidance zones
+- Learns hue center (circular mean), lightness/chroma ranges, and rejected hue avoidance zones
+- Rejection zones use 10-degree buckets, requiring 2+ rejections to activate
+- `classifyHarmony()` — hue distance classification: Analogous (<30°), Complementary (150-210°), Contrasting, Neutral
+- `getPsychologyKeyword()` — first emotion from color psychology data for a hue
+
+**4-Direction Swipe Card** (`src/components/modes/playground/SwipeCard.tsx`)
+- Framer Motion drag on both axes with `dragElastic={0.7}` and card rotation
+- Right = Add (green), Left = Skip (red), Up = Save (purple), Down = Similar (blue)
+- Direction labels fade in proportional to drag distance
+- Shows hex code, color name, harmony badge, and psychology keyword
+- Contrast-aware text using `color.contrastColor`
+
+**Palette Strip** (`src/components/modes/playground/PaletteStrip.tsx`)
+- Circular color swatches with `AnimatePresence mode="popLayout"` for smooth add/remove
+- Empty dashed-border slots with pulse animation on next slot
+- Tap-to-remove with hover overlay showing X icon
+- Count label "N / max"
+
+**Discovery Phase** (`src/components/modes/playground/DiscoveryPhase.tsx`)
+- Orchestrates swipe loop with adaptive engine (via `useRef`)
+- All 4 swipe callbacks with null guards on currentCard
+- Keyboard: ArrowRight/Space=add, ArrowLeft=skip, ArrowUp=save, ArrowDown=similar, Backspace=remove last
+- Onboarding hints stored in sessionStorage, auto-dismiss after 3 swipes
+- "Refine" button appears when palette has 2+ colors
+- "Start Over" resets engine + palette
+- Card stack with background depth cards for visual depth
+- Full-state overlay when palette reaches maxSize
+
+**Refinement Phase** (`src/components/modes/playground/RefinementPhase.tsx`)
+- Full ColorColumn editor reusing MoodEditor pattern
+- RefinementSliders (overlay variant) for temperature/vibrancy/brightness
+- ColorInfoPanel for color psychology data
+- LayoutToggle for column/strip orientation
+- "Back to Discovery" button preserving palette state
+- Regenerate randomizes unlocked colors
+- Auto-returns to discovery if all colors removed
+
+#### Changed
+
+**PlaygroundView Rewrite** (`src/components/modes/playground/PlaygroundView.tsx`)
+- Two-phase state machine: `"discovery" | "refinement"`
+- Engine persists across phase transitions via `useRef(createAdaptiveEngine())`
+- Local palette state during discovery, global store during refinement
+- `AnimatePresence mode="wait"` for smooth phase transitions
+
+**Play Page** (`src/app/play/page.tsx`)
+- Changed `enableGenerate={false}` to `enableGenerate={true}` for CommandCenter spacebar in refinement
+
+#### Technical
+
+**New Files (5)**
+```
+src/lib/adaptive-color.ts
+src/components/modes/playground/SwipeCard.tsx
+src/components/modes/playground/PaletteStrip.tsx
+src/components/modes/playground/DiscoveryPhase.tsx
+src/components/modes/playground/RefinementPhase.tsx
+```
+
+**Rewritten Files (1)**
+```
+src/components/modes/playground/PlaygroundView.tsx
+```
+
+**Modified Files (1)**
+```
+src/app/play/page.tsx
+```
+
+- Build passes with no errors
+- Lint: net reduction of 5 issues (37 → 32)
+- Uses `FREE_MAX_PALETTE_SIZE` (7) from feature-limits.ts instead of hardcoded 5
+- All OKLCH math follows patterns from `generate.ts` and `random.ts`
+- No new dependencies
+
+---
+
 ## [0.21.1] - 2026-01-27
 
 ### Fix: Shade Shift Base Palette Preservation
@@ -1629,6 +1719,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 13 (Mood Consolidation + Shade Control) complete | ✅ | 2026-01-26 |
 | Phase 14 (Layout Toggle + UI Polish) complete | ✅ | 2026-01-27 |
 | Fix: Shade shift base preservation | ✅ | 2026-01-27 |
+| Phase 15 (Color Lab — Playground Redesign) complete | ✅ | 2026-01-27 |
 
 ---
 

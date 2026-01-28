@@ -11,7 +11,7 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 14 complete. Palette Layout Toggle + UI Polish.
+Phase 15 complete. Playground Redesign — Color Lab.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
@@ -26,31 +26,28 @@ Phase 14 complete. Palette Layout Toggle + UI Polish.
 - **64 mood presets across 7 categories** with grid UI
 - **Global shade control** in main CommandBar
 - **Palette layout toggle** (columns vs horizontal strips)
+- **Color Lab** — adaptive discovery with 4-direction swipe + two-phase flow
 - Stripe in test mode
 
-**Latest Fix (0.21.1): Shade Shift Base Preservation**
-- `shadeBaseColors` state preserves original palette before shade shifts
-- Repeated shade shifts no longer destroy chroma (no more muddy grays)
-- Base auto-clears on any non-shade palette mutation
-
-**Phase 14 Complete (Layout Toggle + UI Polish):**
-- Toggle between vertical columns and horizontal strips
-- Shared across Immersive and Mood Editor views
-- Layout preference persisted to localStorage
-- ColorColumn supports `orientation` prop (vertical/horizontal)
-- Fixed ModeSelector nested border mismatch in nav bar
-- Rounded mode icons to match pill-shaped UI
+**Phase 15 Complete (Color Lab — Playground Redesign):**
+- Adaptive color engine learns from accepted/rejected swipes
+- 4-direction swipe: Right=Add, Left=Skip, Up=Save, Down=Similar
+- Two-phase flow: Discovery (swipe) → Refinement (full editor)
+- Harmony badges and psychology keywords on swipe cards
+- Palette strip with animated circular swatches
+- Keyboard support (arrow keys, space, backspace)
+- Onboarding hints auto-dismiss after 3 swipes
 
 **Recent Phases:**
+- Phase 14: Palette Layout Toggle + UI Polish
 - Phase 13: Mood Mode Consolidation + Global Shade Control
 - Phase 12: Mood Mode Redesign (grid of palette cards)
 - Phase 11: Expanded Mood Presets (64 moods, 7 categories)
 - Phase 10: Mobile UI/UX (touch targets, safe areas)
 
-**Next (Phase 4 - Platform Integrations):**
-- Figma plugin
-- Chrome extension
-- VS Code extension
+**Next:**
+- Color Duel (tournament bracket), Color Rush (speed round), Color Forge
+- Phase 4: Platform integrations (Figma, Chrome, VS Code)
 
 ---
 
@@ -114,7 +111,7 @@ src/
 │   │   ├── immersive/    # ImmersiveView, ColorColumn
 │   │   ├── context/
 │   │   ├── mood/         # MoodView, MoodHeader, MoodGrid, MoodCard, MoodEditor
-│   │   ├── playground/
+│   │   ├── playground/   # PlaygroundView, DiscoveryPhase, RefinementPhase, SwipeCard, PaletteStrip
 │   │   ├── gradient/     # GradientView.tsx
 │   │   └── explore/      # ExploreView, FilterBar, Grid, Card
 │   ├── ModeToggle.tsx
@@ -130,6 +127,7 @@ src/
 │   └── AIAssistantModal.tsx # AI palette generation
 ├── lib/
 │   ├── colors.ts         # Color conversions
+│   ├── adaptive-color.ts # Adaptive engine for Color Lab
 │   ├── color-psychology.ts # Color meanings & culture
 │   ├── generate.ts       # Palette algorithms
 │   ├── export.ts         # Export formats (9 total)
@@ -276,6 +274,12 @@ PREMIUM_MAX_PALETTE_SIZE: 10
 | `T` | Toggle dark/light theme |
 | `Ctrl+Z` | Undo |
 | `Ctrl+Y` | Redo |
+| **Color Lab (Playground)** | |
+| `Arrow Right` / `Space` | Add color to palette |
+| `Arrow Left` | Skip color |
+| `Arrow Up` | Save to favorites |
+| `Arrow Down` | See similar color |
+| `Backspace` | Remove last from palette |
 
 ---
 

@@ -31,7 +31,7 @@ Competitors are functional but boring. We differentiate on:
 | Mode | URL | Purpose | Tier |
 |------|-----|---------|------|
 | **Immersive** | `/immersive` | Full-screen, spacebar to generate | Free |
-| **Playground** | `/play` | Swipe to discover | Free |
+| **Playground** | `/play` | Color Lab: adaptive swipe discovery + refinement editor | Free |
 | **Explore** | `/explore` | Browse community palettes | Free |
 | **Context** | `/context` | See palette on real designs | Premium |
 | **Mood** | `/mood` | Grid of 64 mood cards, full ColorColumn actions | Premium |
@@ -53,6 +53,14 @@ Competitors are functional but boring. We differentiate on:
 - **Drag reorder**: Drag handle to rearrange colors
 - **Remove at index**: X button to remove specific colors (min 2)
 - **Layout toggle**: Switch between vertical columns and horizontal strips (persisted)
+
+### Color Lab (Playground)
+- **Adaptive Discovery**: Swipe through colors — algorithm learns your taste from accepts/rejects
+- **4-Direction Gestures**: Right=Add, Left=Skip, Up=Save favorites, Down=See similar
+- **Two-Phase Flow**: Discovery (swipe) → Refinement (full ColorColumn editor with sliders)
+- **Harmony Badges**: Each card shows relationship to your palette (Analogous, Complementary, etc.)
+- **Psychology Keywords**: Color emotion tags on each card
+- **Onboarding Hints**: Auto-dismissing gesture guide for new users
 
 ### Color Psychology (Unique)
 - Meaning and emotions for each color
@@ -141,6 +149,7 @@ All sprints complete. Now implementing competitive roadmap.
 | 12 | Mood mode redesign (grid cards, expand to edit) | ✅ |
 | 13 | Mood mode consolidation + global shade control | ✅ |
 | 14 | Palette layout toggle + UI polish | ✅ |
+| 15 | Playground redesign — Color Lab (adaptive discovery) | ✅ |
 | 4 | Platform integrations (Figma, Chrome, VS Code) | Pending |
 | 5 | SVG recolor, expanded templates | Pending |
 
@@ -190,6 +199,12 @@ localStorage for user preferences, Supabase for community palettes.
 | `T` | Toggle theme |
 | `Ctrl+Z` | Undo |
 | `Ctrl+Y` | Redo |
+| **Color Lab (Playground)** | |
+| `Arrow Right` / `Space` | Add color to palette |
+| `Arrow Left` | Skip color |
+| `Arrow Up` | Save to favorites |
+| `Arrow Down` | See similar color |
+| `Backspace` | Remove last from palette |
 
 ---
 
@@ -221,6 +236,8 @@ localStorage for user preferences, Supabase for community palettes.
 | Mobile touch targets | Basic | 44px+ HIG | ✅ Advantage |
 | Safe area support | Partial | Full | ✅ Advantage |
 | Layout toggle (columns/strips) | No | Yes | ✅ Advantage |
+| Adaptive color discovery | No | Yes (learns from swipes) | ✅ Advantage |
+| 4-direction swipe gestures | No | Yes (add/skip/save/similar) | ✅ Advantage |
 | Figma plugin | Yes | Pending | Phase 4 |
 
 ---
