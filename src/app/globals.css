@@ -183,6 +183,39 @@ body {
   border: none;
 }
 
+/* Chroma slider thumb */
+.chroma-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  transition: transform 0.15s ease;
+}
+
+.chroma-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.chroma-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+}
+
+.chroma-slider::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+}
+
 /* Mosaic cell hover effects */
 .mosaic-cell {
   position: relative;

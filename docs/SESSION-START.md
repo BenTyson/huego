@@ -11,11 +11,11 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 16b complete. Mosaic Grid Sorting Overhaul + Full-Bleed Layout.
+Phase 16c complete. Chroma Slider — Mosaic Grid Smoothness Fix.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
-- **The Mosaic** — 4,096 claimable colors at `/mosaic` (full-bleed layout)
+- **The Mosaic** — 4,096 claimable colors at `/mosaic` with chroma slider
 - Variable palette size (2-10 colors)
 - Dark/light theme support
 - Color psychology info panel
@@ -30,23 +30,23 @@ Phase 16b complete. Mosaic Grid Sorting Overhaul + Full-Bleed Layout.
 - **Color Lab** — adaptive discovery with 4-direction swipe + two-phase flow
 - Stripe in test mode
 
-**Phase 16b Complete (Mosaic Overhaul):**
-- Full-bleed edge-to-edge mosaic layout (no header, no stats bar)
-- Dynamic cell sizing fills viewport on any screen
-- Unified hue-based grid sort (no achromatic zone)
-- CSS hover effects (scale 2x, z-index 100)
-- Floating HueGo logo (top-left, links to /immersive)
-- **OPEN ISSUE**: Grid still has visible chroma noise — low-chroma colors create pastel spots among vivid colors. See CHANGELOG 0.23.1 "Lessons Learned" for 3 failed approaches and potential solutions (Hilbert curve, SOM, traveling salesman swap optimization).
+**Phase 16c Complete (Chroma Slider):**
+- Solved grid noise: chroma dimension moved to interactive slider
+- 16×16 grid (256 colors per slice) — perfectly smooth hue × lightness gradient
+- Slider at bottom (0=muted gray → 15=vivid rainbow), 16 slices total
+- All 4,096 colors accessible by sliding end-to-end
+- Big bold cells centered in viewport above slider bar
+- Fixed-bottom 80px slider with semi-transparent backdrop + blur
+- Default slice: 12 (vivid), persisted in localStorage
 
 **Recent Phases:**
+- Phase 16c: Chroma Slider — Grid Smoothness Fix
+- Phase 16b: Mosaic Grid Sorting Overhaul + Full-Bleed Layout
 - Phase 16: The Mosaic — Community Color Ownership
 - Phase 15: Playground Redesign — Color Lab
 - Phase 14: Palette Layout Toggle + UI Polish
-- Phase 13: Mood Mode Consolidation + Global Shade Control
-- Phase 12: Mood Mode Redesign (grid of palette cards)
 
 **Next (The Mosaic Future Phases):**
-- **Grid smoothness fix** — Hilbert curve or SOM approach to eliminate chroma noise
 - Phase 2: Permalinks + social sharing (`/mosaic/[hex]`, OG images)
 - Phase 3: Realtime + polish (live updates, search, mobile)
 - Phase 4: Profiles + name integration
@@ -82,7 +82,7 @@ src/
 │   ├── gradient/         # Gradient mode (premium)
 │   ├── explore/          # Community explorer (free)
 │   ├── mosaic/           # The Mosaic — color claiming
-│   │   ├── page.tsx      # Main 64×64 grid
+│   │   ├── page.tsx      # Main mosaic page (16×16 chroma slice grid)
 │   │   └── success/      # Post-checkout personalization
 │   ├── p/[id]/           # Shared palettes
 │   ├── api/
@@ -125,8 +125,8 @@ src/
 │   │   ├── gradient/     # GradientView.tsx
 │   │   └── explore/      # ExploreView, FilterBar, Grid, Card
 │   ├── mosaic/           # The Mosaic components
-│   │   ├── MosaicView.tsx        # Main view orchestrator
-│   │   ├── MosaicGrid.tsx        # 64×64 CSS grid with event delegation
+│   │   ├── MosaicView.tsx        # Main view + chroma slider bar
+│   │   ├── MosaicGrid.tsx        # 16×16 chroma slice grid, centered
 │   │   ├── MosaicCell.tsx        # Single memo'd color cell
 │   │   ├── MosaicColorPanel.tsx  # Slide-over detail panel
 │   │   ├── MosaicClaimFlow.tsx   # Claim button → Stripe redirect
@@ -151,7 +151,7 @@ src/
 │   ├── export.ts         # Export formats (9 total)
 │   ├── mood.ts           # 64 mood profiles, 7 categories
 │   ├── mood-icons.tsx    # 64 mood icons + color previews
-│   ├── mosaic-grid.ts    # 4,096 color grid generation + OKLCH sorting
+│   ├── mosaic-grid.ts    # 4,096 color grid + chroma slice generation
 │   ├── mosaic-types.ts   # Mosaic interfaces and constants
 │   ├── import.ts         # Import parsing
 │   ├── extract.ts        # Image extraction (k-means)

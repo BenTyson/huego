@@ -2,27 +2,27 @@
 
 import { useCallback, useRef, useState, useEffect } from "react";
 import { useMosaicStore, useMosaicClaimMap } from "@/store/mosaic";
-import { getMosaicGrid } from "@/lib/mosaic-grid";
-import { MOSAIC_GRID_SIZE } from "@/lib/mosaic-types";
+import { getChromaSlice } from "@/lib/mosaic-grid";
+import { MOSAIC_SLICE_GRID_SIZE } from "@/lib/mosaic-types";
 import { MosaicCell } from "./MosaicCell";
+
+const SLIDER_AREA_HEIGHT = 80; // px reserved for the bottom slider bar
 
 export function MosaicGrid() {
   const claimMap = useMosaicClaimMap();
   const setSelectedHex3 = useMosaicStore((s) => s.setSelectedHex3);
   const setHoveredHex3 = useMosaicStore((s) => s.setHoveredHex3);
+  const chromaSlice = useMosaicStore((s) => s.chromaSlice);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Calculate cell size to fill viewport
   const [cellSize, setCellSize] = useState(15);
 
   useEffect(() => {
     const updateSize = () => {
-      // Use the larger dimension to ensure grid fills the screen
       const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      // Cell size = larger dimension / grid size, so grid always fills or exceeds viewport
-      const size = Math.max(vw, vh) / MOSAIC_GRID_SIZE;
-      setCellSize(Math.ceil(size));
+      const vh = window.innerHeight - SLIDER_AREA_HEIGHT;
+      const size = Math.min(vw, vh) / MOSAIC_SLICE_GRID_SIZE;
+      setCellSize(Math.floor(size));
     };
 
     updateSize();
@@ -30,9 +30,8 @@ export function MosaicGrid() {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
-  const grid = getMosaicGrid();
+  const slice = getChromaSlice(chromaSlice);
 
-  // Event delegation — single handler on the container
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       const target = e.target as HTMLElement;
@@ -59,19 +58,20 @@ export function MosaicGrid() {
     setHoveredHex3(null);
   }, [setHoveredHex3]);
 
-  const gridPx = MOSAIC_GRID_SIZE * cellSize;
+  const gridPx = MOSAIC_SLICE_GRID_SIZE * cellSize;
 
   return (
     <div
-      className="w-screen h-screen overflow-auto"
+      className="w-screen flex items-center justify-center"
+      style={{ height: `calc(100vh - ${SLIDER_AREA_HEIGHT}px)` }}
     >
       <div
         ref={containerRef}
         className="relative"
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${MOSAIC_GRID_SIZE}, ${cellSize}px)`,
-          gridTemplateRows: `repeat(${MOSAIC_GRID_SIZE}, ${cellSize}px)`,
+          gridTemplateColumns: `repeat(${MOSAIC_SLICE_GRID_SIZE}, ${cellSize}px)`,
+          gridTemplateRows: `repeat(${MOSAIC_SLICE_GRID_SIZE}, ${cellSize}px)`,
           width: gridPx,
           height: gridPx,
           gap: 0,
@@ -80,7 +80,7 @@ export function MosaicGrid() {
         onMouseOver={handleMouseOver}
         onMouseLeave={handleMouseLeave}
       >
-        {grid.map((entry) => (
+        {slice.colors.map((entry) => (
           <MosaicCell
             key={entry.hex3}
             hex3={entry.hex3}

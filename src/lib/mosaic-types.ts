@@ -81,3 +81,19 @@ export const MOSAIC_TOTAL_COLORS = 4096;
 export const MOSAIC_CELL_SIZE = 15; // px
 export const MOSAIC_CLAIM_PRICE = 1000; // $10.00 in cents
 export const MOSAIC_RESERVATION_MINUTES = 15;
+
+// ============================================
+// Chroma slider types
+// ============================================
+
+export const MOSAIC_CHROMA_SLICES = 16;
+export const MOSAIC_SLICE_GRID_SIZE = 16; // 16×16 = 256 colors per slice
+
+export interface ChromaSlice {
+  sliceIndex: number;
+  chromaMin: number;
+  chromaMax: number;
+  gridCols: number;
+  gridRows: number;
+  colors: MosaicColorEntry[];
+}

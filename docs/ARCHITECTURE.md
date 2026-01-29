@@ -463,21 +463,46 @@ for (r = 0; r < 16; r++)
       // Expand nibble: 0xF → 0xFF (multiply by 17)
       colors.push({ hex3: rgb hex, hex6: expanded })
 
-// Unified hue-based layout (no achromatic/chromatic split):
-// 1. Sort all 4,096 colors by OKLCH hue
-// 2. Divide into 64 columns of 64 colors each
-// 3. Each column sorted by: lightness + chroma * 0.25 (bright top, dark bottom)
+// Chroma Slider approach (solves the noise problem):
+// 1. Sort all 4,096 colors by chroma ascending
+// 2. Split into 16 equal bands of 256 colors each
+// 3. Within each band: sort by hue → 16 columns (rank-based)
+// 4. Within each column: sort by lightness descending → 16 rows
+// 5. Result: each slice is a perfectly smooth 16×16 hue × lightness grid
+// 6. Interactive slider controls which chroma slice is displayed
 //
-// Note: Still has visible chroma noise. See CHANGELOG 0.23.1 "Lessons Learned"
-// for failed approaches and potential solutions (Hilbert curve, SOM).
+// The legacy 64×64 grid (getMosaicGrid) is kept for backward compatibility
+// with the claim system. The display uses getChromaSlice() for rendering.
 ```
 
 ### Key Functions
 
 ```typescript
+// Legacy 64×64 grid (kept for claim system compatibility)
 getMosaicGrid(): MosaicColorEntry[]      // Cached 4,096 entries
 getMosaicLookup(): Map<string, Entry>    // hex3 → entry map
 getMosaicColor(hex3: string): Entry      // Single color lookup
+
+// Chroma slider (used for display)
+getChromaSlices(): ChromaSlice[]         // All 16 slices (cached)
+getChromaSlice(index: number): ChromaSlice  // Single slice (0–15)
+```
+
+### Key Types
+
+```typescript
+interface ChromaSlice {
+  sliceIndex: number;
+  chromaMin: number;
+  chromaMax: number;
+  gridCols: number;   // 16
+  gridRows: number;   // 16
+  colors: MosaicColorEntry[];  // 256 entries
+}
+
+// Constants
+MOSAIC_CHROMA_SLICES = 16
+MOSAIC_SLICE_GRID_SIZE = 16
 ```
 
 ### Mosaic Store
@@ -489,9 +514,11 @@ interface MosaicState {
   stats: MosaicStats | null;
   selectedHex3: string | null;
   hoveredHex3: string | null;
+  chromaSlice: number;  // 0–15, default 12 (vivid), persisted
 
   fetchClaims: () => Promise<void>;
   getClaim: (hex3: string) => ColorClaim | undefined;
+  setChromaSlice: (index: number) => void;
   handleRealtimeClaim: (claim: ColorClaim) => void;
 }
 ```

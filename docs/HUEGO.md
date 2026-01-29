@@ -63,8 +63,10 @@ Competitors are functional but boring. We differentiate on:
 - **Onboarding Hints**: Auto-dismissing gesture guide for new users
 
 ### The Mosaic (`/mosaic`)
-- **4,096 Colors**: Every 12-bit shorthand hex (`#RGB`) in a 64×64 grid
-- **Full-Bleed Layout**: Edge-to-edge viewport, dynamic cell sizing, immersive experience
+- **4,096 Colors**: Every 12-bit shorthand hex (`#RGB`) across 16 chroma slices
+- **Chroma Slider**: Interactive control — slide left for muted/gray, right for vivid rainbow
+- **Perfectly Smooth Grids**: Each slice is a 16×16 hue × lightness gradient, zero noise
+- **Full-Bleed Layout**: Big bold cells centered in viewport, dynamic sizing
 - **Claim for $10**: Own a color forever, give it a custom name
 - **Write a Blurb**: 280-character description of why you chose it
 - **Hover Preview**: 2x scale zoom with shadow on hover
@@ -160,6 +162,7 @@ All sprints complete. Now implementing competitive roadmap.
 | 14 | Palette layout toggle + UI polish | ✅ |
 | 15 | Playground redesign — Color Lab (adaptive discovery) | ✅ |
 | 16 | The Mosaic — community color ownership | ✅ |
+| 16c | Chroma Slider — mosaic grid smoothness fix | ✅ |
 | 4 | Platform integrations (Figma, Chrome, VS Code) | Pending |
 | 5 | SVG recolor, expanded templates | Pending |
 
@@ -249,6 +252,7 @@ localStorage for user preferences, Supabase for community palettes.
 | Adaptive color discovery | No | Yes (learns from swipes) | ✅ Advantage |
 | 4-direction swipe gestures | No | Yes (add/skip/save/similar) | ✅ Advantage |
 | Community color ownership | No | Yes (The Mosaic, $10/color) | ✅ Advantage |
+| Interactive color explorer | Basic wheel | Chroma slider (16 smooth gradients) | ✅ Advantage |
 | Figma plugin | Yes | Pending | Phase 4 |
 
 ---

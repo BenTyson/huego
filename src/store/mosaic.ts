@@ -15,11 +15,13 @@ interface MosaicState {
   // UI state
   selectedHex3: string | null;
   hoveredHex3: string | null;
+  chromaSlice: number;
 
   // Actions
   fetchClaims: () => Promise<void>;
   setSelectedHex3: (hex3: string | null) => void;
   setHoveredHex3: (hex3: string | null) => void;
+  setChromaSlice: (index: number) => void;
   getClaim: (hex3: string) => ColorClaim | undefined;
   handleRealtimeClaim: (claim: ColorClaim) => void;
 }
@@ -35,6 +37,7 @@ export const useMosaicStore = create<MosaicState>()(
       error: null,
       selectedHex3: null,
       hoveredHex3: null,
+      chromaSlice: 12,
 
       fetchClaims: async () => {
         if (get().isLoading) return;
@@ -66,6 +69,7 @@ export const useMosaicStore = create<MosaicState>()(
 
       setSelectedHex3: (hex3) => set({ selectedHex3: hex3 }),
       setHoveredHex3: (hex3) => set({ hoveredHex3: hex3 }),
+      setChromaSlice: (index) => set({ chromaSlice: Math.max(0, Math.min(15, index)) }),
 
       getClaim: (hex3) => get().claimMap.get(hex3),
 
@@ -97,6 +101,7 @@ export const useMosaicStore = create<MosaicState>()(
       partialize: (state) => ({
         // Only persist UI preferences, not fetched data
         selectedHex3: state.selectedHex3,
+        chromaSlice: state.chromaSlice,
       }),
     }
   )
@@ -110,3 +115,4 @@ export const useMosaicLoading = () => useMosaicStore((state) => state.isLoading)
 export const useMosaicError = () => useMosaicStore((state) => state.error);
 export const useSelectedHex3 = () => useMosaicStore((state) => state.selectedHex3);
 export const useHoveredHex3 = () => useMosaicStore((state) => state.hoveredHex3);
+export const useChromaSlice = () => useMosaicStore((state) => state.chromaSlice);

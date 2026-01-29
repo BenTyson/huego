@@ -4,6 +4,77 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.23.2] - 2026-01-28
+
+### Phase 16c: Chroma Slider — Mosaic Grid Smoothness Fix
+
+Solved the mosaic grid noise problem by giving chroma its own axis. Instead of projecting 3D color (hue × lightness × chroma) onto a 2D grid, the chroma dimension is now controlled by an interactive slider. Each slider position shows a perfectly smooth 16×16 hue × lightness gradient at a consistent chroma level. Sliding end-to-end reveals all 4,096 colors across 16 slices.
+
+#### Added
+
+**Chroma Slice Types** (`src/lib/mosaic-types.ts`)
+- `MOSAIC_CHROMA_SLICES = 16` — number of chroma bands
+- `MOSAIC_SLICE_GRID_SIZE = 16` — 16×16 = 256 colors per slice
+- `ChromaSlice` interface: sliceIndex, chromaMin, chromaMax, gridCols, gridRows, colors
+
+**Chroma Slice Generation** (`src/lib/mosaic-grid.ts`)
+- `getChromaSlices()` — cached, returns all 16 slices
+- `getChromaSlice(index)` — single slice by index (0–15)
+- Algorithm: sort all 4,096 by chroma → split into 16 bands of 256 → within each band: sort by hue (16 columns) → within each column: sort by lightness descending (16 rows)
+- Result: perfectly smooth hue × lightness gradient per slice, zero noise
+- Verified: all 4,096 hex3 values present across 16 slices, no duplicates
+
+**Chroma Slider State** (`src/store/mosaic.ts`)
+- `chromaSlice: number` (0–15, default 12 = vivid)
+- `setChromaSlice(index)` action with clamping
+- `useChromaSlice()` selector hook
+- Persisted in localStorage alongside `selectedHex3`
+
+**Chroma Slider UI** (`src/components/mosaic/MosaicView.tsx`)
+- Fixed-bottom 80px bar with semi-transparent backdrop + blur
+- `<input type="range" min={0} max={15}>` with gradient track (gray → vivid rainbow)
+- "Muted" / "Vivid" labels
+- Wired to `chromaSlice` store state
+
+**Slider CSS** (`src/app/globals.css`)
+- `.chroma-slider` thumb styles for WebKit and Firefox
+- 22px white thumb with shadow and border
+
+#### Changed
+
+**MosaicGrid** (`src/components/mosaic/MosaicGrid.tsx`)
+- Grid size: 64×64 → 16×16 (256 colors from current chroma slice)
+- Data source: `getMosaicGrid()` → `getChromaSlice(chromaSlice)`
+- Cell sizing: `Math.floor(Math.min(vw, vh - 80) / 16)` — big bold cells centered in viewport
+- Grid area: fills viewport above slider (100vh - 80px), centered with flexbox
+- Reads `chromaSlice` from store for reactive updates
+
+#### Technical
+
+**Modified Files (5)**
+```
+src/lib/mosaic-types.ts    — Added ChromaSlice type + constants
+src/lib/mosaic-grid.ts     — Added getChromaSlices(), getChromaSlice()
+src/store/mosaic.ts        — Added chromaSlice state + persistence
+src/components/mosaic/MosaicGrid.tsx  — 16×16 slice grid, centered layout
+src/components/mosaic/MosaicView.tsx  — Chroma slider bar
+src/app/globals.css        — .chroma-slider thumb styles
+```
+
+**Unchanged (as designed)**
+- `MosaicCell.tsx` — already flexible
+- `MosaicColorPanel.tsx` — still opens on click
+- `MosaicClaimFlow.tsx` — claims bound to hex3, not grid position
+- All API routes — unchanged
+
+**Data Verification**
+- 16 slices × 256 colors = 4,096 total
+- All hex3 values unique, zero duplicates
+- Chroma ranges: slice 0 (0.0000–0.0532) → slice 15 (0.2638–0.3225)
+- Build passes with zero errors
+
+---
+
 ## [0.23.1] - 2026-01-28
 
 ### Phase 16b: Mosaic Grid Sorting Overhaul + Full-Bleed Layout
@@ -1898,6 +1969,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Fix: Shade shift base preservation | ✅ | 2026-01-27 |
 | Phase 15 (Color Lab — Playground Redesign) complete | ✅ | 2026-01-27 |
 | Phase 16 (The Mosaic) complete | ✅ | 2026-01-28 |
+| Phase 16c (Chroma Slider — Grid Smoothness Fix) complete | ✅ | 2026-01-28 |
 
 ---
 
