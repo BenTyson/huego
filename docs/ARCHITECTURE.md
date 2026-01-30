@@ -548,6 +548,34 @@ CREATE TABLE color_claims (
 );
 ```
 
+### Canvas Gradient Renderer (`src/components/mosaic/MosaicGrid.tsx`)
+
+The mosaic grid renders as a smooth continuous gradient using bilinear interpolation:
+
+```typescript
+// Build 16×16 anchor grid from slice colors
+buildAnchorGrid(colors: MosaicColorEntry[]): RGB[][]
+
+// Bilinear interpolation of a single channel
+bilerp(c00, c10, c01, c11, tx, ty): number
+
+// Render gradient to ImageData buffer
+renderGradient(imageData: ImageData, anchorGrid: RGB[][], size: number): void
+```
+
+**Algorithm:**
+1. Build 16×16 2D RGB anchor grid from `getChromaSlice(chromaSlice).colors`
+2. For each pixel: map to fractional grid coordinates `gx = (px / canvasSize) * 15`
+3. Find 4 surrounding anchor colors, bilinearly interpolate RGB channels
+4. Write to `ImageData` buffer, `putImageData` to canvas
+
+**Interaction:**
+- Click: `pixelToCell()` maps pixel → grid cell `[0, 15]` → hex3 → `setSelectedHex3()`
+- Hover: Imperative tooltip via ref (no React re-renders) shows `#HEX` with color background
+- Resize: Canvas resizes and redraws via `window.addEventListener("resize")`
+
+**Performance:** ~360K pixels for 600px canvas, ~10-20ms per draw. Fine for slider dragging.
+
 ### Related Files
 
 - Grid algorithm: `src/lib/mosaic-grid.ts`

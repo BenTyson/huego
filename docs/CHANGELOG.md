@@ -4,6 +4,57 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.23.3] - 2026-01-30
+
+### Phase 16d: Canvas-Based Mosaic Grid — Smooth Gradient Renderer
+
+Replaced the discrete 16×16 CSS grid of div cells with a single `<canvas>` element that renders a smooth continuous gradient via bilinear interpolation between the 256 anchor colors. The result looks like a professional gradient picker — continuous color field with no cell boundaries visible.
+
+#### Changed
+
+**MosaicGrid Full Rewrite** (`src/components/mosaic/MosaicGrid.tsx`)
+- Replaced 256 `<MosaicCell>` div elements with a single `<canvas>` element
+- Canvas renders smooth continuous gradient via RGB bilinear interpolation
+- `buildAnchorGrid()` — converts flat `MosaicColorEntry[]` to 16×16 2D RGB array
+- `renderGradient()` — per-pixel bilinear interpolation: maps each pixel to fractional grid coords `[0, 15]`, blends 4 surrounding anchor colors
+- `bilerp()` — bilinear interpolation helper for individual RGB channels
+- Canvas sizing: `Math.floor(Math.min(vw, vh - 80))` — responsive, same logic as before
+- Mouse interaction: `pixelToCell()` maps pixel coords → grid cell `[0, 15]` → hex3 lookup
+- Click → `setSelectedHex3()` (opens color panel)
+- Hover → `setHoveredHex3()` + imperative tooltip update
+- Floating tooltip: ref-based imperative DOM updates (no React re-renders on mousemove)
+- Tooltip shows `#HEX` with color background and auto-contrasting text (luminance-based)
+- `borderRadius: 12` on canvas for rounded corners
+- `cursor: crosshair` for color-picker feel
+- Removed imports: `useMosaicClaimMap`, `MosaicCell`
+- Added imports: `useMemo`, `RGB` from types, `MosaicColorEntry` from mosaic-types
+
+#### Technical
+
+**Modified Files (1)**
+```
+src/components/mosaic/MosaicGrid.tsx  — Full rewrite: CSS grid → canvas with bilinear interpolation
+```
+
+**Unchanged (as designed)**
+- `MosaicCell.tsx` — left in place, unused (could be cleaned up later)
+- `MosaicView.tsx` — no changes needed (slider still works)
+- `MosaicColorPanel.tsx` — still opens on click via `selectedHex3`
+- `mosaic-grid.ts` — `getChromaSlice()` still provides anchor colors
+- `mosaic-types.ts` — no type changes
+- `store/mosaic.ts` — no store changes
+
+**Performance**
+- ~360K pixels for 600px canvas, ~10-20ms per draw
+- Smooth slider dragging: gradient redraws per chroma slice change
+- Tooltip uses imperative DOM updates — zero React re-renders on mousemove
+- `useMemo` on `getChromaSlice()` and `buildAnchorGrid()` prevents unnecessary recomputation
+
+**Build**
+- `npm run build` passes with zero errors
+
+---
+
 ## [0.23.2] - 2026-01-28
 
 ### Phase 16c: Chroma Slider — Mosaic Grid Smoothness Fix
@@ -1970,6 +2021,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 15 (Color Lab — Playground Redesign) complete | ✅ | 2026-01-27 |
 | Phase 16 (The Mosaic) complete | ✅ | 2026-01-28 |
 | Phase 16c (Chroma Slider — Grid Smoothness Fix) complete | ✅ | 2026-01-28 |
+| Phase 16d (Canvas Gradient Renderer) complete | ✅ | 2026-01-30 |
 
 ---
 

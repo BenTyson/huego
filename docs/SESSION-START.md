@@ -1,7 +1,7 @@
 # HueGo - Session Start Guide
 
 > **Read this before doing anything.**
-> Last Updated: 2026-01-28
+> Last Updated: 2026-01-30
 > Production: https://huego-production.up.railway.app
 > Dev: `npm run dev` (port 3377)
 
@@ -11,11 +11,11 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 16c complete. Chroma Slider — Mosaic Grid Smoothness Fix.
+Phase 16d complete. Canvas-Based Mosaic Grid — Smooth Gradient Renderer.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
-- **The Mosaic** — 4,096 claimable colors at `/mosaic` with chroma slider
+- **The Mosaic** — 4,096 claimable colors at `/mosaic` with chroma slider + canvas gradient
 - Variable palette size (2-10 colors)
 - Dark/light theme support
 - Color psychology info panel
@@ -30,21 +30,21 @@ Phase 16c complete. Chroma Slider — Mosaic Grid Smoothness Fix.
 - **Color Lab** — adaptive discovery with 4-direction swipe + two-phase flow
 - Stripe in test mode
 
-**Phase 16c Complete (Chroma Slider):**
-- Solved grid noise: chroma dimension moved to interactive slider
-- 16×16 grid (256 colors per slice) — perfectly smooth hue × lightness gradient
-- Slider at bottom (0=muted gray → 15=vivid rainbow), 16 slices total
-- All 4,096 colors accessible by sliding end-to-end
-- Big bold cells centered in viewport above slider bar
-- Fixed-bottom 80px slider with semi-transparent backdrop + blur
-- Default slice: 12 (vivid), persisted in localStorage
+**Phase 16d Complete (Canvas Gradient Renderer):**
+- Mosaic grid now renders as smooth continuous gradient (like htmlcolorcodes.com picker)
+- Single `<canvas>` replaces 256 `<MosaicCell>` divs
+- Bilinear interpolation between 16×16 anchor colors — no visible cell boundaries
+- Floating tooltip with `#HEX` and color background on hover (imperative DOM, zero re-renders)
+- Crosshair cursor, rounded corners (12px), responsive canvas sizing
+- Click maps pixel → grid cell → opens color panel
+- Chroma slider still drives which 256-color slice is displayed
 
 **Recent Phases:**
+- Phase 16d: Canvas-Based Mosaic Grid — Smooth Gradient Renderer
 - Phase 16c: Chroma Slider — Grid Smoothness Fix
 - Phase 16b: Mosaic Grid Sorting Overhaul + Full-Bleed Layout
 - Phase 16: The Mosaic — Community Color Ownership
 - Phase 15: Playground Redesign — Color Lab
-- Phase 14: Palette Layout Toggle + UI Polish
 
 **Next (The Mosaic Future Phases):**
 - Phase 2: Permalinks + social sharing (`/mosaic/[hex]`, OG images)
@@ -126,8 +126,8 @@ src/
 │   │   └── explore/      # ExploreView, FilterBar, Grid, Card
 │   ├── mosaic/           # The Mosaic components
 │   │   ├── MosaicView.tsx        # Main view + chroma slider bar
-│   │   ├── MosaicGrid.tsx        # 16×16 chroma slice grid, centered
-│   │   ├── MosaicCell.tsx        # Single memo'd color cell
+│   │   ├── MosaicGrid.tsx        # Canvas gradient renderer (bilinear interpolation)
+│   │   ├── MosaicCell.tsx        # Single memo'd color cell (unused, kept for reference)
 │   │   ├── MosaicColorPanel.tsx  # Slide-over detail panel
 │   │   ├── MosaicClaimFlow.tsx   # Claim button → Stripe redirect
 │   │   ├── MosaicStatsBar.tsx    # Progress bar + recent claims

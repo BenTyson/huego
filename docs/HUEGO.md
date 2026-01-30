@@ -65,11 +65,11 @@ Competitors are functional but boring. We differentiate on:
 ### The Mosaic (`/mosaic`)
 - **4,096 Colors**: Every 12-bit shorthand hex (`#RGB`) across 16 chroma slices
 - **Chroma Slider**: Interactive control — slide left for muted/gray, right for vivid rainbow
-- **Perfectly Smooth Grids**: Each slice is a 16×16 hue × lightness gradient, zero noise
-- **Full-Bleed Layout**: Big bold cells centered in viewport, dynamic sizing
+- **Canvas Gradient Renderer**: Smooth continuous gradient via bilinear interpolation — no cell boundaries
+- **Floating Tooltip**: Hover shows `#HEX` with color background and contrasting text
+- **Crosshair Cursor**: Color-picker feel with rounded canvas corners
 - **Claim for $10**: Own a color forever, give it a custom name
 - **Write a Blurb**: 280-character description of why you chose it
-- **Hover Preview**: 2x scale zoom with shadow on hover
 - **Reservation System**: 15-minute hold during checkout prevents double-claims
 - **Living Artwork**: Grid progressively "comes alive" as community claims colors
 
@@ -163,6 +163,7 @@ All sprints complete. Now implementing competitive roadmap.
 | 15 | Playground redesign — Color Lab (adaptive discovery) | ✅ |
 | 16 | The Mosaic — community color ownership | ✅ |
 | 16c | Chroma Slider — mosaic grid smoothness fix | ✅ |
+| 16d | Canvas gradient renderer — smooth bilinear interpolation | ✅ |
 | 4 | Platform integrations (Figma, Chrome, VS Code) | Pending |
 | 5 | SVG recolor, expanded templates | Pending |
 
@@ -252,7 +253,7 @@ localStorage for user preferences, Supabase for community palettes.
 | Adaptive color discovery | No | Yes (learns from swipes) | ✅ Advantage |
 | 4-direction swipe gestures | No | Yes (add/skip/save/similar) | ✅ Advantage |
 | Community color ownership | No | Yes (The Mosaic, $10/color) | ✅ Advantage |
-| Interactive color explorer | Basic wheel | Chroma slider (16 smooth gradients) | ✅ Advantage |
+| Interactive color explorer | Basic wheel | Canvas gradient picker (bilinear interpolation, 16 chroma slices) | ✅ Advantage |
 | Figma plugin | Yes | Pending | Phase 4 |
 
 ---
