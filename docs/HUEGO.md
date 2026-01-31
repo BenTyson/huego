@@ -34,7 +34,7 @@ Competitors are functional but boring. We differentiate on:
 | **Playground** | `/play` | Color Lab: adaptive swipe discovery + refinement editor | Free |
 | **Explore** | `/explore` | Browse community palettes | Free |
 | **Context** | `/context` | See palette on real designs | Premium |
-| **Mood** | `/mood` | Grid of 64 mood cards, full ColorColumn actions | Premium |
+| **Mood** | `/mood` | Grid of 84 mood cards, full ColorColumn actions | Premium |
 | **Gradient** | `/gradient` | Transform palettes to gradients | Premium |
 
 ---
@@ -156,7 +156,7 @@ All sprints complete. Now implementing competitive roadmap.
 | 8 | Enhanced Tailwind export (v3/v4, color spaces) | ✅ |
 | 9 | Coolors-style actions (remove, shades, drag, save) | ✅ |
 | 10 | Mobile UI/UX (touch targets, safe areas, tap-toggle) | ✅ |
-| 11 | Expanded mood presets (64 moods, 7 categories) | ✅ |
+| 11 | Expanded mood presets (84 moods, 7 categories) | ✅ |
 | 12 | Mood mode redesign (grid cards, expand to edit) | ✅ |
 | 13 | Mood mode consolidation + global shade control | ✅ |
 | 14 | Palette layout toggle + UI polish | ✅ |
@@ -164,6 +164,8 @@ All sprints complete. Now implementing competitive roadmap.
 | 16 | The Mosaic — community color ownership | ✅ |
 | 16c | Chroma Slider — mosaic grid smoothness fix | ✅ |
 | 16d | Canvas gradient renderer — smooth bilinear interpolation | ✅ |
+| 17 | Cross-mode palette cohesion (nav preview, guards, current palette bar) | ✅ |
+| 17+ | Creative mood rename + 20 new moods (84 total) | ✅ |
 | 4 | Platform integrations (Figma, Chrome, VS Code) | Pending |
 | 5 | SVG recolor, expanded templates | Pending |
 
@@ -237,7 +239,7 @@ localStorage for user preferences, Supabase for community palettes.
 | Variable palette (2-10) | Yes | Yes | ✅ Parity |
 | Dark mode | Yes | Yes | ✅ Parity |
 | Color info/psychology | Basic | Rich | ✅ Advantage |
-| Mood-based generation | No | 64 moods, grid cards, expand-to-edit | ✅ Advantage |
+| Mood-based generation | No | 84 moods, grid cards, expand-to-edit | ✅ Advantage |
 | Mesh gradients | No | Yes | ✅ Advantage |
 | Accessibility sim | Basic | 5 types | ✅ Advantage |
 | Community palettes | 10M+ | Yes (growing) | ✅ Parity |

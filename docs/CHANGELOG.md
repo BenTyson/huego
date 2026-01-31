@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.25.0] - 2026-01-30
+
+### Phase 17+: Creative Mood Rename + 20 New Moods
+
+Rebranded all 64 existing mood display names and descriptions with evocative, creative alternatives while preserving every `id`, cache key, and icon key. Added 20 new mood profiles distributed across all 7 categories, bringing the total from 64 to 84. Created an `/add-mood` Claude Code skill for future agents.
+
+#### Added
+- **20 new mood profiles** (`src/lib/mood.ts`) — nostalgic, defiant, dreamy, monsoon, solstice, coral-reef, aurora, brutalist, art-nouveau, dark-academia, gaming, architecture, brazilian, indian, korean, african, ethereal, chaotic, monochrome, vintage
+- **20 new SVG icons** (`src/lib/mood-icons.tsx`) — one per new mood, 20x20 viewBox, stroke-based
+- **20 new color previews** (`src/lib/mood-icons.tsx`) — 3 representative hex values per new mood
+- **`/add-mood` skill** (`.claude/skills/add-mood/SKILL.md`) — step-by-step guide for future agents to add moods: validation, insertion points, icon/color templates, parameter guidelines, count update locations, verification commands
+
+#### Changed
+- **64 mood display names renamed** (`src/lib/mood.ts`) — all `name` and `description` fields replaced with creative/evocative alternatives (e.g., "Calm" → "Still Waters", "Cyberpunk" → "Neon District", "Japanese" → "Wabi-Sabi")
+- **Category counts updated** — comment headers in `mood.ts` updated to reflect new totals (13+12+12+15+12+12+8 = 84)
+- **Count references updated** — "64" → "84" in MoodHeader.tsx, SESSION-START.md (3 places), HUEGO.md (3 places)
+
+#### Technical
+- No changes to `id` fields, icon keys, cache keys, category IDs, community tags, or component logic
+- All existing palette generation parameters (hueRange, saturationRange, lightnessRange, hueVariance) unchanged
+- Build passes with zero type errors
+- Verified: `moodProfiles.length === 84`, `moodIcons` keys === 84, `moodColors` keys === 84
+
+---
+
 ## [0.24.0] - 2026-01-30
 
 ### Phase 17: Cross-Mode Palette Cohesion
@@ -2128,6 +2153,8 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 16 (The Mosaic) complete | ✅ | 2026-01-28 |
 | Phase 16c (Chroma Slider — Grid Smoothness Fix) complete | ✅ | 2026-01-28 |
 | Phase 16d (Canvas Gradient Renderer) complete | ✅ | 2026-01-30 |
+| Phase 17 (Cross-Mode Palette Cohesion) complete | ✅ | 2026-01-30 |
+| Phase 17+ (Creative Mood Rename + 20 New Moods) complete | ✅ | 2026-01-30 |
 | Phase 17 (Cross-Mode Palette Cohesion) complete | ✅ | 2026-01-30 |
 
 ---

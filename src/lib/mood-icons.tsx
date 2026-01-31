@@ -72,6 +72,28 @@ export const moodIcons: Record<string, React.ReactNode> = {
       <path d="M12 12v10" />
     </svg>
   ),
+  nostalgic: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <rect x="6" y="6" width="12" height="12" rx="1" />
+      <path d="M3 21l6-6M15 9l6-6" />
+    </svg>
+  ),
+  defiant: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M4 20l8-16 8 16" />
+      <path d="M12 4v4" />
+      <path d="M9 6l3-4 3 4" />
+      <path d="M7 16h10" />
+    </svg>
+  ),
+  dreamy: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M18 8h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+      <circle cx="8" cy="11" r="1" fill="currentColor" />
+      <circle cx="13" cy="14" r="0.5" fill="currentColor" />
+    </svg>
+  ),
 
   // ============================================
   // SEASONS & TIME
@@ -145,6 +167,19 @@ export const moodIcons: Record<string, React.ReactNode> = {
   overcast: (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+    </svg>
+  ),
+  monsoon: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M18 8h-1.26A8 8 0 1 0 9 18h9a5 5 0 0 0 0-10z" />
+      <path d="M8 20v2M12 19v3M16 20v2" />
+    </svg>
+  ),
+  solstice: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="6" />
+      <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+      <path d="M5.64 5.64l2.12 2.12M16.24 16.24l2.12 2.12M5.64 18.36l2.12-2.12M16.24 7.76l2.12-2.12" />
     </svg>
   ),
 
@@ -223,6 +258,24 @@ export const moodIcons: Record<string, React.ReactNode> = {
       <path d="M2 22c2-4 5-6 10-6s8 2 10 6" />
       <path d="M3 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2s2.5 2 5 2c1.3 0 1.9-.5 2.5-1" />
       <circle cx="17" cy="6" r="3" />
+    </svg>
+  ),
+  "coral-reef": (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M12 22v-6" />
+      <path d="M8 22v-4" />
+      <path d="M16 22v-4" />
+      <path d="M12 16c-3 0-5-3-5-6s2-6 5-6 5 3 5 6-2 6-5 6z" />
+      <circle cx="10" cy="10" r="1" fill="currentColor" />
+      <circle cx="14" cy="12" r="1" fill="currentColor" />
+    </svg>
+  ),
+  aurora: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M3 20c3-6 6-8 9-16" />
+      <path d="M8 20c2-5 4-8 7-14" />
+      <path d="M14 20c1-4 3-7 5-12" />
+      <path d="M19 20c.5-3 1.5-5 3-8" />
     </svg>
   ),
 
@@ -316,6 +369,28 @@ export const moodIcons: Record<string, React.ReactNode> = {
       <circle cx="12" cy="6" r="4" />
     </svg>
   ),
+  brutalist: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="2" y="4" width="20" height="16" />
+      <path d="M2 10h20" />
+      <path d="M8 4v16" />
+      <path d="M16 4v16" />
+    </svg>
+  ),
+  "art-nouveau": (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M12 2c-4 4-4 8 0 12s4 8 0 12" />
+      <path d="M12 2c4 4 4 8 0 12s-4 8 0 12" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  ),
+  "dark-academia": (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z" />
+      <path d="M8 7h8M8 11h6" />
+    </svg>
+  ),
 
   // ============================================
   // INDUSTRY & BRAND
@@ -383,6 +458,22 @@ export const moodIcons: Record<string, React.ReactNode> = {
   "luxury-brand": (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z" />
+    </svg>
+  ),
+  gaming: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M6 11h4M8 9v4" />
+      <circle cx="15" cy="10" r="1" fill="currentColor" />
+      <circle cx="18" cy="12" r="1" fill="currentColor" />
+      <path d="M2 14.5A4.5 4.5 0 0 0 6.5 19h11a4.5 4.5 0 0 0 0-9h-11A4.5 4.5 0 0 0 2 14.5z" />
+    </svg>
+  ),
+  architecture: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M2 22h20" />
+      <path d="M6 22V6l6-4 6 4v16" />
+      <path d="M10 22v-4h4v4" />
+      <path d="M10 10h4M10 14h4" />
     </svg>
   ),
 
@@ -459,6 +550,37 @@ export const moodIcons: Record<string, React.ReactNode> = {
       <path d="M7 16h2M16 12h2" />
     </svg>
   ),
+  brazilian: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 2c-3 3-3 6 0 10s3 7 0 10" />
+      <path d="M12 2c3 3 3 6 0 10s-3 7 0 10" />
+      <path d="M5 8h14M5 16h14" />
+    </svg>
+  ),
+  indian: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+    </svg>
+  ),
+  korean: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M8 8c2 2 4 6 4 8" />
+      <path d="M16 8c-2 2-4 6-4 8" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ),
+  african: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M12 2l-8 8v12h16V10l-8-8z" />
+      <path d="M4 10h16" />
+      <path d="M4 16h16" />
+      <path d="M12 10v12" />
+    </svg>
+  ),
 
   // ============================================
   // ABSTRACT & CONCEPTUAL
@@ -488,6 +610,36 @@ export const moodIcons: Record<string, React.ReactNode> = {
       <circle cx="12" cy="12" r="3" />
     </svg>
   ),
+  ethereal: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="12" r="8" />
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 4v-2M12 22v-2M4 12H2M22 12h-2" />
+    </svg>
+  ),
+  chaotic: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M2 12l4-4 3 6 4-8 3 6 4-4" />
+      <path d="M3 18l5-3 3 4 4-6 3 4 3-3" />
+      <circle cx="6" cy="6" r="2" />
+      <circle cx="18" cy="5" r="1.5" />
+    </svg>
+  ),
+  monochrome: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M3 3l18 18" />
+      <path d="M3 12h18" />
+    </svg>
+  ),
+  vintage: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="12" cy="13" r="8" />
+      <circle cx="12" cy="13" r="3" />
+      <path d="M5 3h14" />
+      <path d="M12 5V3" />
+    </svg>
+  ),
 };
 
 // Mood color previews (representative colors for each mood)
@@ -503,6 +655,9 @@ export const moodColors: Record<string, string[]> = {
   melancholy: ["#5D7B93", "#7A95AB", "#98B0C2"],
   joyful: ["#FFE066", "#FFD633", "#FFCC00"],
   hopeful: ["#7DCEA0", "#A9DFBF", "#D4EFDF"],
+  nostalgic: ["#C4A882", "#D4BFA0", "#E8D8C0"],
+  defiant: ["#8B1A2B", "#A62D3E", "#C94055"],
+  dreamy: ["#D4B8E8", "#E0C8F0", "#ECD8F8"],
 
   // Seasons
   spring: ["#98D8AA", "#B5E5C4", "#D2F0DC"],
@@ -515,6 +670,8 @@ export const moodColors: Record<string, string[]> = {
   midnight: ["#1A1A40", "#2D2D5A", "#404075"],
   twilight: ["#614385", "#7B5B9A", "#9673AF"],
   overcast: ["#A0A0A0", "#B8B8B8", "#D0D0D0"],
+  monsoon: ["#4A7A8C", "#5E8E9E", "#7AABB8"],
+  solstice: ["#E8C060", "#F0D080", "#F8E0A0"],
 
   // Nature
   natural: ["#6B8E23", "#8FBC8F", "#9ACD32"],
@@ -527,6 +684,8 @@ export const moodColors: Record<string, string[]> = {
   meadow: ["#7CFC00", "#90EE90", "#98FB98"],
   volcanic: ["#8B0000", "#B22222", "#CD5C5C"],
   coastal: ["#5F9EA0", "#7FB3B3", "#AFEEEE"],
+  "coral-reef": ["#FF7F50", "#40E0D0", "#FF6B81"],
+  aurora: ["#2ECC71", "#8E44AD", "#3498DB"],
 
   // Aesthetics
   retro: ["#D4A574", "#C19A6B", "#E6BE8A"],
@@ -541,6 +700,9 @@ export const moodColors: Record<string, string[]> = {
   bohemian: ["#8B4513", "#CD853F", "#D2691E"],
   industrial: ["#4A4A4A", "#696969", "#808080"],
   vaporwave: ["#FF71CE", "#01CDFE", "#B967FF"],
+  brutalist: ["#808080", "#999999", "#B3B3B3"],
+  "art-nouveau": ["#8B9E6B", "#B8C99A", "#D4DEAD"],
+  "dark-academia": ["#3D2B1F", "#5C4033", "#7B5B4A"],
 
   // Industry
   professional: ["#2C3E50", "#5D6D7E", "#85929E"],
@@ -553,6 +715,8 @@ export const moodColors: Record<string, string[]> = {
   wellness: ["#4CAF50", "#81C784", "#A5D6A7"],
   education: ["#2196F3", "#64B5F6", "#90CAF9"],
   "luxury-brand": ["#FFD700", "#4A0080", "#D4AF37"],
+  gaming: ["#9B59B6", "#E91E63", "#00BCD4"],
+  architecture: ["#5C7A8A", "#7A9AAA", "#A0BCC8"],
 
   // Cultural
   japanese: ["#FFB7C5", "#F8E8E8", "#E8D4D4"],
@@ -563,10 +727,18 @@ export const moodColors: Record<string, string[]> = {
   "tropical-paradise": ["#00FA9A", "#FFD700", "#FF6347"],
   southwestern: ["#CD853F", "#40E0D0", "#8B4513"],
   "coastal-new-england": ["#000080", "#FFFFFF", "#DC143C"],
+  brazilian: ["#00A859", "#FFDF00", "#FF6F00"],
+  indian: ["#FF6F00", "#E91E63", "#FFD700"],
+  korean: ["#F8BBD0", "#E1BEE7", "#B3E5FC"],
+  african: ["#B8860B", "#CD853F", "#8B4513"],
 
   // Abstract
   urban: ["#34495E", "#7F8C8D", "#BDC3C7"],
   luxurious: ["#6C3483", "#8E44AD", "#BB8FCE"],
   warm: ["#E67E22", "#D35400", "#F5B041"],
   cool: ["#3498DB", "#5DADE2", "#85C1E9"],
+  ethereal: ["#D8BFD8", "#E6D0F0", "#F0E4F8"],
+  chaotic: ["#FF4500", "#00CED1", "#FFD700"],
+  monochrome: ["#404040", "#808080", "#C0C0C0"],
+  vintage: ["#BFA882", "#C4A070", "#D4B896"],
 };

@@ -163,7 +163,7 @@ export const MoodHeader = memo(function MoodHeader({
           <h1 className="text-xl font-semibold text-white">
             How should it feel?
           </h1>
-          <p className="text-sm text-zinc-500">64 moods across 7 categories</p>
+          <p className="text-sm text-zinc-500">84 moods across 7 categories</p>
         </div>
       </div>
 

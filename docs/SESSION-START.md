@@ -11,7 +11,7 @@
 
 **Phase: Building - Competitive Roadmap**
 
-Phase 16d complete. Canvas-Based Mosaic Grid — Smooth Gradient Renderer.
+Phase 17+ complete. Creative Mood Rename + 20 New Moods.
 
 **Current state:**
 - 6 modes (Immersive, Playground, Context, Mood, Gradient, Explore)
@@ -24,27 +24,24 @@ Phase 16d complete. Canvas-Based Mosaic Grid — Smooth Gradient Renderer.
 - Supabase community database active
 - AI-powered palette generation via Claude API
 - Mobile-optimized with touch targets and safe areas
-- **64 mood presets across 7 categories** with grid UI
+- **84 mood presets across 7 categories** with grid UI
 - **Global shade control** in main CommandBar
 - **Palette layout toggle** (columns vs horizontal strips)
 - **Color Lab** — adaptive discovery with 4-direction swipe + two-phase flow
 - Stripe in test mode
 
-**Phase 16d Complete (Canvas Gradient Renderer):**
-- Mosaic grid now renders as smooth continuous gradient (like htmlcolorcodes.com picker)
-- Single `<canvas>` replaces 256 `<MosaicCell>` divs
-- Bilinear interpolation between 16×16 anchor colors — no visible cell boundaries
-- Floating tooltip with `#HEX` and color background on hover (imperative DOM, zero re-renders)
-- Crosshair cursor, rounded corners (12px), responsive canvas sizing
-- Click maps pixel → grid cell → opens color panel
-- Chroma slider still drives which 256-color slice is displayed
+**Phase 17+ Complete (Creative Mood Rename + 20 New Moods):**
+- All 64 existing mood display names and descriptions renamed to creative/evocative alternatives
+- 20 new moods added across all 7 categories (84 total)
+- `/add-mood` Claude Code skill created for future agents
+- No changes to ids, cache keys, icon keys, or generation parameters
 
 **Recent Phases:**
+- Phase 17+: Creative Mood Rename + 20 New Moods
+- Phase 17: Cross-Mode Palette Cohesion
 - Phase 16d: Canvas-Based Mosaic Grid — Smooth Gradient Renderer
 - Phase 16c: Chroma Slider — Grid Smoothness Fix
 - Phase 16b: Mosaic Grid Sorting Overhaul + Full-Bleed Layout
-- Phase 16: The Mosaic — Community Color Ownership
-- Phase 15: Playground Redesign — Color Lab
 
 **Next (The Mosaic Future Phases):**
 - Phase 2: Permalinks + social sharing (`/mosaic/[hex]`, OG images)
@@ -149,8 +146,8 @@ src/
 │   ├── color-psychology.ts # Color meanings & culture
 │   ├── generate.ts       # Palette algorithms
 │   ├── export.ts         # Export formats (9 total)
-│   ├── mood.ts           # 64 mood profiles, 7 categories
-│   ├── mood-icons.tsx    # 64 mood icons + color previews
+│   ├── mood.ts           # 84 mood profiles, 7 categories
+│   ├── mood-icons.tsx    # 84 mood icons + color previews
 │   ├── mosaic-grid.ts    # 4,096 color grid + chroma slice generation
 │   ├── mosaic-types.ts   # Mosaic interfaces and constants
 │   ├── import.ts         # Import parsing
