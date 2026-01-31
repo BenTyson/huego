@@ -4,6 +4,112 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.24.0] - 2026-01-30
+
+### Phase 17: Cross-Mode Palette Cohesion
+
+Made navigating between modes feel connected by showing the current palette in the nav bar, warning users before losing unsaved work in Play Discovery, and surfacing the current palette on the Mood browse page.
+
+#### Added
+
+**Nav Bar Palette Preview** (`src/components/Navigation/PalettePreview.tsx`)
+- Compact row of circular color dots (12px desktop, 10px mobile) reading from `useColors()`
+- Click to expand dropdown showing larger swatches with hex codes and "From: Mode" source label
+- Click any color in dropdown to copy hex to clipboard
+- Shows first 6 colors + "+N" overflow label when palette has >6 colors
+- Pulse animation: when colors change (tracked via `useRef` hex string comparison), dots briefly scale up over 300ms
+- Dropdown closes on outside click or pathname change
+- Positioned between ModeSelector and Logo in the nav pill
+
+**Navigation Guard System** (`src/contexts/NavigationGuardContext.tsx`)
+- React context providing `setGuard(condition, message)`, `clearGuard()`, `requestNavigation(href)`
+- Provider renders confirmation modal (follows existing `ModalBase` visual pattern) with "Stay" / "Leave" buttons
+- "Leave" calls `router.push(pendingHref)` + clears guard; "Stay" cancels pending navigation
+
+**Guarded Link Component** (`src/components/Navigation/GuardedLink.tsx`)
+- Wraps Next.js `<Link>` — intercepts `onClick`, checks guard context
+- If guard is active and condition returns true, prevents default and calls `requestNavigation(href)`
+- If no guard context present, behaves as normal `<Link>`
+
+**Current Palette Bar on Mood Browse** (`src/components/modes/mood/CurrentPaletteBar.tsx`)
+- Reads `useColors()` from global store
+- Expanded: circular swatches (24px) + "Your palette" label + color count + "Edit Current" button
+- Collapsed: thin color bar (segments of each palette color), click to expand
+- Collapsible via chevron toggle (local `useState`, default expanded)
+- Hidden when global palette is empty
+
+**Store: lastModifiedIn Tracking** (`src/store/palette.ts`)
+- New `lastModifiedIn: string | null` field tracks which mode last changed the palette
+- Persisted in `partialize` to localStorage
+- Updated in `setColors()` (current mode), `generate()` (current mode), `loadPalette()` ("loaded"), `applySuggestion()` ("ai")
+- New `useLastModifiedIn()` selector hook
+
+#### Changed
+
+**NavigationBar** (`src/components/Navigation/NavigationBar.tsx`)
+- Inserted `<PalettePreview />` between `<ModeSelector />` and Logo `<Link>`
+
+**ModePageLayout** (`src/components/layout/ModePageLayout.tsx`)
+- Wrapped children with `<NavigationGuardProvider>`
+
+**ModeSelector** (`src/components/Navigation/ModeSelector.tsx`)
+- Replaced `Link` with `GuardedLink` for navigation guard support
+
+**ExploreLink** (`src/components/Navigation/ExploreLink.tsx`)
+- Replaced `Link` with `GuardedLink`
+
+**MosaicLink** (`src/components/Navigation/MosaicLink.tsx`)
+- Replaced `Link` with `GuardedLink`
+
+**PlaygroundView** (`src/components/modes/playground/PlaygroundView.tsx`)
+- Registers navigation guard during discovery phase (condition: `localPalette.length > 0`)
+- Clears guard when entering refinement or on unmount
+
+**DiscoveryPhase** (`src/components/modes/playground/DiscoveryPhase.tsx`)
+- Added `beforeunload` handler when `palette.length > 0` (covers browser refresh/close)
+
+**MoodView** (`src/components/modes/mood/MoodView.tsx`)
+- Added `<CurrentPaletteBar>` between `<MoodHeader>` and `<MoodGrid>` in browse view
+- Added `handleUseCurrent` callback: sets baseColorsRef to store colors, clears selectedMood, enters edit mode
+- Edit view now renders `<MoodEditor>` when `viewMode === "edit"` regardless of mood being null (previously guarded by `selectedMoodProfile &&`)
+
+**MoodEditor** (`src/components/modes/mood/MoodEditor.tsx`)
+- `mood` prop type changed from `MoodProfile` to `MoodProfile | null`
+- When `mood` is null: shows "Your Palette" as title, hides mood icon, passes `undefined` for `onRegenerate`
+
+**RefinementSliders** (`src/components/modes/mood/RefinementSliders.tsx`)
+- `onRegenerate` prop is now optional — regenerate button hidden when not provided
+
+#### Technical
+
+**New Files (4)**
+```
+src/components/Navigation/PalettePreview.tsx    — Color dot strip in nav bar + expandable dropdown
+src/contexts/NavigationGuardContext.tsx          — Navigation interception context + confirmation modal
+src/components/Navigation/GuardedLink.tsx        — Link wrapper that checks navigation guard
+src/components/modes/mood/CurrentPaletteBar.tsx  — Current palette reference on mood browse page
+```
+
+**Modified Files (10)**
+```
+src/store/palette.ts                                — Added lastModifiedIn field + selector
+src/components/Navigation/NavigationBar.tsx          — Added PalettePreview to nav pill
+src/components/layout/ModePageLayout.tsx             — Wrapped with NavigationGuardProvider
+src/components/Navigation/ModeSelector.tsx           — Link → GuardedLink
+src/components/Navigation/ExploreLink.tsx            — Link → GuardedLink
+src/components/Navigation/MosaicLink.tsx             — Link → GuardedLink
+src/components/modes/playground/PlaygroundView.tsx   — Register/clear navigation guard
+src/components/modes/playground/DiscoveryPhase.tsx   — Added beforeunload handler
+src/components/modes/mood/MoodView.tsx               — Added CurrentPaletteBar, handleUseCurrent, nullable mood
+src/components/modes/mood/MoodEditor.tsx             — Nullable mood prop, conditional icon/title/regenerate
+src/components/modes/mood/RefinementSliders.tsx      — Optional onRegenerate prop
+```
+
+**Build**
+- `npm run build` passes with zero errors
+
+---
+
 ## [0.23.3] - 2026-01-30
 
 ### Phase 16d: Canvas-Based Mosaic Grid — Smooth Gradient Renderer
@@ -2022,6 +2128,7 @@ STRIPE_PREMIUM_PRICE_ID
 | Phase 16 (The Mosaic) complete | ✅ | 2026-01-28 |
 | Phase 16c (Chroma Slider — Grid Smoothness Fix) complete | ✅ | 2026-01-28 |
 | Phase 16d (Canvas Gradient Renderer) complete | ✅ | 2026-01-30 |
+| Phase 17 (Cross-Mode Palette Cohesion) complete | ✅ | 2026-01-30 |
 
 ---
 

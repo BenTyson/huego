@@ -15,6 +15,7 @@ import { useMoodPaletteCache } from "@/hooks/useMoodPaletteCache";
 import { MoodHeader } from "./MoodHeader";
 import { MoodGrid } from "./MoodGrid";
 import { MoodEditor } from "./MoodEditor";
+import { CurrentPaletteBar } from "./CurrentPaletteBar";
 
 type ViewMode = "browse" | "edit";
 
@@ -89,6 +90,13 @@ export function MoodView() {
     [refinements, setColors]
   );
 
+  // Handle using the current palette (no mood selected)
+  const handleUseCurrent = useCallback(() => {
+    baseColorsRef.current = storeColors;
+    setSelectedMood(null);
+    setViewMode("edit");
+  }, [storeColors]);
+
   // Handle back from editor to grid
   const handleBack = useCallback(() => {
     setViewMode("browse");
@@ -156,6 +164,7 @@ export function MoodView() {
                 selectedCategory={selectedCategory}
                 onCategoryChange={handleCategoryChange}
               />
+              <CurrentPaletteBar onUseCurrent={handleUseCurrent} />
               <MoodGrid
                 selectedCategory={selectedCategory}
                 cache={cache}
@@ -165,16 +174,14 @@ export function MoodView() {
             </div>
           </motion.div>
         ) : (
-          selectedMoodProfile && (
-            <MoodEditor
-              key="edit"
-              mood={selectedMoodProfile}
-              refinements={refinements}
-              onRefinementChange={handleRefinementChange}
-              onRegenerate={handleRegenerate}
-              onBack={handleBack}
-            />
-          )
+          <MoodEditor
+            key="edit"
+            mood={selectedMoodProfile ?? null}
+            refinements={refinements}
+            onRefinementChange={handleRefinementChange}
+            onRegenerate={handleRegenerate}
+            onBack={handleBack}
+          />
         )}
       </AnimatePresence>
     </LayoutGroup>

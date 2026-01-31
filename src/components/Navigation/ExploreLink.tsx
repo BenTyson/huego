@@ -1,15 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { GuardedLink } from "./GuardedLink";
 
 export function ExploreLink() {
   const pathname = usePathname();
   const isActive = pathname.startsWith("/explore");
 
   return (
-    <Link href="/explore">
+    <GuardedLink href="/explore">
       <motion.div
         className={`
           flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
@@ -36,6 +36,6 @@ export function ExploreLink() {
         </svg>
         <span className="hidden sm:inline">Explore</span>
       </motion.div>
-    </Link>
+    </GuardedLink>
   );
 }

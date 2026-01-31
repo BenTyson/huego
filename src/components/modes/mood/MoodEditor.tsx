@@ -14,7 +14,7 @@ import { useColors, useLocked, useSavedColors, usePaletteStore } from "@/store/p
 import { usePaletteLayout } from "@/store/ui";
 
 interface MoodEditorProps {
-  mood: MoodProfile;
+  mood: MoodProfile | null;
   refinements: RefinementValues;
   onRefinementChange: (key: keyof RefinementValues, value: number) => void;
   onRegenerate: () => void;
@@ -28,7 +28,7 @@ export const MoodEditor = memo(function MoodEditor({
   onRegenerate,
   onBack,
 }: MoodEditorProps) {
-  const icon = moodIcons[mood.id];
+  const icon = mood ? moodIcons[mood.id] : null;
 
   // Global store hooks
   const colors = useColors();
@@ -115,14 +115,20 @@ export const MoodEditor = memo(function MoodEditor({
         </motion.button>
 
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-            <span className="text-white/70">{icon}</span>
-          </div>
+          {icon && (
+            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+              <span className="text-white/70">{icon}</span>
+            </div>
+          )}
           <div>
-            <h2 className="text-lg font-semibold text-white">{mood.name}</h2>
-            <p className="text-xs text-white/40 hidden sm:block">
-              {mood.description}
-            </p>
+            <h2 className="text-lg font-semibold text-white">
+              {mood ? mood.name : "Your Palette"}
+            </h2>
+            {mood && (
+              <p className="text-xs text-white/40 hidden sm:block">
+                {mood.description}
+              </p>
+            )}
           </div>
         </div>
 
@@ -163,7 +169,7 @@ export const MoodEditor = memo(function MoodEditor({
         variant="overlay"
         refinements={refinements}
         onRefinementChange={onRefinementChange}
-        onRegenerate={onRegenerate}
+        onRegenerate={mood ? onRegenerate : undefined}
       />
 
       {/* Color Psychology Info Panel */}

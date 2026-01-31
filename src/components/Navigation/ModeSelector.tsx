@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { GuardedLink } from "./GuardedLink";
 import type { Mode } from "@/lib/types";
 
 interface ModeOption {
@@ -141,7 +141,7 @@ export function ModeSelector() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.03 }}
                   >
-                    <Link
+                    <GuardedLink
                       href={mode.href}
                       className={`
                         flex items-start gap-3 px-3 py-2.5 rounded-lg transition-colors
@@ -159,7 +159,7 @@ export function ModeSelector() {
                         <span className="text-sm font-medium">{mode.label}</span>
                         <span className="text-xs text-muted-foreground">{mode.description}</span>
                       </div>
-                    </Link>
+                    </GuardedLink>
                   </motion.div>
                 );
               })}

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ModeSelector } from "./ModeSelector";
+import { PalettePreview } from "./PalettePreview";
 import { ExploreLink } from "./ExploreLink";
 import { MosaicLink } from "./MosaicLink";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
@@ -46,6 +47,9 @@ export function NavigationBar() {
         <div className="flex items-center gap-2 px-2 py-1.5 rounded-full bg-command-bg/90 backdrop-blur-xl border border-command-border shadow-lg">
           {/* Mode selector */}
           <ModeSelector />
+
+          {/* Palette preview dots */}
+          <PalettePreview />
 
           {/* Logo */}
           <Link href="/" className="hidden sm:block">

@@ -1,15 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { GuardedLink } from "./GuardedLink";
 
 export function MosaicLink() {
   const pathname = usePathname();
   const isActive = pathname.startsWith("/mosaic");
 
   return (
-    <Link href="/mosaic">
+    <GuardedLink href="/mosaic">
       <motion.div
         className={`
           flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
@@ -38,6 +38,6 @@ export function MosaicLink() {
         </svg>
         <span className="hidden sm:inline">Mosaic</span>
       </motion.div>
-    </Link>
+    </GuardedLink>
   );
 }

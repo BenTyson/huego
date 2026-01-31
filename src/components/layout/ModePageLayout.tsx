@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { NavigationBar } from "@/components/Navigation";
 import { CommandCenter } from "@/components/CommandCenter";
 import { HydrationLoader } from "@/components/ui/HydrationLoader";
+import { NavigationGuardProvider } from "@/contexts/NavigationGuardContext";
 import { useKeyboard } from "@/hooks/useKeyboard";
 
 // Lazy load BannerAd only when needed
@@ -47,11 +48,11 @@ export function ModePageLayout({
   }
 
   return (
-    <>
+    <NavigationGuardProvider>
       {showBannerAd && <BannerAd position="top" />}
       <NavigationBar />
       {children}
       <CommandCenter />
-    </>
+    </NavigationGuardProvider>
   );
 }

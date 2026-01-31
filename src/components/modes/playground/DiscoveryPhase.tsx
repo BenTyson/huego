@@ -41,6 +41,17 @@ export function DiscoveryPhase({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Warn on browser refresh/close if palette has colors
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (palette.length > 0) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [palette.length]);
+
   // Check onboarding on mount
   useEffect(() => {
     try {

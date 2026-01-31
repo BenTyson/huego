@@ -77,6 +77,9 @@ interface PaletteState {
   shiftToShade: (shade: ShadeLevel) => void; // Shift all colors to a shade level
   clearShadeBase: () => void;
 
+  // Track which mode last modified the palette
+  lastModifiedIn: string | null;
+
   // AI actions
   generateAISuggestions: (prompt: string, isPremium: boolean) => Promise<void>;
   applySuggestion: () => void;
@@ -103,6 +106,9 @@ export const usePaletteStore = create<PaletteState>()(
 
       // Shade base state
       shadeBaseColors: null,
+
+      // Track which mode last changed the palette
+      lastModifiedIn: null,
 
       // AI state
       aiSuggestions: null,
@@ -142,6 +148,7 @@ export const usePaletteStore = create<PaletteState>()(
           history: newHistory,
           historyIndex: newHistory.length - 1,
           shadeBaseColors: null,
+          lastModifiedIn: get().mode,
         });
       },
 
@@ -163,7 +170,7 @@ export const usePaletteStore = create<PaletteState>()(
 
       // Set all colors at once
       setColors: (colors: Color[]) => {
-        set({ colors, shadeBaseColors: null });
+        set({ colors, shadeBaseColors: null, lastModifiedIn: get().mode });
       },
 
       // Switch mode
@@ -329,6 +336,7 @@ export const usePaletteStore = create<PaletteState>()(
           locked: palette.locked,
           paletteSize: palette.colors.length,
           shadeBaseColors: null,
+          lastModifiedIn: "loaded",
         });
       },
 
@@ -563,6 +571,7 @@ export const usePaletteStore = create<PaletteState>()(
           historyIndex: newHistory.length - 1,
           aiSuggestions: null,
           shadeBaseColors: null,
+          lastModifiedIn: "ai",
         });
       },
 
@@ -581,6 +590,7 @@ export const usePaletteStore = create<PaletteState>()(
         paletteSize: state.paletteSize,
         savedPalettes: state.savedPalettes,
         savedColors: state.savedColors,
+        lastModifiedIn: state.lastModifiedIn,
         // Don't persist history or shadeBaseColors to keep localStorage small
       }),
     }
@@ -604,6 +614,9 @@ export const useCanRedo = () =>
 export const useAISuggestions = () => usePaletteStore((state) => state.aiSuggestions);
 export const useAILoading = () => usePaletteStore((state) => state.aiLoading);
 export const useAIError = () => usePaletteStore((state) => state.aiError);
+
+// Last modified in selector
+export const useLastModifiedIn = () => usePaletteStore((state) => state.lastModifiedIn);
 
 // Saved colors selector hooks
 export const useSavedColors = () => usePaletteStore((state) => state.savedColors);
